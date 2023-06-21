@@ -1,0 +1,27 @@
+{
+  "applications": "*",
+  "changelogDate": "20230621070057",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "diagnose",
+  "fields": [
+    {
+      "fieldName": "description",
+      "fieldType": "String"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "Diagnose",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "order",
+      "ownerSide": true,
+      "relationshipName": "order",
+      "relationshipType": "one-to-one"
+    }
+  ],
+  "service": "serviceClass"
+}

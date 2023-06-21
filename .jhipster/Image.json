@@ -1,0 +1,41 @@
+{
+  "applications": "*",
+  "changelogDate": "20230621070058",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "image",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "path",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "type",
+      "fieldType": "ImageType",
+      "fieldValues": "LOGO,AVATAR,DESCRIPTION"
+    },
+    {
+      "fieldName": "hospitalId",
+      "fieldType": "Long"
+    },
+    {
+      "fieldName": "doctorId",
+      "fieldType": "Long"
+    },
+    {
+      "fieldName": "departmentId",
+      "fieldType": "Long"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "Image",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [],
+  "service": "serviceClass"
+}

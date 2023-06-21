@@ -1,0 +1,44 @@
+{
+  "applications": "*",
+  "changelogDate": "20230621070054",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "pack",
+  "fields": [
+    {
+      "fieldName": "nane",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String"
+    }
+  ],
+  "fluentMethods": true,
+  "javadoc": "Task entity.\\n@author The JHipster team.",
+  "jpaMetamodelFiltering": false,
+  "name": "Pack",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "timeSlot",
+      "otherEntityRelationshipName": "pack",
+      "relationshipName": "timeSlot",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "order",
+      "otherEntityRelationshipName": "pack",
+      "relationshipName": "order",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "hospital",
+      "otherEntityRelationshipName": "pack",
+      "relationshipName": "hospital",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "service": "serviceClass"
+}

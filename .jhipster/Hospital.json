@@ -1,0 +1,68 @@
+{
+  "applications": "*",
+  "changelogDate": "20230621070050",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "hospital",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "address",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "email",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "phoneNumber",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "workDay",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "workTime",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "type",
+      "fieldType": "FacilityType",
+      "fieldValues": "BENH_VIEN,PHONG_KHAM"
+    },
+    {
+      "fieldName": "procedure",
+      "fieldType": "String"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "Hospital",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "department",
+      "otherEntityRelationshipName": "hospital",
+      "relationshipName": "department",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "pack",
+      "otherEntityRelationshipName": "hospital",
+      "relationshipName": "pack",
+      "relationshipType": "one-to-many"
+    }
+  ],
+  "service": "serviceClass"
+}

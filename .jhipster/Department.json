@@ -1,0 +1,38 @@
+{
+  "applications": "*",
+  "changelogDate": "20230621070053",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "department",
+  "fields": [
+    {
+      "fieldName": "departmentName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "Department",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "doctor",
+      "otherEntityRelationshipName": "department",
+      "relationshipName": "doctor",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "hospital",
+      "otherEntityRelationshipName": "department",
+      "relationshipName": "hospital",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "service": "serviceClass"
+}

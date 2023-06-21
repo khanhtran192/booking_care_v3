@@ -1,0 +1,9 @@
+{
+  "bookingCareV3App": {
+    "FacilityType": {
+      "null": "",
+      "BENH_VIEN": "BENH_VIEN",
+      "PHONG_KHAM": "PHONG_KHAM"
+    }
+  }
+}

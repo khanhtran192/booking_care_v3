@@ -1,0 +1,48 @@
+{
+  "applications": "*",
+  "changelogDate": "20230621070052",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "time_slot",
+  "fields": [
+    {
+      "fieldName": "time",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "price",
+      "fieldType": "Double",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "Boolean"
+    }
+  ],
+  "fluentMethods": true,
+  "javadoc": "not an ignored comment",
+  "jpaMetamodelFiltering": false,
+  "name": "TimeSlot",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityName": "doctor",
+      "otherEntityRelationshipName": "timeSlot",
+      "relationshipName": "doctor",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityName": "pack",
+      "otherEntityRelationshipName": "timeSlot",
+      "relationshipName": "pack",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "service": "serviceClass"
+}

@@ -1,0 +1,10 @@
+{
+  "bookingCareV3App": {
+    "OrderStatus": {
+      "null": "",
+      "PENDING": "PENDING",
+      "APPROVED": "APPROVED",
+      "REJECTED": "REJECTED"
+    }
+  }
+}

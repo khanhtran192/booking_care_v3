@@ -1,0 +1,10 @@
+{
+  "bookingCareV3App": {
+    "ImageType": {
+      "null": "",
+      "LOGO": "LOGO",
+      "AVATAR": "AVATAR",
+      "DESCRIPTION": "DESCRIPTION"
+    }
+  }
+}
