@@ -3,6 +3,7 @@ package com.mycompany.myapp.web.rest;
 import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.service.OrderService;
 import com.mycompany.myapp.service.dto.OrderDTO;
+import com.mycompany.myapp.service.dto.request.CreateOrderDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -54,7 +54,7 @@ public class OrderResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/orders")
-    public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderDTO orderDTO) throws URISyntaxException {
+    public ResponseEntity<OrderDTO> createOrder(@RequestBody CreateOrderDTO orderDTO) throws URISyntaxException {
         log.debug("REST request to save Order : {}", orderDTO);
         if (orderDTO.getId() != null) {
             throw new BadRequestAlertException("A new order cannot already have an ID", ENTITY_NAME, "idexists");

@@ -3,6 +3,7 @@ package com.mycompany.myapp.service;
 import com.mycompany.myapp.domain.Order;
 import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.service.dto.OrderDTO;
+import com.mycompany.myapp.service.dto.request.CreateOrderDTO;
 import com.mycompany.myapp.service.mapper.OrderMapper;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -25,9 +26,25 @@ public class OrderService {
 
     private final OrderMapper orderMapper;
 
-    public OrderService(OrderRepository orderRepository, OrderMapper orderMapper) {
+    private final CustomerService customerService;
+    private final DoctorService doctorService;
+    private final PackService packService;
+    private final TimeSlotService timeSlotService;
+
+    public OrderService(
+        OrderRepository orderRepository,
+        OrderMapper orderMapper,
+        CustomerService customerService,
+        DoctorService doctorService,
+        PackService packService,
+        TimeSlotService timeSlotService
+    ) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
+        this.customerService = customerService;
+        this.doctorService = doctorService;
+        this.packService = packService;
+        this.timeSlotService = timeSlotService;
     }
 
     /**
@@ -36,9 +53,11 @@ public class OrderService {
      * @param orderDTO the entity to save.
      * @return the persisted entity.
      */
-    public OrderDTO save(OrderDTO orderDTO) {
+    public OrderDTO save(CreateOrderDTO orderDTO) {
         log.debug("Request to save Order : {}", orderDTO);
-        Order order = orderMapper.toEntity(orderDTO);
+        OrderDTO dto = new OrderDTO();
+
+        Order order = orderMapper.toEntity(dto);
         order = orderRepository.save(order);
         return orderMapper.toDto(order);
     }
