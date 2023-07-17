@@ -1,10 +1,14 @@
 package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Department;
+import com.mycompany.myapp.domain.Hospital;
 import com.mycompany.myapp.repository.DepartmentRepository;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
+import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.mapper.DepartmentMapper;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -24,10 +28,12 @@ public class DepartmentService {
     private final DepartmentRepository departmentRepository;
 
     private final DepartmentMapper departmentMapper;
+    private final DoctorService doctorService;
 
-    public DepartmentService(DepartmentRepository departmentRepository, DepartmentMapper departmentMapper) {
+    public DepartmentService(DepartmentRepository departmentRepository, DepartmentMapper departmentMapper, DoctorService doctorService) {
         this.departmentRepository = departmentRepository;
         this.departmentMapper = departmentMapper;
+        this.doctorService = doctorService;
     }
 
     /**
@@ -108,5 +114,14 @@ public class DepartmentService {
     public void delete(Long id) {
         log.debug("Request to delete Department : {}", id);
         departmentRepository.deleteById(id);
+    }
+
+    public List<DoctorDTO> findAllByDepartment(Long id) {
+        Department department = departmentRepository.findById(id).orElseThrow(() -> new RuntimeException("No department found"));
+        return doctorService.findAllByDepartment(department);
+    }
+
+    public List<DepartmentDTO> findAllByHospital(Hospital hospital) {
+        return departmentRepository.findAllByHospital(hospital).stream().map(departmentMapper::toDto).collect(Collectors.toList());
     }
 }

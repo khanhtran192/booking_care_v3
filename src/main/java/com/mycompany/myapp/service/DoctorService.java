@@ -1,10 +1,13 @@
 package com.mycompany.myapp.service;
 
+import com.mycompany.myapp.domain.Department;
 import com.mycompany.myapp.domain.Doctor;
 import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.mapper.DoctorMapper;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -108,5 +111,13 @@ public class DoctorService {
     public void delete(Long id) {
         log.debug("Request to delete Doctor : {}", id);
         doctorRepository.deleteById(id);
+    }
+
+    public List<DoctorDTO> findAllByHospitalId(Integer hospitalId) {
+        return doctorRepository.findAllByHospitalId(hospitalId).stream().map(doctorMapper::toDto).collect(Collectors.toList());
+    }
+
+    public List<DoctorDTO> findAllByDepartment(Department department) {
+        return doctorRepository.findAllByDepartment(department).stream().map(doctorMapper::toDto).collect(Collectors.toList());
     }
 }

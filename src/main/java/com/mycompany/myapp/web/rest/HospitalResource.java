@@ -1,9 +1,16 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.HospitalRepository;
+import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.HospitalService;
+import com.mycompany.myapp.service.dto.AdminUserDTO;
+import com.mycompany.myapp.service.dto.DepartmentDTO;
+import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
+import com.mycompany.myapp.web.rest.errors.EmailAlreadyUsedException;
+import com.mycompany.myapp.web.rest.errors.LoginAlreadyUsedException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -19,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -179,5 +187,17 @@ public class HospitalResource {
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @GetMapping("/hospitals/doctors")
+    public ResponseEntity<List<DoctorDTO>> doctors(@RequestParam("id") Integer id) {
+        log.debug("REST request to get all doctors in Hospital : {}", id);
+        return ResponseEntity.ok().body(hospitalService.getAllDoctor(id));
+    }
+
+    @GetMapping("/hospitals/departments")
+    public ResponseEntity<List<DepartmentDTO>> departments(@RequestParam("id") Long id) {
+        log.debug("REST request to get all department in Hospital : {}", id);
+        return ResponseEntity.ok().body(hospitalService.getAllDepartments(id));
     }
 }

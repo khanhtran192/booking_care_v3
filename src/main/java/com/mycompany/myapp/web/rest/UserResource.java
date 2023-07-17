@@ -1,11 +1,13 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.config.Constants;
+import com.mycompany.myapp.domain.Authority;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.MailService;
 import com.mycompany.myapp.service.UserService;
+import com.mycompany.myapp.service.UtilService;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import com.mycompany.myapp.web.rest.errors.EmailAlreadyUsedException;
@@ -86,11 +88,13 @@ public class UserResource {
     private final UserRepository userRepository;
 
     private final MailService mailService;
+    private final UtilService utilService;
 
-    public UserResource(UserService userService, UserRepository userRepository, MailService mailService) {
+    public UserResource(UserService userService, UserRepository userRepository, MailService mailService, UtilService utilService) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.mailService = mailService;
+        this.utilService = utilService;
     }
 
     /**
@@ -203,5 +207,16 @@ public class UserResource {
         log.debug("REST request to delete User: {}", login);
         userService.deleteUser(login);
         return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "userManagement.deleted", login)).build();
+    }
+
+    @PostMapping("/hospitals/doctors/doctor")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\")")
+    public ResponseEntity<Void> createDoctor(@Valid @RequestBody AdminUserDTO userDTO) {
+        log.debug("REST request to save doctor : {}", userDTO);
+        if (utilService.checkCreateUser(userDTO)) {
+            User newUser = userService.createUser(userDTO);
+            mailService.sendCreationEmail(newUser);
+        }
+        return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "Create list doctor success", "")).build();
     }
 }

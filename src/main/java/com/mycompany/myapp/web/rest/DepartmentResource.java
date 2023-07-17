@@ -3,6 +3,7 @@ package com.mycompany.myapp.web.rest;
 import com.mycompany.myapp.repository.DepartmentRepository;
 import com.mycompany.myapp.service.DepartmentService;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
+import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -179,5 +180,11 @@ public class DepartmentResource {
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @GetMapping("/departments/doctors")
+    public ResponseEntity<List<DoctorDTO>> getDoctorByDepartment(@RequestParam("id") Long id) {
+        log.debug("REST request to get doctors by Department : {}", id);
+        return ResponseEntity.ok().body(departmentService.findAllByDepartment(id));
     }
 }

@@ -2,8 +2,11 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Hospital;
 import com.mycompany.myapp.repository.HospitalRepository;
+import com.mycompany.myapp.service.dto.DepartmentDTO;
+import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
 import com.mycompany.myapp.service.mapper.HospitalMapper;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +28,20 @@ public class HospitalService {
 
     private final HospitalMapper hospitalMapper;
 
-    public HospitalService(HospitalRepository hospitalRepository, HospitalMapper hospitalMapper) {
+    private final DoctorService doctorService;
+
+    private final DepartmentService departmentService;
+
+    public HospitalService(
+        HospitalRepository hospitalRepository,
+        HospitalMapper hospitalMapper,
+        DoctorService doctorService,
+        DepartmentService departmentService
+    ) {
         this.hospitalRepository = hospitalRepository;
         this.hospitalMapper = hospitalMapper;
+        this.doctorService = doctorService;
+        this.departmentService = departmentService;
     }
 
     /**
@@ -108,5 +122,14 @@ public class HospitalService {
     public void delete(Long id) {
         log.debug("Request to delete Hospital : {}", id);
         hospitalRepository.deleteById(id);
+    }
+
+    public List<DoctorDTO> getAllDoctor(Integer id) {
+        return doctorService.findAllByHospitalId(id);
+    }
+
+    public List<DepartmentDTO> getAllDepartments(Long id) {
+        Hospital hospital = hospitalRepository.findById(id).orElseThrow(() -> new RuntimeException("Hospital not found"));
+        return departmentService.findAllByHospital(hospital);
     }
 }
