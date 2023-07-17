@@ -2,6 +2,7 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Department;
 import com.mycompany.myapp.domain.Doctor;
+import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.mapper.DoctorMapper;

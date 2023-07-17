@@ -208,15 +208,4 @@ public class UserResource {
         userService.deleteUser(login);
         return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "userManagement.deleted", login)).build();
     }
-
-    @PostMapping("/hospitals/doctors/doctor")
-    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\")")
-    public ResponseEntity<Void> createDoctor(@Valid @RequestBody AdminUserDTO userDTO) {
-        log.debug("REST request to save doctor : {}", userDTO);
-        if (utilService.checkCreateUser(userDTO)) {
-            User newUser = userService.createUser(userDTO);
-            mailService.sendCreationEmail(newUser);
-        }
-        return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "Create list doctor success", "")).build();
-    }
 }

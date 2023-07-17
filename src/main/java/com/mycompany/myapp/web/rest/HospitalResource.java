@@ -4,6 +4,9 @@ import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.HospitalService;
+import com.mycompany.myapp.service.MailService;
+import com.mycompany.myapp.service.UserService;
+import com.mycompany.myapp.service.UtilService;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
@@ -50,10 +53,22 @@ public class HospitalResource {
     private final HospitalService hospitalService;
 
     private final HospitalRepository hospitalRepository;
+    private final UserService userService;
+    private final UtilService utilService;
+    private final MailService mailService;
 
-    public HospitalResource(HospitalService hospitalService, HospitalRepository hospitalRepository) {
+    public HospitalResource(
+        HospitalService hospitalService,
+        HospitalRepository hospitalRepository,
+        UtilService utilService,
+        UserService userService,
+        MailService mailService
+    ) {
         this.hospitalService = hospitalService;
         this.hospitalRepository = hospitalRepository;
+        this.userService = userService;
+        this.utilService = utilService;
+        this.mailService = mailService;
     }
 
     /**
@@ -199,5 +214,16 @@ public class HospitalResource {
     public ResponseEntity<List<DepartmentDTO>> departments(@RequestParam("id") Long id) {
         log.debug("REST request to get all department in Hospital : {}", id);
         return ResponseEntity.ok().body(hospitalService.getAllDepartments(id));
+    }
+
+    @PostMapping("/hospitals/doctors/doctor")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\")")
+    public ResponseEntity<Void> createDoctor(@Valid @RequestBody AdminUserDTO userDTO) {
+        log.debug("REST request to save doctor : {}", userDTO);
+        if (Boolean.TRUE.equals(utilService.checkCreateUser(userDTO))) {
+            User newUser = userService.createUser(userDTO);
+            mailService.sendCreationEmail(newUser);
+        }
+        return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "Create list doctor success", "")).build();
     }
 }

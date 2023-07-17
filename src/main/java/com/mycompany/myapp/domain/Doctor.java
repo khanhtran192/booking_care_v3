@@ -7,12 +7,14 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import lombok.Builder;
 
 /**
  * A Doctor.
  */
 @Entity
 @Table(name = "doctor")
+@Builder
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class Doctor implements Serializable {
 
@@ -60,6 +62,8 @@ public class Doctor implements Serializable {
     @ManyToOne
     @JsonIgnoreProperties(value = { "doctors", "hospital" }, allowSetters = true)
     private Department department;
+
+    public Doctor() {}
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
