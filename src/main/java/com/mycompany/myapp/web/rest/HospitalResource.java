@@ -3,14 +3,13 @@ package com.mycompany.myapp.web.rest;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
-import com.mycompany.myapp.service.HospitalService;
-import com.mycompany.myapp.service.MailService;
-import com.mycompany.myapp.service.UserService;
-import com.mycompany.myapp.service.UtilService;
+import com.mycompany.myapp.service.*;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
+import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
+import com.mycompany.myapp.service.dto.response.DoctorCreatedDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import com.mycompany.myapp.web.rest.errors.EmailAlreadyUsedException;
 import com.mycompany.myapp.web.rest.errors.LoginAlreadyUsedException;
@@ -53,22 +52,12 @@ public class HospitalResource {
     private final HospitalService hospitalService;
 
     private final HospitalRepository hospitalRepository;
-    private final UserService userService;
-    private final UtilService utilService;
-    private final MailService mailService;
+    private final DoctorService doctorService;
 
-    public HospitalResource(
-        HospitalService hospitalService,
-        HospitalRepository hospitalRepository,
-        UtilService utilService,
-        UserService userService,
-        MailService mailService
-    ) {
+    public HospitalResource(HospitalService hospitalService, HospitalRepository hospitalRepository, DoctorService doctorService) {
         this.hospitalService = hospitalService;
         this.hospitalRepository = hospitalRepository;
-        this.userService = userService;
-        this.utilService = utilService;
-        this.mailService = mailService;
+        this.doctorService = doctorService;
     }
 
     /**
@@ -218,12 +207,8 @@ public class HospitalResource {
 
     @PostMapping("/hospitals/doctors/doctor")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\")")
-    public ResponseEntity<Void> createDoctor(@Valid @RequestBody AdminUserDTO userDTO) {
-        log.debug("REST request to save doctor : {}", userDTO);
-        if (Boolean.TRUE.equals(utilService.checkCreateUser(userDTO))) {
-            User newUser = userService.createUser(userDTO);
-            mailService.sendCreationEmail(newUser);
-        }
-        return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "Create list doctor success", "")).build();
+    public ResponseEntity<List<DoctorCreatedDTO>> createDoctor(@Valid @RequestBody List<CreateDoctorDTO> doctorDTO) {
+        log.debug("REST request to save doctor : {}", doctorDTO);
+        return ResponseEntity.ok().body(doctorService.createDoctor(doctorDTO));
     }
 }

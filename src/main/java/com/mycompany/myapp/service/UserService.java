@@ -2,13 +2,16 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.domain.Authority;
+import com.mycompany.myapp.domain.Doctor;
 import com.mycompany.myapp.domain.User;
-import com.mycompany.myapp.repository.AuthorityRepository;
-import com.mycompany.myapp.repository.UserRepository;
+import com.mycompany.myapp.exception.AlreadyExistedException;
+import com.mycompany.myapp.exception.NotFoundException;
+import com.mycompany.myapp.repository.*;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.security.SecurityUtils;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
 import com.mycompany.myapp.service.dto.UserDTO;
+import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -30,6 +33,8 @@ import tech.jhipster.security.RandomUtil;
 @Transactional
 public class UserService {
 
+    private static final String CREATE_USER_SUCCESS = "Created Information for User: {}";
+
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
@@ -37,11 +42,28 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final AuthorityRepository authorityRepository;
+    private final DoctorRepository doctorRepository;
+    private final DepartmentRepository departmentRepository;
+    private final HospitalRepository hospitalRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository) {
+    private final MailService mailService;
+
+    public UserService(
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder,
+        AuthorityRepository authorityRepository,
+        DoctorRepository doctorRepository,
+        DepartmentRepository departmentRepository,
+        HospitalRepository hospitalRepository,
+        MailService mailService
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
+        this.doctorRepository = doctorRepository;
+        this.departmentRepository = departmentRepository;
+        this.hospitalRepository = hospitalRepository;
+        this.mailService = mailService;
     }
 
     public Optional<User> activateRegistration(String key) {
@@ -118,7 +140,7 @@ public class UserService {
         authorityRepository.findById(AuthoritiesConstants.USER).ifPresent(authorities::add);
         newUser.setAuthorities(authorities);
         userRepository.save(newUser);
-        log.debug("Created Information for User: {}", newUser);
+        log.debug(CREATE_USER_SUCCESS, newUser);
         return newUser;
     }
 
@@ -161,7 +183,7 @@ public class UserService {
             user.setAuthorities(authorities);
         }
         userRepository.save(user);
-        log.debug("Created Information for User: {}", user);
+        log.debug(CREATE_USER_SUCCESS, user);
         return user;
     }
 
@@ -293,5 +315,49 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<String> getAuthorities() {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
+    }
+
+    public List<String> createDoctor(List<CreateDoctorDTO> doctorDTOs) {
+        List<String> doctorCreated = new ArrayList<>();
+        for (CreateDoctorDTO doctorDTO : doctorDTOs) {
+            if (!hospitalRepository.existsById(doctorDTO.getHospitalId())) {
+                throw new NotFoundException("hospital does not exist");
+            }
+            if (!departmentRepository.existsById(doctorDTO.getDepartmentId())) {
+                throw new NotFoundException("Department does not exist");
+            }
+            if (doctorDTO.getEmail() == null) {
+                throw new NotFoundException("Email can not be null");
+            }
+            if (userRepository.existsByEmail(doctorDTO.getEmail())) {
+                throw new AlreadyExistedException("Email :" + doctorDTO.getEmail() + " was registered");
+            }
+            List<Authority> authorities = authorityRepository.findAllById(
+                Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.DOCTOR)
+            );
+            User user = new User();
+            user.setEmail(doctorDTO.getEmail().toLowerCase());
+            user.setFirstName(doctorDTO.getFirstName());
+            user.setLastName(doctorDTO.getLastName());
+            user.setLangKey(Constants.DEFAULT_LANGUAGE);
+            user.setPassword(passwordEncoder.encode(RandomUtil.generatePassword()));
+            user.setResetKey(RandomUtil.generateResetKey());
+            user.setActivated(true);
+            user.setAuthorities((new HashSet<>(authorities)));
+            userRepository.save(user);
+            log.debug(CREATE_USER_SUCCESS, user);
+
+            Doctor doctor = new Doctor();
+            doctor.setName(doctorDTO.getName());
+            doctor.setEmail(doctorDTO.getEmail().toLowerCase());
+            doctor.setHospitalId(doctor.getHospitalId());
+            doctor.setDepartment(departmentRepository.findById(doctorDTO.getDepartmentId()).orElse(null));
+            doctorRepository.save(doctor);
+            log.debug("Created Information for doctor: {}", doctor);
+
+            doctorCreated.add(doctorDTO.getEmail());
+            mailService.sendCreationEmail(user);
+        }
+        return doctorCreated;
     }
 }

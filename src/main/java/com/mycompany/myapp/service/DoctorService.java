@@ -2,10 +2,14 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Department;
 import com.mycompany.myapp.domain.Doctor;
-import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.DoctorRepository;
+import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.service.dto.DoctorDTO;
+import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
+import com.mycompany.myapp.service.dto.response.DoctorCreatedDTO;
+import com.mycompany.myapp.service.mapper.DepartmentMapper;
 import com.mycompany.myapp.service.mapper.DoctorMapper;
+import com.mycompany.myapp.service.mapper.HospitalMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,9 +33,26 @@ public class DoctorService {
 
     private final DoctorMapper doctorMapper;
 
-    public DoctorService(DoctorRepository doctorRepository, DoctorMapper doctorMapper) {
+    private final UserService userService;
+
+    private final HospitalRepository hospitalRepository;
+    private final HospitalMapper hospitalMapper;
+    private final DepartmentMapper departmentMapper;
+
+    public DoctorService(
+        DoctorRepository doctorRepository,
+        DoctorMapper doctorMapper,
+        UserService userService,
+        HospitalRepository hospitalRepository,
+        HospitalMapper hospitalMapper,
+        DepartmentMapper departmentMapper
+    ) {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
+        this.userService = userService;
+        this.hospitalRepository = hospitalRepository;
+        this.hospitalMapper = hospitalMapper;
+        this.departmentMapper = departmentMapper;
     }
 
     /**
@@ -120,5 +141,21 @@ public class DoctorService {
 
     public List<DoctorDTO> findAllByDepartment(Department department) {
         return doctorRepository.findAllByDepartment(department).stream().map(doctorMapper::toDto).collect(Collectors.toList());
+    }
+
+    public List<DoctorCreatedDTO> createDoctor(List<CreateDoctorDTO> doctorDTOs) {
+        List<String> emailDoctorCreated = userService.createDoctor(doctorDTOs);
+        List<Doctor> doctorCreated = emailDoctorCreated.stream().distinct().map(doctorRepository::findByEmail).collect(Collectors.toList());
+        return doctorCreated
+            .stream()
+            .map(doctor -> {
+                DoctorCreatedDTO d = new DoctorCreatedDTO();
+                d.setName(doctor.getName());
+                d.setEmail(doctor.getEmail());
+                d.setDepartment(departmentMapper.toDto(doctor.getDepartment()));
+                d.setHospital(hospitalMapper.toDto(hospitalRepository.findById(Long.valueOf(doctor.getHospitalId())).orElse(null)));
+                return d;
+            })
+            .collect(Collectors.toList());
     }
 }
