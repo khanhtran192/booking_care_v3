@@ -51,6 +51,11 @@ public class Doctor implements Serializable {
     @Column(name = "specialize")
     private String specialize;
 
+    @Column(name = "user_Id")
+    private Long userId;
+
+    private Boolean active;
+
     @OneToMany(mappedBy = "doctor")
     @JsonIgnoreProperties(value = { "doctor", "pack" }, allowSetters = true)
     private Set<TimeSlot> timeSlots = new HashSet<>();
@@ -66,6 +71,22 @@ public class Doctor implements Serializable {
     public Doctor() {}
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     public Long getId() {
         return this.id;

@@ -2,6 +2,7 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Department;
 import com.mycompany.myapp.domain.Doctor;
+import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.service.dto.DoctorDTO;
@@ -157,5 +158,13 @@ public class DoctorService {
                 return d;
             })
             .collect(Collectors.toList());
+    }
+
+    public void inactiveDoctorById(Long doctorId) {
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow(() -> new NotFoundException("Doctor not found"));
+        userService.deleteDoctor(doctor.getUserId());
+        doctor.setActive(false);
+        doctorRepository.save(doctor);
+        log.debug("delete Doctors: {} success", doctorId);
     }
 }

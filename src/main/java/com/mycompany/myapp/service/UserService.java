@@ -329,13 +329,14 @@ public class UserService {
             if (doctorDTO.getEmail() == null) {
                 throw new NotFoundException("Email can not be null");
             }
-            if (userRepository.existsByEmail(doctorDTO.getEmail())) {
+            if (Boolean.TRUE.equals(userRepository.existsByEmail(doctorDTO.getEmail()))) {
                 throw new AlreadyExistedException("Email :" + doctorDTO.getEmail() + " was registered");
             }
             List<Authority> authorities = authorityRepository.findAllById(
                 Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.DOCTOR)
             );
             User user = new User();
+            user.setLogin(doctorDTO.getLogin());
             user.setEmail(doctorDTO.getEmail().toLowerCase());
             user.setFirstName(doctorDTO.getFirstName());
             user.setLastName(doctorDTO.getLastName());
@@ -344,14 +345,16 @@ public class UserService {
             user.setResetKey(RandomUtil.generateResetKey());
             user.setActivated(true);
             user.setAuthorities((new HashSet<>(authorities)));
+            user.setResetDate(Instant.now());
             userRepository.save(user);
             log.debug(CREATE_USER_SUCCESS, user);
 
             Doctor doctor = new Doctor();
             doctor.setName(doctorDTO.getName());
             doctor.setEmail(doctorDTO.getEmail().toLowerCase());
-            doctor.setHospitalId(doctor.getHospitalId());
+            doctor.setHospitalId(Math.toIntExact(doctorDTO.getHospitalId()));
             doctor.setDepartment(departmentRepository.findById(doctorDTO.getDepartmentId()).orElse(null));
+            doctor.setUserId(user.getId());
             doctorRepository.save(doctor);
             log.debug("Created Information for doctor: {}", doctor);
 
@@ -359,5 +362,18 @@ public class UserService {
             mailService.sendCreationEmail(user);
         }
         return doctorCreated;
+    }
+
+    public void deleteDoctor(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User " + id + " does not exist"));
+        Set<Authority> authorities = new HashSet<>();
+        authorities.add(
+            authorityRepository
+                .findById(AuthoritiesConstants.USER)
+                .orElseThrow(() -> new NotFoundException("Authority " + AuthoritiesConstants.USER + " does not exist"))
+        );
+        user.setAuthorities(authorities);
+        userRepository.save(user);
+        log.debug("Delete role doctor of user: {}", user);
     }
 }

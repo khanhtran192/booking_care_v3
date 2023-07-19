@@ -206,9 +206,20 @@ public class HospitalResource {
     }
 
     @PostMapping("/hospitals/doctors/doctor")
-    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\")")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<DoctorCreatedDTO>> createDoctor(@Valid @RequestBody List<CreateDoctorDTO> doctorDTO) {
         log.debug("REST request to save doctor : {}", doctorDTO);
         return ResponseEntity.ok().body(doctorService.createDoctor(doctorDTO));
+    }
+
+    @DeleteMapping("/hospitals/doctors/doctor/{id}")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
+        log.debug("REST request to delete doctor : {}", id);
+        doctorService.inactiveDoctorById(id);
+        return ResponseEntity
+            .noContent()
+            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+            .build();
     }
 }
