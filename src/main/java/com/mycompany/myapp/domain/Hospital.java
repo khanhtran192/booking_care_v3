@@ -47,12 +47,17 @@ public class Hospital implements Serializable {
     @Column(name = "work_time")
     private String workTime;
 
+    private Boolean active;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private FacilityType type;
 
     @Column(name = "jhi_procedure")
     private String procedure;
+
+    @Column(name = "user_Id")
+    private Long userId;
 
     @OneToMany(mappedBy = "hospital")
     @JsonIgnoreProperties(value = { "doctors", "hospital" }, allowSetters = true)
@@ -66,6 +71,22 @@ public class Hospital implements Serializable {
 
     public Long getId() {
         return this.id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Hospital id(Long id) {

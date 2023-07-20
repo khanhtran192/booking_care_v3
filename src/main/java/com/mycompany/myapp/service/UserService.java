@@ -355,6 +355,7 @@ public class UserService {
             doctor.setHospitalId(Math.toIntExact(doctorDTO.getHospitalId()));
             doctor.setDepartment(departmentRepository.findById(doctorDTO.getDepartmentId()).orElse(null));
             doctor.setUserId(user.getId());
+            doctor.setActive(true);
             doctorRepository.save(doctor);
             log.debug("Created Information for doctor: {}", doctor);
 

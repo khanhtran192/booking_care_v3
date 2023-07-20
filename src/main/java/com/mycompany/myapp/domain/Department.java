@@ -30,6 +30,8 @@ public class Department implements Serializable {
     @Column(name = "description")
     private String description;
 
+    private Boolean active;
+
     @OneToMany(mappedBy = "department")
     @JsonIgnoreProperties(value = { "timeSlots", "orders", "department" }, allowSetters = true)
     private Set<Doctor> doctors = new HashSet<>();
@@ -39,9 +41,16 @@ public class Department implements Serializable {
     private Hospital hospital;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
-
     public Long getId() {
         return this.id;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Department id(Long id) {
