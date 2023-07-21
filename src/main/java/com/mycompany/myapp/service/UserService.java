@@ -4,7 +4,6 @@ import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.domain.Authority;
 import com.mycompany.myapp.domain.Doctor;
 import com.mycompany.myapp.domain.User;
-import com.mycompany.myapp.exception.AlreadyExistedException;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.*;
 import com.mycompany.myapp.security.AuthoritiesConstants;
@@ -319,6 +318,8 @@ public class UserService {
 
     public List<String> createDoctor(List<CreateDoctorDTO> doctorDTOs) {
         List<String> doctorCreated = new ArrayList<>();
+        User user = new User();
+        Doctor doctor = new Doctor();
         for (CreateDoctorDTO doctorDTO : doctorDTOs) {
             if (!hospitalRepository.existsById(doctorDTO.getHospitalId())) {
                 throw new NotFoundException("hospital does not exist");
@@ -330,26 +331,25 @@ public class UserService {
                 throw new NotFoundException("Email can not be null");
             }
             if (Boolean.TRUE.equals(userRepository.existsByEmail(doctorDTO.getEmail()))) {
-                throw new AlreadyExistedException("Email :" + doctorDTO.getEmail() + " was registered");
+                log.debug("User already exists, add role doctor for user: {}", doctorDTO.getEmail());
+                user = userRepository.findByEmail(doctorDTO.getEmail());
+            } else {
+                List<Authority> authorities = authorityRepository.findAllById(
+                    Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.DOCTOR)
+                );
+                user.setLogin(doctorDTO.getLogin());
+                user.setEmail(doctorDTO.getEmail().toLowerCase());
+                user.setFirstName(doctorDTO.getFirstName());
+                user.setLastName(doctorDTO.getLastName());
+                user.setLangKey(Constants.DEFAULT_LANGUAGE);
+                user.setPassword(passwordEncoder.encode(RandomUtil.generatePassword()));
+                user.setResetKey(RandomUtil.generateResetKey());
+                user.setActivated(true);
+                user.setAuthorities((new HashSet<>(authorities)));
+                user.setResetDate(Instant.now());
+                userRepository.save(user);
+                log.debug(CREATE_USER_SUCCESS, user);
             }
-            List<Authority> authorities = authorityRepository.findAllById(
-                Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.DOCTOR)
-            );
-            User user = new User();
-            user.setLogin(doctorDTO.getLogin());
-            user.setEmail(doctorDTO.getEmail().toLowerCase());
-            user.setFirstName(doctorDTO.getFirstName());
-            user.setLastName(doctorDTO.getLastName());
-            user.setLangKey(Constants.DEFAULT_LANGUAGE);
-            user.setPassword(passwordEncoder.encode(RandomUtil.generatePassword()));
-            user.setResetKey(RandomUtil.generateResetKey());
-            user.setActivated(true);
-            user.setAuthorities((new HashSet<>(authorities)));
-            user.setResetDate(Instant.now());
-            userRepository.save(user);
-            log.debug(CREATE_USER_SUCCESS, user);
-
-            Doctor doctor = new Doctor();
             doctor.setName(doctorDTO.getName());
             doctor.setEmail(doctorDTO.getEmail().toLowerCase());
             doctor.setHospitalId(Math.toIntExact(doctorDTO.getHospitalId()));

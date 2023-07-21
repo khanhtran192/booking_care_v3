@@ -29,4 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findAllByIdNotNullAndActivatedIsTrue(Pageable pageable);
 
     Boolean existsByEmail(String email);
+
+    User findByEmail(String email);
 }
