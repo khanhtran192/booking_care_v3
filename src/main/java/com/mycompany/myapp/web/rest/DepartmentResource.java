@@ -1,9 +1,11 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.repository.DepartmentRepository;
+import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.DepartmentService;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
+import com.mycompany.myapp.service.dto.request.CreateHospitalDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -57,6 +60,7 @@ public class DepartmentResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/departments")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<DepartmentDTO> createDepartment(@Valid @RequestBody DepartmentDTO departmentDTO) throws URISyntaxException {
         log.debug("REST request to save Department : {}", departmentDTO);
         if (departmentDTO.getId() != null) {

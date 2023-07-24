@@ -3,7 +3,10 @@ package com.mycompany.myapp.service;
 import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.domain.Authority;
 import com.mycompany.myapp.domain.Doctor;
+import com.mycompany.myapp.domain.Hospital;
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.domain.enumeration.FacilityType;
+import com.mycompany.myapp.exception.AlreadyExistedException;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.*;
 import com.mycompany.myapp.security.AuthoritiesConstants;
@@ -11,6 +14,7 @@ import com.mycompany.myapp.security.SecurityUtils;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
 import com.mycompany.myapp.service.dto.UserDTO;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
+import com.mycompany.myapp.service.dto.request.CreateHospitalDTO;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -376,5 +380,41 @@ public class UserService {
         user.setAuthorities(authorities);
         userRepository.save(user);
         log.debug("Delete role doctor of user: {}", user);
+    }
+
+    public void createHospital(CreateHospitalDTO hospital) {
+        if (Boolean.TRUE.equals(userRepository.existsByEmail(hospital.getEmail()))) {
+            throw new AlreadyExistedException("user " + hospital.getEmail() + " already exists");
+        } else if (hospitalRepository.existsByEmail(hospital.getEmail())) {
+            throw new AlreadyExistedException("hospital " + hospital.getEmail() + " already exists");
+        } else {
+            List<Authority> authorities = authorityRepository.findAllById(
+                Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.HOSPITAL)
+            );
+            User user = new User();
+            user.setLogin(hospital.getLogin());
+            user.setEmail(hospital.getEmail().toLowerCase());
+            user.setLangKey(Constants.DEFAULT_LANGUAGE);
+            user.setPassword(passwordEncoder.encode(RandomUtil.generatePassword()));
+            user.setResetKey(RandomUtil.generateResetKey());
+            user.setActivated(true);
+            user.setAuthorities((new HashSet<>(authorities)));
+            user.setResetDate(Instant.now());
+            userRepository.save(user);
+            log.debug(CREATE_USER_SUCCESS, user);
+
+            Hospital newHospital = new Hospital();
+            newHospital.setName(hospital.getName());
+            newHospital.setEmail(hospital.getEmail());
+            newHospital.setAddress(hospital.getAddress());
+            newHospital.setDescription(hospital.getDescription());
+            newHospital.setPhoneNumber(hospital.getPhoneNumber());
+            newHospital.setUserId(user.getId());
+            newHospital.setType(FacilityType.valueOf(hospital.getType()));
+            hospitalRepository.save(newHospital);
+            log.debug("Created successfully new hospital with name: {}", newHospital.getName());
+
+            mailService.sendCreationEmail(user);
+        }
     }
 }

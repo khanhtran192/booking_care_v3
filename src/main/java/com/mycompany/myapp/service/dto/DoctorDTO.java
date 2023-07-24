@@ -28,6 +28,8 @@ public class DoctorDTO implements Serializable {
 
     private Double rate;
 
+    private Boolean active;
+
     private String specialize;
 
     private DepartmentDTO department;
@@ -102,6 +104,14 @@ public class DoctorDTO implements Serializable {
 
     public void setSpecialize(String specialize) {
         this.specialize = specialize;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public DepartmentDTO getDepartment() {

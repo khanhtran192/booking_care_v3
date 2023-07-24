@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface HospitalRepository extends JpaRepository<Hospital, Long> {}
+public interface HospitalRepository extends JpaRepository<Hospital, Long> {
+    Boolean existsByEmail(String email);
+}

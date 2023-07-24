@@ -16,8 +16,16 @@ public class DepartmentDTO implements Serializable {
     private String departmentName;
 
     private String description;
-
+    private Boolean active;
     private HospitalDTO hospital;
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
     public Long getId() {
         return id;

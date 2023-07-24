@@ -91,7 +91,7 @@ public class DepartmentService {
     @Transactional(readOnly = true)
     public Page<DepartmentDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Departments");
-        return departmentRepository.findAll(pageable).map(departmentMapper::toDto);
+        return departmentRepository.findAllByActiveIsTrue(pageable).map(departmentMapper::toDto);
     }
 
     /**

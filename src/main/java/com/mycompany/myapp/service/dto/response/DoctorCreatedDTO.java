@@ -2,7 +2,6 @@ package com.mycompany.myapp.service.dto.response;
 
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
-import lombok.*;
 
 public class DoctorCreatedDTO {
 

@@ -9,6 +9,8 @@ import com.mycompany.myapp.service.MailService;
 import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.service.UtilService;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
+import com.mycompany.myapp.service.dto.HospitalDTO;
+import com.mycompany.myapp.service.dto.request.CreateHospitalDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import com.mycompany.myapp.web.rest.errors.EmailAlreadyUsedException;
 import com.mycompany.myapp.web.rest.errors.LoginAlreadyUsedException;
@@ -207,5 +209,16 @@ public class UserResource {
         log.debug("REST request to delete User: {}", login);
         userService.deleteUser(login);
         return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "userManagement.deleted", login)).build();
+    }
+
+    @PostMapping("/hospitals")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Void> createHospital(@RequestBody CreateHospitalDTO createHospitalDTO) {
+        log.debug("REST request to create hospital: {}", createHospitalDTO.getName());
+        userService.createHospital(createHospitalDTO);
+        return ResponseEntity
+            .noContent()
+            .headers(HeaderUtil.createAlert(applicationName, "userManagement.created", createHospitalDTO.getName()))
+            .build();
     }
 }
