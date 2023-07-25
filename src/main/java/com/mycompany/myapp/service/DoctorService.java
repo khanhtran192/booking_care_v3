@@ -11,6 +11,7 @@ import com.mycompany.myapp.service.dto.response.DoctorCreatedDTO;
 import com.mycompany.myapp.service.mapper.DepartmentMapper;
 import com.mycompany.myapp.service.mapper.DoctorMapper;
 import com.mycompany.myapp.service.mapper.HospitalMapper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -146,7 +147,11 @@ public class DoctorService {
 
     public List<DoctorCreatedDTO> createDoctor(List<CreateDoctorDTO> doctorDTOs) {
         List<String> emailDoctorCreated = userService.createDoctor(doctorDTOs);
-        List<Doctor> doctorCreated = emailDoctorCreated.stream().distinct().map(doctorRepository::findByEmail).collect(Collectors.toList());
+        List<Doctor> doctorCreated = new ArrayList<>();
+        for (String s : emailDoctorCreated) {
+            Doctor doctor = doctorRepository.findByEmail(s);
+            doctorCreated.add(doctor);
+        }
         return doctorCreated
             .stream()
             .map(doctor -> {

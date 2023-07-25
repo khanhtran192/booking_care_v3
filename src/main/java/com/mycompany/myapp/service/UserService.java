@@ -324,7 +324,11 @@ public class UserService {
         List<String> doctorCreated = new ArrayList<>();
         User user = new User();
         Doctor doctor = new Doctor();
+        List<Authority> authorities = authorityRepository.findAllById(
+            Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.DOCTOR)
+        );
         for (CreateDoctorDTO doctorDTO : doctorDTOs) {
+            boolean newAccount = true;
             if (!hospitalRepository.existsById(doctorDTO.getHospitalId())) {
                 throw new NotFoundException("hospital does not exist");
             }
@@ -336,11 +340,11 @@ public class UserService {
             }
             if (Boolean.TRUE.equals(userRepository.existsByEmail(doctorDTO.getEmail()))) {
                 log.debug("User already exists, add role doctor for user: {}", doctorDTO.getEmail());
+                newAccount = false;
                 user = userRepository.findByEmail(doctorDTO.getEmail());
+                user.setAuthorities((new HashSet<>(authorities)));
+                userRepository.save(user);
             } else {
-                List<Authority> authorities = authorityRepository.findAllById(
-                    Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.DOCTOR)
-                );
                 user.setLogin(doctorDTO.getLogin());
                 user.setEmail(doctorDTO.getEmail().toLowerCase());
                 user.setFirstName(doctorDTO.getFirstName());
@@ -362,9 +366,10 @@ public class UserService {
             doctor.setActive(true);
             doctorRepository.save(doctor);
             log.debug("Created Information for doctor: {}", doctor);
-
             doctorCreated.add(doctorDTO.getEmail());
-            mailService.sendCreationEmail(user);
+            if (Boolean.TRUE.equals(newAccount)) {
+                mailService.sendCreationEmail(user);
+            }
         }
         return doctorCreated;
     }
@@ -385,7 +390,7 @@ public class UserService {
     public void createHospital(CreateHospitalDTO hospital) {
         if (Boolean.TRUE.equals(userRepository.existsByEmail(hospital.getEmail()))) {
             throw new AlreadyExistedException("user " + hospital.getEmail() + " already exists");
-        } else if (hospitalRepository.existsByEmail(hospital.getEmail())) {
+        } else if (Boolean.TRUE.equals(hospitalRepository.existsByEmail(hospital.getEmail()))) {
             throw new AlreadyExistedException("hospital " + hospital.getEmail() + " already exists");
         } else {
             List<Authority> authorities = authorityRepository.findAllById(
