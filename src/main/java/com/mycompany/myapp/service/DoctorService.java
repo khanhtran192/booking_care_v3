@@ -146,10 +146,10 @@ public class DoctorService {
     }
 
     public List<DoctorCreatedDTO> createDoctor(List<CreateDoctorDTO> doctorDTOs) {
-        List<String> emailDoctorCreated = userService.createDoctor(doctorDTOs);
+        List<Long> emailDoctorCreated = userService.createDoctor(doctorDTOs);
         List<Doctor> doctorCreated = new ArrayList<>();
-        for (String s : emailDoctorCreated) {
-            Doctor doctor = doctorRepository.findByEmail(s);
+        for (Long id : emailDoctorCreated) {
+            Doctor doctor = doctorRepository.findDoctorByUserId(id);
             doctorCreated.add(doctor);
         }
         return doctorCreated

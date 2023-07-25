@@ -320,8 +320,8 @@ public class UserService {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
     }
 
-    public List<String> createDoctor(List<CreateDoctorDTO> doctorDTOs) {
-        List<String> doctorCreated = new ArrayList<>();
+    public List<Long> createDoctor(List<CreateDoctorDTO> doctorDTOs) {
+        List<Long> doctorCreated = new ArrayList<>();
         User user = new User();
         Doctor doctor = new Doctor();
         List<Authority> authorities = authorityRepository.findAllById(
@@ -329,11 +329,10 @@ public class UserService {
         );
         for (CreateDoctorDTO doctorDTO : doctorDTOs) {
             boolean newAccount = true;
-            if (!hospitalRepository.existsById(doctorDTO.getHospitalId())) {
-                throw new NotFoundException("hospital does not exist");
-            }
-            if (!departmentRepository.existsById(doctorDTO.getDepartmentId())) {
-                throw new NotFoundException("Department does not exist");
+            if (
+                !hospitalRepository.existsById(doctorDTO.getHospitalId()) || !departmentRepository.existsById(doctorDTO.getDepartmentId())
+            ) {
+                throw new NotFoundException("hospital or department does not exist");
             }
             if (doctorDTO.getEmail() == null) {
                 throw new NotFoundException("Email can not be null");
@@ -358,6 +357,9 @@ public class UserService {
                 userRepository.save(user);
                 log.debug(CREATE_USER_SUCCESS, user);
             }
+            if (doctorRepository.findDoctorByUserId(user.getId()) != null) {
+                doctor = doctorRepository.findDoctorByUserId(user.getId());
+            }
             doctor.setName(doctorDTO.getName());
             doctor.setEmail(doctorDTO.getEmail().toLowerCase());
             doctor.setHospitalId(Math.toIntExact(doctorDTO.getHospitalId()));
@@ -366,7 +368,7 @@ public class UserService {
             doctor.setActive(true);
             doctorRepository.save(doctor);
             log.debug("Created Information for doctor: {}", doctor);
-            doctorCreated.add(doctorDTO.getEmail());
+            doctorCreated.add(doctor.getUserId());
             if (Boolean.TRUE.equals(newAccount)) {
                 mailService.sendCreationEmail(user);
             }
