@@ -22,11 +22,14 @@ public class Pack implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "nane")
-    private String nane;
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "price")
+    private Double price;
 
     @OneToMany(mappedBy = "pack")
     @JsonIgnoreProperties(value = { "doctor", "pack" }, allowSetters = true)
@@ -55,17 +58,17 @@ public class Pack implements Serializable {
         this.id = id;
     }
 
-    public String getNane() {
-        return this.nane;
+    public String getName() {
+        return this.name;
     }
 
-    public Pack nane(String nane) {
-        this.setNane(nane);
+    public Pack name(String name) {
+        this.setName(name);
         return this;
     }
 
-    public void setNane(String nane) {
-        this.nane = nane;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -75,6 +78,14 @@ public class Pack implements Serializable {
     public Pack description(String description) {
         this.setDescription(description);
         return this;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
     public void setDescription(String description) {
@@ -180,7 +191,7 @@ public class Pack implements Serializable {
     public String toString() {
         return "Pack{" +
             "id=" + getId() +
-            ", nane='" + getNane() + "'" +
+            ", nane='" + getName() + "'" +
             ", description='" + getDescription() + "'" +
             "}";
     }

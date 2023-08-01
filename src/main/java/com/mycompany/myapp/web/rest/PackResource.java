@@ -3,6 +3,8 @@ package com.mycompany.myapp.web.rest;
 import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.service.PackService;
 import com.mycompany.myapp.service.dto.PackDTO;
+import com.mycompany.myapp.service.dto.request.CreatePackDTO;
+import com.mycompany.myapp.service.dto.response.PackResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -54,12 +56,12 @@ public class PackResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/packs")
-    public ResponseEntity<PackDTO> createPack(@RequestBody PackDTO packDTO) throws URISyntaxException {
+    public ResponseEntity<PackResponseDTO> createPack(@RequestBody CreatePackDTO packDTO) throws URISyntaxException {
         log.debug("REST request to save Pack : {}", packDTO);
         if (packDTO.getId() != null) {
             throw new BadRequestAlertException("A new pack cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        PackDTO result = packService.save(packDTO);
+        PackResponseDTO result = packService.save(packDTO);
         return ResponseEntity
             .created(new URI("/api/packs/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -77,8 +79,10 @@ public class PackResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/packs/{id}")
-    public ResponseEntity<PackDTO> updatePack(@PathVariable(value = "id", required = false) final Long id, @RequestBody PackDTO packDTO)
-        throws URISyntaxException {
+    public ResponseEntity<PackResponseDTO> updatePack(
+        @PathVariable(value = "id", required = false) final Long id,
+        @RequestBody CreatePackDTO packDTO
+    ) throws URISyntaxException {
         log.debug("REST request to update Pack : {}, {}", id, packDTO);
         if (packDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
@@ -91,7 +95,7 @@ public class PackResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        PackDTO result = packService.update(packDTO);
+        PackResponseDTO result = packService.update(packDTO, id);
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, packDTO.getId().toString()))
@@ -141,9 +145,9 @@ public class PackResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of packs in body.
      */
     @GetMapping("/packs")
-    public ResponseEntity<List<PackDTO>> getAllPacks(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
+    public ResponseEntity<List<PackResponseDTO>> getAllPacks(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
         log.debug("REST request to get a page of Packs");
-        Page<PackDTO> page = packService.findAll(pageable);
+        Page<PackResponseDTO> page = packService.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -155,9 +159,9 @@ public class PackResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the packDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/packs/{id}")
-    public ResponseEntity<PackDTO> getPack(@PathVariable Long id) {
+    public ResponseEntity<PackResponseDTO> getPack(@PathVariable Long id) {
         log.debug("REST request to get Pack : {}", id);
-        Optional<PackDTO> packDTO = packService.findOne(id);
+        Optional<PackResponseDTO> packDTO = packService.findOne(id);
         return ResponseUtil.wrapOrNotFound(packDTO);
     }
 

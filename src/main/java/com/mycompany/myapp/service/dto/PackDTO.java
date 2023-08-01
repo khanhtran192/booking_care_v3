@@ -13,9 +13,11 @@ public class PackDTO implements Serializable {
 
     private Long id;
 
-    private String nane;
+    private String name;
 
     private String description;
+
+    private Double price;
 
     private HospitalDTO hospital;
 
@@ -27,12 +29,12 @@ public class PackDTO implements Serializable {
         this.id = id;
     }
 
-    public String getNane() {
-        return nane;
+    public String getName() {
+        return name;
     }
 
-    public void setNane(String nane) {
-        this.nane = nane;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -49,6 +51,14 @@ public class PackDTO implements Serializable {
 
     public void setHospital(HospitalDTO hospital) {
         this.hospital = hospital;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
     @Override
@@ -77,7 +87,7 @@ public class PackDTO implements Serializable {
     public String toString() {
         return "PackDTO{" +
             "id=" + getId() +
-            ", nane='" + getNane() + "'" +
+            ", nane='" + getName() + "'" +
             ", description='" + getDescription() + "'" +
             ", hospital=" + getHospital() +
             "}";

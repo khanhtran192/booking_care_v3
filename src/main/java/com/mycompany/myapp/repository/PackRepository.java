@@ -1,5 +1,6 @@
 package com.mycompany.myapp.repository;
 
+import com.mycompany.myapp.domain.Hospital;
 import com.mycompany.myapp.domain.Pack;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
@@ -9,4 +10,6 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface PackRepository extends JpaRepository<Pack, Long> {}
+public interface PackRepository extends JpaRepository<Pack, Long> {
+    Boolean existsByNameAndHospital(String name, Hospital hospital);
+}

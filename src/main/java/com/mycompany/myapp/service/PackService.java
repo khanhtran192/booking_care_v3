@@ -1,8 +1,15 @@
 package com.mycompany.myapp.service;
 
+import com.mycompany.myapp.domain.Hospital;
 import com.mycompany.myapp.domain.Pack;
+import com.mycompany.myapp.exception.AlreadyExistedException;
+import com.mycompany.myapp.exception.NotFoundException;
+import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.service.dto.PackDTO;
+import com.mycompany.myapp.service.dto.request.CreatePackDTO;
+import com.mycompany.myapp.service.dto.response.PackResponseDTO;
+import com.mycompany.myapp.service.mapper.HospitalMapper;
 import com.mycompany.myapp.service.mapper.PackMapper;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -25,9 +32,20 @@ public class PackService {
 
     private final PackMapper packMapper;
 
-    public PackService(PackRepository packRepository, PackMapper packMapper) {
+    private final HospitalRepository hospitalRepository;
+
+    private final HospitalMapper hospitalMapper;
+
+    public PackService(
+        PackRepository packRepository,
+        PackMapper packMapper,
+        HospitalRepository hospitalRepository,
+        HospitalMapper hospitalMapper
+    ) {
         this.packRepository = packRepository;
         this.packMapper = packMapper;
+        this.hospitalRepository = hospitalRepository;
+        this.hospitalMapper = hospitalMapper;
     }
 
     /**
@@ -36,11 +54,21 @@ public class PackService {
      * @param packDTO the entity to save.
      * @return the persisted entity.
      */
-    public PackDTO save(PackDTO packDTO) {
+    public PackResponseDTO save(CreatePackDTO packDTO) {
         log.debug("Request to save Pack : {}", packDTO);
-        Pack pack = packMapper.toEntity(packDTO);
+        Hospital hospital = hospitalRepository
+            .findById(packDTO.getHospitalId())
+            .orElseThrow(() -> new NotFoundException("Hospital not found"));
+        if (packRepository.existsByNameAndHospital(packDTO.getName(), hospital)) {
+            throw new AlreadyExistedException("This pack already exists");
+        }
+        Pack pack = new Pack();
+        pack.setName(packDTO.getName());
+        pack.setDescription(packDTO.getDescription());
+        pack.setPrice(packDTO.getPrice());
+        pack.setHospital(hospital);
         pack = packRepository.save(pack);
-        return packMapper.toDto(pack);
+        return mapToDto(pack);
     }
 
     /**
@@ -49,11 +77,18 @@ public class PackService {
      * @param packDTO the entity to save.
      * @return the persisted entity.
      */
-    public PackDTO update(PackDTO packDTO) {
+    public PackResponseDTO update(CreatePackDTO packDTO, Long id) {
         log.debug("Request to update Pack : {}", packDTO);
-        Pack pack = packMapper.toEntity(packDTO);
+        Pack pack = packRepository.findById(id).orElse(new Pack());
+        Hospital hospital = hospitalRepository
+            .findById(packDTO.getHospitalId())
+            .orElseThrow(() -> new NotFoundException("Hospital not found"));
+        pack.setName(packDTO.getName());
+        pack.setDescription(packDTO.getDescription());
+        pack.setPrice(packDTO.getPrice());
+        pack.setHospital(hospital);
         pack = packRepository.save(pack);
-        return packMapper.toDto(pack);
+        return mapToDto(pack);
     }
 
     /**
@@ -83,9 +118,9 @@ public class PackService {
      * @return the list of entities.
      */
     @Transactional(readOnly = true)
-    public Page<PackDTO> findAll(Pageable pageable) {
+    public Page<PackResponseDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Packs");
-        return packRepository.findAll(pageable).map(packMapper::toDto);
+        return packRepository.findAll(pageable).map(this::mapToDto);
     }
 
     /**
@@ -95,9 +130,9 @@ public class PackService {
      * @return the entity.
      */
     @Transactional(readOnly = true)
-    public Optional<PackDTO> findOne(Long id) {
+    public Optional<PackResponseDTO> findOne(Long id) {
         log.debug("Request to get Pack : {}", id);
-        return packRepository.findById(id).map(packMapper::toDto);
+        return packRepository.findById(id).map(this::mapToDto);
     }
 
     /**
@@ -108,5 +143,16 @@ public class PackService {
     public void delete(Long id) {
         log.debug("Request to delete Pack : {}", id);
         packRepository.deleteById(id);
+    }
+
+    public PackResponseDTO mapToDto(Pack pack) {
+        log.debug("map {} to dto", pack);
+        PackResponseDTO dto = new PackResponseDTO();
+        dto.setId(pack.getId());
+        dto.setName(pack.getName());
+        dto.setDescription(pack.getDescription());
+        dto.setPrice(pack.getPrice());
+        dto.setHospital(hospitalMapper.toDto(pack.getHospital()));
+        return dto;
     }
 }
