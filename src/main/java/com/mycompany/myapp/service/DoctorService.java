@@ -8,12 +8,11 @@ import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
 import com.mycompany.myapp.service.dto.response.DoctorCreatedDTO;
+import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
 import com.mycompany.myapp.service.mapper.DepartmentMapper;
 import com.mycompany.myapp.service.mapper.DoctorMapper;
 import com.mycompany.myapp.service.mapper.HospitalMapper;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +34,8 @@ public class DoctorService {
 
     private final DoctorMapper doctorMapper;
 
+    private final MapperService mapperService;
+
     private final UserService userService;
 
     private final HospitalRepository hospitalRepository;
@@ -47,7 +48,8 @@ public class DoctorService {
         UserService userService,
         HospitalRepository hospitalRepository,
         HospitalMapper hospitalMapper,
-        DepartmentMapper departmentMapper
+        DepartmentMapper departmentMapper,
+        MapperService mapperService
     ) {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
@@ -55,6 +57,7 @@ public class DoctorService {
         this.hospitalRepository = hospitalRepository;
         this.hospitalMapper = hospitalMapper;
         this.departmentMapper = departmentMapper;
+        this.mapperService = mapperService;
     }
 
     /**
@@ -137,8 +140,12 @@ public class DoctorService {
         doctorRepository.deleteById(id);
     }
 
-    public List<DoctorDTO> findAllByHospitalId(Integer hospitalId) {
-        return doctorRepository.findAllByHospitalId(hospitalId).stream().map(doctorMapper::toDto).collect(Collectors.toList());
+    public Page<DoctorDTO> findAllByHospitalId(Pageable pageable, Integer hospitalId, String keyword) {
+        return doctorRepository.pageDoctorByHospital(pageable, hospitalId, keyword).map(doctorMapper::toDto);
+    }
+
+    public Page<DoctorDTO> findAllByHospitalIdForUser(Pageable pageable, Integer hospitalId, String keyword) {
+        return doctorRepository.pageDoctorByHospitalForUser(pageable, hospitalId, keyword).map(doctorMapper::toDto);
     }
 
     public List<DoctorDTO> findAllByDepartment(Department department) {
@@ -171,5 +178,23 @@ public class DoctorService {
         doctor.setActive(false);
         doctorRepository.save(doctor);
         log.debug("delete Doctors: {} success", doctorId);
+    }
+
+    public void acticeDoctor(Long id) {
+        Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor: " + id + " not found"));
+        doctor.setActive(true);
+        doctorRepository.save(doctor);
+        userService.activeDoctor(id);
+    }
+
+    public List<DoctorResponseDTO> listDoctorMostRate() {
+        List<Doctor> doctors = doctorRepository
+            .findAll()
+            .stream()
+            .filter(doctor -> doctor.getActive() == true)
+            .sorted((Comparator.comparing(doctor -> doctor.getRate())))
+            .limit(5)
+            .collect(Collectors.toList());
+        return doctors.stream().map(mapperService::mapToDto).collect(Collectors.toList());
     }
 }

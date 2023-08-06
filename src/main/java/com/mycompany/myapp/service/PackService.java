@@ -11,6 +11,7 @@ import com.mycompany.myapp.service.dto.request.CreatePackDTO;
 import com.mycompany.myapp.service.dto.response.PackResponseDTO;
 import com.mycompany.myapp.service.mapper.HospitalMapper;
 import com.mycompany.myapp.service.mapper.PackMapper;
+import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,18 +35,18 @@ public class PackService {
 
     private final HospitalRepository hospitalRepository;
 
-    private final HospitalMapper hospitalMapper;
+    private final MapperService mapperService;
 
     public PackService(
         PackRepository packRepository,
         PackMapper packMapper,
         HospitalRepository hospitalRepository,
-        HospitalMapper hospitalMapper
+        MapperService mapperService
     ) {
         this.packRepository = packRepository;
         this.packMapper = packMapper;
         this.hospitalRepository = hospitalRepository;
-        this.hospitalMapper = hospitalMapper;
+        this.mapperService = mapperService;
     }
 
     /**
@@ -65,10 +66,9 @@ public class PackService {
         Pack pack = new Pack();
         pack.setName(packDTO.getName());
         pack.setDescription(packDTO.getDescription());
-        pack.setPrice(packDTO.getPrice());
         pack.setHospital(hospital);
         pack = packRepository.save(pack);
-        return mapToDto(pack);
+        return mapperService.mapToDto(pack);
     }
 
     /**
@@ -85,10 +85,10 @@ public class PackService {
             .orElseThrow(() -> new NotFoundException("Hospital not found"));
         pack.setName(packDTO.getName());
         pack.setDescription(packDTO.getDescription());
-        pack.setPrice(packDTO.getPrice());
+
         pack.setHospital(hospital);
         pack = packRepository.save(pack);
-        return mapToDto(pack);
+        return mapperService.mapToDto(pack);
     }
 
     /**
@@ -120,7 +120,7 @@ public class PackService {
     @Transactional(readOnly = true)
     public Page<PackResponseDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Packs");
-        return packRepository.findAll(pageable).map(this::mapToDto);
+        return packRepository.findAll(pageable).map(mapperService::mapToDto);
     }
 
     /**
@@ -132,7 +132,7 @@ public class PackService {
     @Transactional(readOnly = true)
     public Optional<PackResponseDTO> findOne(Long id) {
         log.debug("Request to get Pack : {}", id);
-        return packRepository.findById(id).map(this::mapToDto);
+        return packRepository.findById(id).map(mapperService::mapToDto);
     }
 
     /**
@@ -143,16 +143,5 @@ public class PackService {
     public void delete(Long id) {
         log.debug("Request to delete Pack : {}", id);
         packRepository.deleteById(id);
-    }
-
-    public PackResponseDTO mapToDto(Pack pack) {
-        log.debug("map {} to dto", pack);
-        PackResponseDTO dto = new PackResponseDTO();
-        dto.setId(pack.getId());
-        dto.setName(pack.getName());
-        dto.setDescription(pack.getDescription());
-        dto.setPrice(pack.getPrice());
-        dto.setHospital(hospitalMapper.toDto(pack.getHospital()));
-        return dto;
     }
 }

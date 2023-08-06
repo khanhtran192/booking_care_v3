@@ -1,15 +1,16 @@
 package com.mycompany.myapp.service.dto.response;
 
-public class PackResponseDTO {
+import javax.validation.constraints.NotNull;
+
+public class DepartmentResponseDTO {
 
     private Long id;
 
-    private String name;
+    @NotNull
+    private String departmentName;
 
     private String description;
-
-    private String price;
-
+    private Boolean active;
     private HospitalInfoResponseDTO hospital;
 
     public Long getId() {
@@ -20,12 +21,12 @@ public class PackResponseDTO {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getDepartmentName() {
+        return departmentName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 
     public String getDescription() {
@@ -36,12 +37,12 @@ public class PackResponseDTO {
         this.description = description;
     }
 
-    public String getPrice() {
-        return price;
+    public Boolean getActive() {
+        return active;
     }
 
-    public void setPrice(String price) {
-        this.price = price;
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public HospitalInfoResponseDTO getHospital() {

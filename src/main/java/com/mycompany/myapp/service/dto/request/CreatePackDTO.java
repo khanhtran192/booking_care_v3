@@ -8,7 +8,7 @@ public class CreatePackDTO {
 
     private String description;
 
-    private Double price;
+    //    private Double price;
 
     private Long hospitalId;
 
@@ -36,13 +36,13 @@ public class CreatePackDTO {
         this.description = description;
     }
 
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
+    //    public Double getPrice() {
+    //        return price;
+    //    }
+    //
+    //    public void setPrice(Double price) {
+    //        this.price = price;
+    //    }
 
     public Long getHospitalId() {
         return hospitalId;

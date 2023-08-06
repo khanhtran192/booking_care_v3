@@ -1,5 +1,6 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.Pack;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
@@ -9,6 +10,7 @@ import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
+import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
 import com.mycompany.myapp.service.dto.response.DoctorCreatedDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import com.mycompany.myapp.web.rest.errors.EmailAlreadyUsedException;
@@ -157,9 +159,24 @@ public class HospitalResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of hospitals in body.
      */
     @GetMapping("/hospitals")
-    public ResponseEntity<List<HospitalDTO>> getAllHospitals(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
+    public ResponseEntity<List<HospitalDTO>> getAllHospitalsForUser(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam(value = "keyword", required = false) String keyword
+    ) {
         log.debug("REST request to get a page of Hospitals");
-        Page<HospitalDTO> page = hospitalService.findAll(pageable);
+        Page<HospitalDTO> page = hospitalService.findAllForUser(pageable, keyword);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    @GetMapping("/hospitals/manage")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<HospitalDTO>> getAllHospitals(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam(value = "keyword", required = false) String keyword
+    ) {
+        log.debug("REST request to get a page of Hospitals");
+        Page<HospitalDTO> page = hospitalService.findAll(pageable, keyword);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -183,7 +200,7 @@ public class HospitalResource {
      * @param id the id of the hospitalDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/hospitals/{id}")
+    @DeleteMapping("/hospitals/manage/{id}")
     public ResponseEntity<Void> deleteHospital(@PathVariable Long id) {
         log.debug("REST request to delete Hospital : {}", id);
         hospitalService.delete(id);
@@ -193,26 +210,55 @@ public class HospitalResource {
             .build();
     }
 
-    @GetMapping("/hospitals/doctors")
-    public ResponseEntity<List<DoctorDTO>> doctors(@RequestParam("id") Integer id) {
+    @GetMapping("/hospitals/manage/doctors")
+    public ResponseEntity<Page<DoctorDTO>> getALlDoctorsByHospital(
+        @RequestParam("id") Integer id,
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam(value = "keyword", required = false) String keyword
+    ) {
         log.debug("REST request to get all doctors in Hospital : {}", id);
-        return ResponseEntity.ok().body(hospitalService.getAllDoctor(id));
+        return ResponseEntity.ok().body(hospitalService.getAllDoctor(pageable, id, keyword));
+    }
+
+    @GetMapping("/hospitals/doctors")
+    public ResponseEntity<Page<DoctorDTO>> getALlDoctorsByHospitalForUser(
+        @RequestParam("id") Integer id,
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam(value = "keyword", required = false) String keyword
+    ) {
+        log.debug("REST request to get all doctors in Hospital : {}", id);
+        return ResponseEntity.ok().body(hospitalService.getAllDoctorForUser(pageable, id, keyword));
+    }
+
+    @GetMapping("/hospitals/manage/departments")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Page<DepartmentResponseDTO>> getAllDepartmentByHospital(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam("id") Long id,
+        @RequestParam(value = "keyword", required = false) String keyword
+    ) {
+        log.debug("REST request to get all department in Hospital : {}", id);
+        return ResponseEntity.ok().body(hospitalService.getAllDepartments(pageable, id, keyword));
     }
 
     @GetMapping("/hospitals/departments")
-    public ResponseEntity<List<DepartmentDTO>> departments(@RequestParam("id") Long id) {
+    public ResponseEntity<Page<DepartmentResponseDTO>> getAllDepartmentByHospitalForUser(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam("id") Long id,
+        @RequestParam(value = "keyword", required = false) String keyword
+    ) {
         log.debug("REST request to get all department in Hospital : {}", id);
-        return ResponseEntity.ok().body(hospitalService.getAllDepartments(id));
+        return ResponseEntity.ok().body(hospitalService.getAllDepartmentsForUser(pageable, id, keyword));
     }
 
-    @PostMapping("/hospitals/doctors/doctor")
+    @PostMapping("/hospitals/manage/doctors/doctor")
     @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<DoctorCreatedDTO>> createDoctor(@Valid @RequestBody List<CreateDoctorDTO> doctorDTO) {
         log.debug("REST request to save doctor : {}", doctorDTO);
         return ResponseEntity.ok().body(doctorService.createDoctor(doctorDTO));
     }
 
-    @DeleteMapping("/hospitals/doctors/doctor/{id}")
+    @DeleteMapping("/hospitals/manage/doctors/doctor/{id}")
     @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
         log.debug("REST request to delete doctor : {}", id);
@@ -221,5 +267,21 @@ public class HospitalResource {
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @GetMapping("/hospitals/hospital/active/{id}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Void> activeHospital(@PathVariable Long id) {
+        log.debug("REST request to active hospital : {}", id);
+        hospitalService.activeHospital(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/hospitals/doctors/active/{id}")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Void> activeDoctor(@PathVariable Long id) {
+        log.debug("REST request to active doctor : {}", id);
+        doctorService.acticeDoctor(id);
+        return ResponseEntity.noContent().build();
     }
 }

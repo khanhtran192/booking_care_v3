@@ -29,7 +29,7 @@ public class Pack implements Serializable {
     private String description;
 
     @Column(name = "price")
-    private Double price;
+    private String price;
 
     @OneToMany(mappedBy = "pack")
     @JsonIgnoreProperties(value = { "doctor", "pack" }, allowSetters = true)
@@ -80,11 +80,11 @@ public class Pack implements Serializable {
         return this;
     }
 
-    public Double getPrice() {
+    public String getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(String price) {
         this.price = price;
     }
 

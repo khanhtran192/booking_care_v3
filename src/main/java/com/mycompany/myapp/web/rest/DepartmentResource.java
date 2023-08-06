@@ -5,7 +5,7 @@ import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.DepartmentService;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
-import com.mycompany.myapp.service.dto.request.CreateHospitalDTO;
+import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -61,12 +60,13 @@ public class DepartmentResource {
      */
     @PostMapping("/departments")
     @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<DepartmentDTO> createDepartment(@Valid @RequestBody DepartmentDTO departmentDTO) throws URISyntaxException {
+    public ResponseEntity<DepartmentResponseDTO> createDepartment(@Valid @RequestBody DepartmentDTO departmentDTO)
+        throws URISyntaxException {
         log.debug("REST request to save Department : {}", departmentDTO);
         if (departmentDTO.getId() != null) {
             throw new BadRequestAlertException("A new department cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        DepartmentDTO result = departmentService.save(departmentDTO);
+        DepartmentResponseDTO result = departmentService.save(departmentDTO);
         return ResponseEntity
             .created(new URI("/api/departments/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -84,7 +84,7 @@ public class DepartmentResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/departments/{id}")
-    public ResponseEntity<DepartmentDTO> updateDepartment(
+    public ResponseEntity<DepartmentResponseDTO> updateDepartment(
         @PathVariable(value = "id", required = false) final Long id,
         @Valid @RequestBody DepartmentDTO departmentDTO
     ) throws URISyntaxException {
@@ -100,7 +100,7 @@ public class DepartmentResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        DepartmentDTO result = departmentService.update(departmentDTO);
+        DepartmentResponseDTO result = departmentService.update(departmentDTO);
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, departmentDTO.getId().toString()))
@@ -150,11 +150,14 @@ public class DepartmentResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of departments in body.
      */
     @GetMapping("/departments")
-    public ResponseEntity<List<DepartmentDTO>> getAllDepartments(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
+    public ResponseEntity<Page<DepartmentResponseDTO>> getAllDepartments(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam(value = "keyword", required = false) String keyword
+    ) {
         log.debug("REST request to get a page of Departments");
-        Page<DepartmentDTO> page = departmentService.findAll(pageable);
+        Page<DepartmentResponseDTO> page = departmentService.findAll(pageable, keyword);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
+        return ResponseEntity.ok().headers(headers).body(page);
     }
 
     /**
@@ -164,9 +167,9 @@ public class DepartmentResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the departmentDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/departments/{id}")
-    public ResponseEntity<DepartmentDTO> getDepartment(@PathVariable Long id) {
+    public ResponseEntity<DepartmentResponseDTO> getDepartment(@PathVariable Long id) {
         log.debug("REST request to get Department : {}", id);
-        Optional<DepartmentDTO> departmentDTO = departmentService.findOne(id);
+        Optional<DepartmentResponseDTO> departmentDTO = departmentService.findOne(id);
         return ResponseUtil.wrapOrNotFound(departmentDTO);
     }
 

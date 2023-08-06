@@ -424,4 +424,37 @@ public class UserService {
             mailService.sendCreationEmail(user);
         }
     }
+
+    public void deleteHospital(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User " + id + " does not exist"));
+        Set<Authority> authorities = new HashSet<>();
+        authorities.add(
+            authorityRepository
+                .findById(AuthoritiesConstants.USER)
+                .orElseThrow(() -> new NotFoundException("Authority " + AuthoritiesConstants.USER + " does not exist"))
+        );
+        user.setAuthorities(authorities);
+        userRepository.save(user);
+        log.debug("Delete role hospital of user: {}", user);
+    }
+
+    public void activeHospital(Long id) {
+        List<Authority> authorities = authorityRepository.findAllById(
+            Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.HOSPITAL)
+        );
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User " + id + " does not exist"));
+        user.setAuthorities(new HashSet<>(authorities));
+        userRepository.save(user);
+        log.debug("Delete role hospital of user: {}", user);
+    }
+
+    public void activeDoctor(Long id) {
+        List<Authority> authorities = authorityRepository.findAllById(
+            Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.DOCTOR)
+        );
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User " + id + " does not exist"));
+        user.setAuthorities(new HashSet<>(authorities));
+        userRepository.save(user);
+        log.debug("Delete role doctor of user: {}", user);
+    }
 }

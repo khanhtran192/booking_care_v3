@@ -3,6 +3,8 @@ package com.mycompany.myapp.web.rest;
 import com.mycompany.myapp.repository.TimeSlotRepository;
 import com.mycompany.myapp.service.TimeSlotService;
 import com.mycompany.myapp.service.dto.TimeSlotDTO;
+import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
+import com.mycompany.myapp.service.dto.response.TimeSlotResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,12 +58,12 @@ public class TimeSlotResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/time-slots")
-    public ResponseEntity<TimeSlotDTO> createTimeSlot(@Valid @RequestBody TimeSlotDTO timeSlotDTO) throws URISyntaxException {
+    public ResponseEntity<TimeSlotResponseDTO> createTimeSlot(@Valid @RequestBody CreateTimeSlotDTO timeSlotDTO) throws URISyntaxException {
         log.debug("REST request to save TimeSlot : {}", timeSlotDTO);
-        if (timeSlotDTO.getId() != null) {
-            throw new BadRequestAlertException("A new timeSlot cannot already have an ID", ENTITY_NAME, "idexists");
-        }
-        TimeSlotDTO result = timeSlotService.save(timeSlotDTO);
+        //        if (timeSlotDTO.getId() != null) {
+        //            throw new BadRequestAlertException("A new timeSlot cannot already have an ID", ENTITY_NAME, "idexists");
+        //        }
+        TimeSlotResponseDTO result = timeSlotService.save(timeSlotDTO);
         return ResponseEntity
             .created(new URI("/api/time-slots/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -79,26 +81,26 @@ public class TimeSlotResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/time-slots/{id}")
-    public ResponseEntity<TimeSlotDTO> updateTimeSlot(
+    public ResponseEntity<TimeSlotResponseDTO> updateTimeSlot(
         @PathVariable(value = "id", required = false) final Long id,
-        @Valid @RequestBody TimeSlotDTO timeSlotDTO
+        @Valid @RequestBody CreateTimeSlotDTO timeSlotDTO
     ) throws URISyntaxException {
         log.debug("REST request to update TimeSlot : {}, {}", id, timeSlotDTO);
-        if (timeSlotDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, timeSlotDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
+        //        if (id == null) {
+        //            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        //        }
+        //        if (!Objects.equals(id, timeSlotDTO.getId())) {
+        //            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        //        }
 
         if (!timeSlotRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        TimeSlotDTO result = timeSlotService.update(timeSlotDTO);
+        TimeSlotResponseDTO result = timeSlotService.update(timeSlotDTO, id);
         return ResponseEntity
             .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, timeSlotDTO.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, String.valueOf(id)))
             .body(result);
     }
 
@@ -145,9 +147,9 @@ public class TimeSlotResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of timeSlots in body.
      */
     @GetMapping("/time-slots")
-    public ResponseEntity<List<TimeSlotDTO>> getAllTimeSlots(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
+    public ResponseEntity<List<TimeSlotResponseDTO>> getAllTimeSlots(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
         log.debug("REST request to get a page of TimeSlots");
-        Page<TimeSlotDTO> page = timeSlotService.findAll(pageable);
+        Page<TimeSlotResponseDTO> page = timeSlotService.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -159,9 +161,9 @@ public class TimeSlotResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the timeSlotDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/time-slots/{id}")
-    public ResponseEntity<TimeSlotDTO> getTimeSlot(@PathVariable Long id) {
+    public ResponseEntity<TimeSlotResponseDTO> getTimeSlot(@PathVariable Long id) {
         log.debug("REST request to get TimeSlot : {}", id);
-        Optional<TimeSlotDTO> timeSlotDTO = timeSlotService.findOne(id);
+        Optional<TimeSlotResponseDTO> timeSlotDTO = timeSlotService.findOne(id);
         return ResponseUtil.wrapOrNotFound(timeSlotDTO);
     }
 

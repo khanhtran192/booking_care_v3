@@ -5,6 +5,7 @@ import com.mycompany.myapp.domain.Hospital;
 import com.mycompany.myapp.repository.DepartmentRepository;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
+import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
 import com.mycompany.myapp.service.mapper.DepartmentMapper;
 import java.util.List;
 import java.util.Optional;
@@ -30,10 +31,18 @@ public class DepartmentService {
     private final DepartmentMapper departmentMapper;
     private final DoctorService doctorService;
 
-    public DepartmentService(DepartmentRepository departmentRepository, DepartmentMapper departmentMapper, DoctorService doctorService) {
+    private final MapperService mapperService;
+
+    public DepartmentService(
+        DepartmentRepository departmentRepository,
+        DepartmentMapper departmentMapper,
+        DoctorService doctorService,
+        MapperService mapperService
+    ) {
         this.departmentRepository = departmentRepository;
         this.departmentMapper = departmentMapper;
         this.doctorService = doctorService;
+        this.mapperService = mapperService;
     }
 
     /**
@@ -42,11 +51,11 @@ public class DepartmentService {
      * @param departmentDTO the entity to save.
      * @return the persisted entity.
      */
-    public DepartmentDTO save(DepartmentDTO departmentDTO) {
+    public DepartmentResponseDTO save(DepartmentDTO departmentDTO) {
         log.debug("Request to save Department : {}", departmentDTO);
         Department department = departmentMapper.toEntity(departmentDTO);
         department = departmentRepository.save(department);
-        return departmentMapper.toDto(department);
+        return mapperService.mapToDto(department);
     }
 
     /**
@@ -55,11 +64,11 @@ public class DepartmentService {
      * @param departmentDTO the entity to save.
      * @return the persisted entity.
      */
-    public DepartmentDTO update(DepartmentDTO departmentDTO) {
+    public DepartmentResponseDTO update(DepartmentDTO departmentDTO) {
         log.debug("Request to update Department : {}", departmentDTO);
         Department department = departmentMapper.toEntity(departmentDTO);
         department = departmentRepository.save(department);
-        return departmentMapper.toDto(department);
+        return mapperService.mapToDto(department);
     }
 
     /**
@@ -89,9 +98,9 @@ public class DepartmentService {
      * @return the list of entities.
      */
     @Transactional(readOnly = true)
-    public Page<DepartmentDTO> findAll(Pageable pageable) {
+    public Page<DepartmentResponseDTO> findAll(Pageable pageable, String keyword) {
         log.debug("Request to get all Departments");
-        return departmentRepository.findAllByActiveIsTrue(pageable).map(departmentMapper::toDto);
+        return departmentRepository.pageDepartmentForUser(pageable, keyword).map(mapperService::mapToDto);
     }
 
     /**
@@ -101,9 +110,9 @@ public class DepartmentService {
      * @return the entity.
      */
     @Transactional(readOnly = true)
-    public Optional<DepartmentDTO> findOne(Long id) {
+    public Optional<DepartmentResponseDTO> findOne(Long id) {
         log.debug("Request to get Department : {}", id);
-        return departmentRepository.findById(id).map(departmentMapper::toDto);
+        return departmentRepository.findById(id).map(mapperService::mapToDto);
     }
 
     /**
@@ -121,7 +130,11 @@ public class DepartmentService {
         return doctorService.findAllByDepartment(department);
     }
 
-    public List<DepartmentDTO> findAllByHospital(Hospital hospital) {
-        return departmentRepository.findAllByHospital(hospital).stream().map(departmentMapper::toDto).collect(Collectors.toList());
+    public Page<DepartmentResponseDTO> findAllByHospital(Pageable pageable, Hospital hospital, String keyword) {
+        return departmentRepository.pageDepartmentByHospital(pageable, hospital, keyword).map(mapperService::mapToDto);
+    }
+
+    public Page<DepartmentResponseDTO> findAllByHospitalForUser(Pageable pageable, Hospital hospital, String keyword) {
+        return departmentRepository.pageDepartmentByHospitalForUser(pageable, hospital, keyword).map(mapperService::mapToDto);
     }
 }

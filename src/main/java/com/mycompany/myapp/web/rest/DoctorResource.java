@@ -3,6 +3,7 @@ package com.mycompany.myapp.web.rest;
 import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.service.DoctorService;
 import com.mycompany.myapp.service.dto.DoctorDTO;
+import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -179,5 +180,11 @@ public class DoctorResource {
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @GetMapping("/doctors/most-rate")
+    public ResponseEntity<List<DoctorResponseDTO>> listDoctorMostRate() {
+        log.debug("REST request get list doctor most rate");
+        return ResponseEntity.ok().body(doctorService.listDoctorMostRate());
     }
 }
