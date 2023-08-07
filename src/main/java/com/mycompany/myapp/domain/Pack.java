@@ -31,6 +31,8 @@ public class Pack implements Serializable {
     @Column(name = "price")
     private String price;
 
+    private Boolean active;
+
     @OneToMany(mappedBy = "pack")
     @JsonIgnoreProperties(value = { "doctor", "pack" }, allowSetters = true)
     private Set<TimeSlot> timeSlots = new HashSet<>();
@@ -140,6 +142,14 @@ public class Pack implements Serializable {
     public Pack orders(Set<Order> orders) {
         this.setOrders(orders);
         return this;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Pack addOrder(Order order) {

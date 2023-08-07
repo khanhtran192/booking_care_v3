@@ -8,6 +8,8 @@ public class CreatePackDTO {
 
     private String description;
 
+    private Boolean active;
+
     //    private Double price;
 
     private Long hospitalId;
@@ -50,5 +52,13 @@ public class CreatePackDTO {
 
     public void setHospitalId(Long hospitalId) {
         this.hospitalId = hospitalId;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }

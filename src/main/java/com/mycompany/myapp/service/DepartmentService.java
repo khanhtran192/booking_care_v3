@@ -2,6 +2,7 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Department;
 import com.mycompany.myapp.domain.Hospital;
+import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DepartmentRepository;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
@@ -136,5 +137,21 @@ public class DepartmentService {
 
     public Page<DepartmentResponseDTO> findAllByHospitalForUser(Pageable pageable, Hospital hospital, String keyword) {
         return departmentRepository.pageDepartmentByHospitalForUser(pageable, hospital, keyword).map(mapperService::mapToDto);
+    }
+
+    public void inactiveDepartment(Long id) {
+        Department department = departmentRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Department: " + id + " not found"));
+        department.setActive(false);
+        departmentRepository.save(department);
+    }
+
+    public void activeDepartment(Long id) {
+        Department department = departmentRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Department: " + id + " not found"));
+        department.setActive(true);
+        departmentRepository.save(department);
     }
 }

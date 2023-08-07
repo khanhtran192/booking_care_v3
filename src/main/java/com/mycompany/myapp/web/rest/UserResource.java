@@ -210,15 +210,4 @@ public class UserResource {
         userService.deleteUser(login);
         return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "userManagement.deleted", login)).build();
     }
-
-    @PostMapping("/hospitals")
-    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<Void> createHospital(@RequestBody CreateHospitalDTO createHospitalDTO) {
-        log.debug("REST request to create hospital: {}", createHospitalDTO.getName());
-        userService.createHospital(createHospitalDTO);
-        return ResponseEntity
-            .noContent()
-            .headers(HeaderUtil.createAlert(applicationName, "userManagement.created", createHospitalDTO.getName()))
-            .build();
-    }
 }

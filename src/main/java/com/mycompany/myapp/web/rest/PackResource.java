@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -145,9 +144,12 @@ public class PackResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of packs in body.
      */
     @GetMapping("/packs")
-    public ResponseEntity<List<PackResponseDTO>> getAllPacks(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
+    public ResponseEntity<List<PackResponseDTO>> getAllPacksForUser(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam(value = "keyword", required = false) String keyword
+    ) {
         log.debug("REST request to get a page of Packs");
-        Page<PackResponseDTO> page = packService.findAll(pageable);
+        Page<PackResponseDTO> page = packService.findAll(pageable, true, null, keyword);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -164,20 +166,19 @@ public class PackResource {
         Optional<PackResponseDTO> packDTO = packService.findOne(id);
         return ResponseUtil.wrapOrNotFound(packDTO);
     }
-
     /**
      * {@code DELETE  /packs/:id} : delete the "id" pack.
      *
      * @param id the id of the packDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/packs/{id}")
-    public ResponseEntity<Void> deletePack(@PathVariable Long id) {
-        log.debug("REST request to delete Pack : {}", id);
-        packService.delete(id);
-        return ResponseEntity
-            .noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-            .build();
-    }
+    //    @DeleteMapping("/packs/{id}")
+    //    public ResponseEntity<Void> deletePack(@PathVariable Long id) {
+    //        log.debug("REST request to delete Pack : {}", id);
+    //        packService.delete(id);
+    //        return ResponseEntity
+    //            .noContent()
+    //            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+    //            .build();
+    //    }
 }

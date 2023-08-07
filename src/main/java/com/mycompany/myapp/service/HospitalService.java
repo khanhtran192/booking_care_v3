@@ -8,6 +8,7 @@ import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
 import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
+import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
 import com.mycompany.myapp.service.dto.response.HospitalInfoResponseDTO;
 import com.mycompany.myapp.service.mapper.HospitalMapper;
 import java.util.List;
@@ -142,11 +143,11 @@ public class HospitalService {
         userService.deleteHospital(hospital.getUserId());
     }
 
-    public Page<DoctorDTO> getAllDoctor(Pageable pageable, Integer id, String keyword) {
+    public Page<DoctorResponseDTO> getAllDoctor(Pageable pageable, Integer id, String keyword) {
         return doctorService.findAllByHospitalId(pageable, id, keyword);
     }
 
-    public Page<DoctorDTO> getAllDoctorForUser(Pageable pageable, Integer id, String keyword) {
+    public Page<DoctorResponseDTO> getAllDoctorForUser(Pageable pageable, Integer id, String keyword) {
         return doctorService.findAllByHospitalIdForUser(pageable, id, keyword);
     }
 

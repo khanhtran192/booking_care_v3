@@ -140,12 +140,12 @@ public class DoctorService {
         doctorRepository.deleteById(id);
     }
 
-    public Page<DoctorDTO> findAllByHospitalId(Pageable pageable, Integer hospitalId, String keyword) {
-        return doctorRepository.pageDoctorByHospital(pageable, hospitalId, keyword).map(doctorMapper::toDto);
+    public Page<DoctorResponseDTO> findAllByHospitalId(Pageable pageable, Integer hospitalId, String keyword) {
+        return doctorRepository.pageDoctorByHospital(pageable, hospitalId, keyword).map(mapperService::mapToDto);
     }
 
-    public Page<DoctorDTO> findAllByHospitalIdForUser(Pageable pageable, Integer hospitalId, String keyword) {
-        return doctorRepository.pageDoctorByHospitalForUser(pageable, hospitalId, keyword).map(doctorMapper::toDto);
+    public Page<DoctorResponseDTO> findAllByHospitalIdForUser(Pageable pageable, Integer hospitalId, String keyword) {
+        return doctorRepository.pageDoctorByHospitalForUser(pageable, hospitalId, keyword).map(mapperService::mapToDto);
     }
 
     public List<DoctorDTO> findAllByDepartment(Department department) {
@@ -191,8 +191,8 @@ public class DoctorService {
         List<Doctor> doctors = doctorRepository
             .findAll()
             .stream()
-            .filter(doctor -> doctor.getActive() == true)
-            .sorted((Comparator.comparing(doctor -> doctor.getRate())))
+            .filter(Doctor::getActive)
+            .sorted((Comparator.comparing(Doctor::getRate)))
             .limit(5)
             .collect(Collectors.toList());
         return doctors.stream().map(mapperService::mapToDto).collect(Collectors.toList());

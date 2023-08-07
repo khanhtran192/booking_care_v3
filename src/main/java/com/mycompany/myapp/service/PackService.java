@@ -65,6 +65,7 @@ public class PackService {
         }
         Pack pack = new Pack();
         pack.setName(packDTO.getName());
+        pack.setActive(true);
         pack.setDescription(packDTO.getDescription());
         pack.setHospital(hospital);
         pack = packRepository.save(pack);
@@ -83,9 +84,12 @@ public class PackService {
         Hospital hospital = hospitalRepository
             .findById(packDTO.getHospitalId())
             .orElseThrow(() -> new NotFoundException("Hospital not found"));
+        if (packRepository.existsByNameAndHospital(packDTO.getName(), hospital)) {
+            throw new AlreadyExistedException("This pack already exists");
+        }
         pack.setName(packDTO.getName());
         pack.setDescription(packDTO.getDescription());
-
+        pack.setActive(packDTO.getActive());
         pack.setHospital(hospital);
         pack = packRepository.save(pack);
         return mapperService.mapToDto(pack);
@@ -118,9 +122,13 @@ public class PackService {
      * @return the list of entities.
      */
     @Transactional(readOnly = true)
-    public Page<PackResponseDTO> findAll(Pageable pageable) {
+    public Page<PackResponseDTO> findAll(Pageable pageable, Boolean active, Long hospitalId, String keyword) {
         log.debug("Request to get all Packs");
-        return packRepository.findAll(pageable).map(mapperService::mapToDto);
+        Hospital hospital = null;
+        if (hospitalId != null) {
+            hospital = hospitalRepository.findById(hospitalId).orElse(null);
+        }
+        return packRepository.pagePack(pageable, active, hospital, keyword).map(mapperService::mapToDto);
     }
 
     /**
@@ -142,6 +150,15 @@ public class PackService {
      */
     public void delete(Long id) {
         log.debug("Request to delete Pack : {}", id);
-        packRepository.deleteById(id);
+        Pack pack = packRepository.findById(id).orElseThrow(() -> new NotFoundException("pack: " + id + " not found"));
+        pack.setActive(false);
+        packRepository.save(pack);
+    }
+
+    public void activePack(Long id) {
+        log.debug("Request to active Pack : {}", id);
+        Pack pack = packRepository.findById(id).orElseThrow(() -> new NotFoundException("pack: " + id + " not found"));
+        pack.setActive(true);
+        packRepository.save(pack);
     }
 }
