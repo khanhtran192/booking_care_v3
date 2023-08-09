@@ -162,20 +162,4 @@ public class OrderResource {
         Optional<OrderDTO> orderDTO = orderService.findOne(id);
         return ResponseUtil.wrapOrNotFound(orderDTO);
     }
-
-    /**
-     * {@code DELETE  /orders/:id} : delete the "id" order.
-     *
-     * @param id the id of the orderDTO to delete.
-     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
-     */
-    @DeleteMapping("/orders/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        log.debug("REST request to delete Order : {}", id);
-        orderService.delete(id);
-        return ResponseEntity
-            .noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-            .build();
-    }
 }

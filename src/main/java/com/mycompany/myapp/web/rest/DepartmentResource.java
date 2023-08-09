@@ -6,6 +6,7 @@ import com.mycompany.myapp.service.DepartmentService;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
+import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,54 +59,6 @@ public class DepartmentResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new departmentDTO, or with status {@code 400 (Bad Request)} if the department has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/departments")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<DepartmentResponseDTO> createDepartment(@Valid @RequestBody DepartmentDTO departmentDTO)
-        throws URISyntaxException {
-        log.debug("REST request to save Department : {}", departmentDTO);
-        if (departmentDTO.getId() != null) {
-            throw new BadRequestAlertException("A new department cannot already have an ID", ENTITY_NAME, "idexists");
-        }
-        DepartmentResponseDTO result = departmentService.save(departmentDTO);
-        return ResponseEntity
-            .created(new URI("/api/departments/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
-    }
-
-    /**
-     * {@code PUT  /departments/:id} : Updates an existing department.
-     *
-     * @param id the id of the departmentDTO to save.
-     * @param departmentDTO the departmentDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated departmentDTO,
-     * or with status {@code 400 (Bad Request)} if the departmentDTO is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the departmentDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PutMapping("/departments/{id}")
-    public ResponseEntity<DepartmentResponseDTO> updateDepartment(
-        @PathVariable(value = "id", required = false) final Long id,
-        @Valid @RequestBody DepartmentDTO departmentDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to update Department : {}, {}", id, departmentDTO);
-        if (departmentDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, departmentDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!departmentRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        DepartmentResponseDTO result = departmentService.update(departmentDTO);
-        return ResponseEntity
-            .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, departmentDTO.getId().toString()))
-            .body(result);
-    }
 
     /**
      * {@code PATCH  /departments/:id} : Partial updates given fields of an existing department, field will ignore if it is null
@@ -173,24 +126,8 @@ public class DepartmentResource {
         return ResponseUtil.wrapOrNotFound(departmentDTO);
     }
 
-    /**
-     * {@code DELETE  /departments/:id} : delete the "id" department.
-     *
-     * @param id the id of the departmentDTO to delete.
-     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
-     */
-    @DeleteMapping("/departments/{id}")
-    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
-        log.debug("REST request to delete Department : {}", id);
-        departmentService.delete(id);
-        return ResponseEntity
-            .noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-            .build();
-    }
-
-    @GetMapping("/departments/doctors")
-    public ResponseEntity<List<DoctorDTO>> getDoctorByDepartment(@RequestParam("id") Long id) {
+    @GetMapping("/departments/{id}/doctors")
+    public ResponseEntity<List<DoctorResponseDTO>> getDoctorByDepartment(@PathVariable Long id) {
         log.debug("REST request to get doctors by Department : {}", id);
         return ResponseEntity.ok().body(departmentService.findAllByDepartment(id));
     }

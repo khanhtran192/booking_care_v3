@@ -6,7 +6,6 @@ import com.mycompany.myapp.service.dto.PackDTO;
 import com.mycompany.myapp.service.dto.request.CreatePackDTO;
 import com.mycompany.myapp.service.dto.response.PackResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
@@ -54,18 +53,6 @@ public class PackResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new packDTO, or with status {@code 400 (Bad Request)} if the pack has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/packs")
-    public ResponseEntity<PackResponseDTO> createPack(@RequestBody CreatePackDTO packDTO) throws URISyntaxException {
-        log.debug("REST request to save Pack : {}", packDTO);
-        if (packDTO.getId() != null) {
-            throw new BadRequestAlertException("A new pack cannot already have an ID", ENTITY_NAME, "idexists");
-        }
-        PackResponseDTO result = packService.save(packDTO);
-        return ResponseEntity
-            .created(new URI("/api/packs/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
-    }
 
     /**
      * {@code PUT  /packs/:id} : Updates an existing pack.

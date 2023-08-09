@@ -148,8 +148,8 @@ public class DoctorService {
         return doctorRepository.pageDoctorByHospitalForUser(pageable, hospitalId, keyword).map(mapperService::mapToDto);
     }
 
-    public List<DoctorDTO> findAllByDepartment(Department department) {
-        return doctorRepository.findAllByDepartment(department).stream().map(doctorMapper::toDto).collect(Collectors.toList());
+    public List<DoctorResponseDTO> findAllByDepartment(Department department) {
+        return doctorRepository.findAllByDepartment(department).stream().map(mapperService::mapToDto).collect(Collectors.toList());
     }
 
     public List<DoctorCreatedDTO> createDoctor(List<CreateDoctorDTO> doctorDTOs) {

@@ -2,7 +2,9 @@ package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.Pack;
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.repository.DepartmentRepository;
 import com.mycompany.myapp.repository.HospitalRepository;
+import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.*;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
@@ -10,6 +12,7 @@ import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
+import com.mycompany.myapp.service.dto.request.CreatePackDTO;
 import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
 import com.mycompany.myapp.service.dto.response.DoctorCreatedDTO;
 import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
@@ -54,26 +57,29 @@ public class HospitalResource {
     private String applicationName;
 
     private final HospitalService hospitalService;
-
     private final HospitalRepository hospitalRepository;
     private final DoctorService doctorService;
-
     private final PackService packService;
-
+    private final PackRepository packRepository;
     private final DepartmentService departmentService;
+    private final DepartmentRepository departmentRepository;
 
     public HospitalResource(
         HospitalService hospitalService,
         HospitalRepository hospitalRepository,
         DoctorService doctorService,
         PackService packService,
-        DepartmentService departmentService
+        DepartmentService departmentService,
+        PackRepository packRepository,
+        DepartmentRepository departmentRepository
     ) {
         this.hospitalService = hospitalService;
         this.hospitalRepository = hospitalRepository;
         this.doctorService = doctorService;
         this.packService = packService;
         this.departmentService = departmentService;
+        this.packRepository = packRepository;
+        this.departmentRepository = departmentRepository;
     }
 
     /**
@@ -265,7 +271,7 @@ public class HospitalResource {
         return ResponseEntity.ok().body(hospitalService.getAllDepartmentsForUser(pageable, id, keyword));
     }
 
-    @PostMapping("/hospitals/manage/doctors/doctor")
+    @PostMapping("/hospitals/manage/doctors")
     @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<DoctorCreatedDTO>> createDoctor(@Valid @RequestBody List<CreateDoctorDTO> doctorDTO) {
         log.debug("REST request to save doctor : {}", doctorDTO);
@@ -352,5 +358,81 @@ public class HospitalResource {
         log.debug("REST request active Department : {}", id);
         departmentService.activeDepartment(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/hospitals/manage/departments")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<DepartmentResponseDTO> createDepartment(@Valid @RequestBody DepartmentDTO departmentDTO)
+        throws URISyntaxException {
+        log.debug("REST request to save Department : {}", departmentDTO);
+        if (departmentDTO.getId() != null) {
+            throw new BadRequestAlertException("A new department cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        DepartmentResponseDTO result = departmentService.save(departmentDTO);
+        return ResponseEntity
+            .created(new URI("/api/departments/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    @PostMapping("/hospitals/manage/packs")
+    public ResponseEntity<PackResponseDTO> createPack(@RequestBody CreatePackDTO packDTO) throws URISyntaxException {
+        log.debug("REST request to save Pack : {}", packDTO);
+        if (packDTO.getId() != null) {
+            throw new BadRequestAlertException("A new pack cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        PackResponseDTO result = packService.save(packDTO);
+        return ResponseEntity
+            .created(new URI("/api/packs/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    @PutMapping("/hospitals/manage/packs/{id}")
+    public ResponseEntity<PackResponseDTO> updatePack(
+        @PathVariable(value = "id", required = false) final Long id,
+        @RequestBody CreatePackDTO packDTO
+    ) throws URISyntaxException {
+        log.debug("REST request to update Pack : {}, {}", id, packDTO);
+        if (packDTO.getId() == null) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+        if (!Objects.equals(id, packDTO.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!packRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
+        PackResponseDTO result = packService.update(packDTO, id);
+        return ResponseEntity
+            .ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, packDTO.getId().toString()))
+            .body(result);
+    }
+
+    @PutMapping("/hospitals/manage/departments/{id}")
+    public ResponseEntity<DepartmentResponseDTO> updateDepartment(
+        @PathVariable(value = "id", required = false) final Long id,
+        @Valid @RequestBody DepartmentDTO departmentDTO
+    ) throws URISyntaxException {
+        log.debug("REST request to update Department : {}, {}", id, departmentDTO);
+        if (departmentDTO.getId() == null) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+        if (!Objects.equals(id, departmentDTO.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!departmentRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
+        DepartmentResponseDTO result = departmentService.update(departmentDTO);
+        return ResponseEntity
+            .ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, departmentDTO.getId().toString()))
+            .body(result);
     }
 }

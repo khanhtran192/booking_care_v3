@@ -7,6 +7,7 @@ import com.mycompany.myapp.repository.DepartmentRepository;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
+import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
 import com.mycompany.myapp.service.mapper.DepartmentMapper;
 import java.util.List;
 import java.util.Optional;
@@ -126,7 +127,7 @@ public class DepartmentService {
         departmentRepository.deleteById(id);
     }
 
-    public List<DoctorDTO> findAllByDepartment(Long id) {
+    public List<DoctorResponseDTO> findAllByDepartment(Long id) {
         Department department = departmentRepository.findById(id).orElseThrow(() -> new RuntimeException("No department found"));
         return doctorService.findAllByDepartment(department);
     }

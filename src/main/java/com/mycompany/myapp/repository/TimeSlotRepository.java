@@ -1,6 +1,9 @@
 package com.mycompany.myapp.repository;
 
+import com.mycompany.myapp.domain.Doctor;
+import com.mycompany.myapp.domain.Pack;
 import com.mycompany.myapp.domain.TimeSlot;
+import java.util.List;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
@@ -9,4 +12,7 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {}
+public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
+    List<TimeSlot> findAllByDoctor(Doctor doctor);
+    List<TimeSlot> findAllByPack(Pack pack);
+}

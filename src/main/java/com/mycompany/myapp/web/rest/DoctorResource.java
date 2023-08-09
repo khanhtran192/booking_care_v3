@@ -50,26 +50,6 @@ public class DoctorResource {
     }
 
     /**
-     * {@code POST  /doctors} : Create a new doctor.
-     *
-     * @param doctorDTO the doctorDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new doctorDTO, or with status {@code 400 (Bad Request)} if the doctor has already an ID.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PostMapping("/doctors")
-    public ResponseEntity<DoctorDTO> createDoctor(@Valid @RequestBody DoctorDTO doctorDTO) throws URISyntaxException {
-        log.debug("REST request to save Doctor : {}", doctorDTO);
-        if (doctorDTO.getId() != null) {
-            throw new BadRequestAlertException("A new doctor cannot already have an ID", ENTITY_NAME, "idexists");
-        }
-        DoctorDTO result = doctorService.save(doctorDTO);
-        return ResponseEntity
-            .created(new URI("/api/doctors/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
-    }
-
-    /**
      * {@code PUT  /doctors/:id} : Updates an existing doctor.
      *
      * @param id the id of the doctorDTO to save.
@@ -164,22 +144,6 @@ public class DoctorResource {
         log.debug("REST request to get Doctor : {}", id);
         Optional<DoctorDTO> doctorDTO = doctorService.findOne(id);
         return ResponseUtil.wrapOrNotFound(doctorDTO);
-    }
-
-    /**
-     * {@code DELETE  /doctors/:id} : delete the "id" doctor.
-     *
-     * @param id the id of the doctorDTO to delete.
-     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
-     */
-    @DeleteMapping("/doctors/{id}")
-    public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
-        log.debug("REST request to delete Doctor : {}", id);
-        doctorService.delete(id);
-        return ResponseEntity
-            .noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-            .build();
     }
 
     @GetMapping("/doctors/most-rate")
