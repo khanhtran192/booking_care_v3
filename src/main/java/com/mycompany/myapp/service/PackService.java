@@ -5,12 +5,14 @@ import com.mycompany.myapp.domain.Pack;
 import com.mycompany.myapp.exception.AlreadyExistedException;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.HospitalRepository;
+import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.service.dto.PackDTO;
 import com.mycompany.myapp.service.dto.request.CreatePackDTO;
 import com.mycompany.myapp.service.dto.response.PackResponseDTO;
 import com.mycompany.myapp.service.mapper.HospitalMapper;
 import com.mycompany.myapp.service.mapper.PackMapper;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -31,7 +33,7 @@ public class PackService {
 
     private final PackRepository packRepository;
 
-    private final PackMapper packMapper;
+    private final OrderRepository orderRepository;
 
     private final HospitalRepository hospitalRepository;
 
@@ -39,14 +41,14 @@ public class PackService {
 
     public PackService(
         PackRepository packRepository,
-        PackMapper packMapper,
         HospitalRepository hospitalRepository,
-        MapperService mapperService
+        MapperService mapperService,
+        OrderRepository orderRepository
     ) {
         this.packRepository = packRepository;
-        this.packMapper = packMapper;
         this.hospitalRepository = hospitalRepository;
         this.mapperService = mapperService;
+        this.orderRepository = orderRepository;
     }
 
     /**
@@ -96,26 +98,6 @@ public class PackService {
     }
 
     /**
-     * Partially update a pack.
-     *
-     * @param packDTO the entity to update partially.
-     * @return the persisted entity.
-     */
-    public Optional<PackDTO> partialUpdate(PackDTO packDTO) {
-        log.debug("Request to partially update Pack : {}", packDTO);
-
-        return packRepository
-            .findById(packDTO.getId())
-            .map(existingPack -> {
-                packMapper.partialUpdate(existingPack, packDTO);
-
-                return existingPack;
-            })
-            .map(packRepository::save)
-            .map(packMapper::toDto);
-    }
-
-    /**
      * Get all the packs.
      *
      * @param pageable the pagination information.
@@ -160,5 +142,10 @@ public class PackService {
         Pack pack = packRepository.findById(id).orElseThrow(() -> new NotFoundException("pack: " + id + " not found"));
         pack.setActive(true);
         packRepository.save(pack);
+    }
+
+    List<PackResponseDTO> listMostBooking() {
+        List<Pack> packs = packRepository.findAllByActiveIsTrue();
+        return null;
     }
 }

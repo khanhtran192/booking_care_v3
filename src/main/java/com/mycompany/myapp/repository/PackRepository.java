@@ -33,4 +33,6 @@ public interface PackRepository extends JpaRepository<Pack, Long> {
         @Param("hospital") Hospital hospital,
         @Param("keyword") String keyword
     );
+
+    List<Pack> findAllByActiveIsTrue();
 }

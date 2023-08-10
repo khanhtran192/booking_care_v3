@@ -2,13 +2,8 @@ package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.service.PackService;
-import com.mycompany.myapp.service.dto.PackDTO;
-import com.mycompany.myapp.service.dto.request.CreatePackDTO;
 import com.mycompany.myapp.service.dto.response.PackResponseDTO;
-import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
-import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +14,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 
