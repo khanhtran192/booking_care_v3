@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
+    List<TimeSlot> findAllByDoctorAndActiveIsTrue(Doctor doctor);
     List<TimeSlot> findAllByDoctor(Doctor doctor);
+    List<TimeSlot> findAllByPackAndActiveIsTrue(Pack pack);
     List<TimeSlot> findAllByPack(Pack pack);
 }

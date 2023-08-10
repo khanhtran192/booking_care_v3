@@ -5,6 +5,7 @@ import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.DepartmentRepository;
 import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.repository.PackRepository;
+import com.mycompany.myapp.repository.TimeSlotRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.*;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
@@ -13,10 +14,8 @@ import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
 import com.mycompany.myapp.service.dto.request.CreatePackDTO;
-import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
-import com.mycompany.myapp.service.dto.response.DoctorCreatedDTO;
-import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
-import com.mycompany.myapp.service.dto.response.PackResponseDTO;
+import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
+import com.mycompany.myapp.service.dto.response.*;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import com.mycompany.myapp.web.rest.errors.EmailAlreadyUsedException;
 import com.mycompany.myapp.web.rest.errors.LoginAlreadyUsedException;
@@ -63,6 +62,7 @@ public class HospitalResource {
     private final PackRepository packRepository;
     private final DepartmentService departmentService;
     private final DepartmentRepository departmentRepository;
+    private final TimeSlotService timeSlotService;
 
     public HospitalResource(
         HospitalService hospitalService,
@@ -71,7 +71,8 @@ public class HospitalResource {
         PackService packService,
         DepartmentService departmentService,
         PackRepository packRepository,
-        DepartmentRepository departmentRepository
+        DepartmentRepository departmentRepository,
+        TimeSlotService timeSlotService
     ) {
         this.hospitalService = hospitalService;
         this.hospitalRepository = hospitalRepository;
@@ -80,27 +81,8 @@ public class HospitalResource {
         this.departmentService = departmentService;
         this.packRepository = packRepository;
         this.departmentRepository = departmentRepository;
+        this.timeSlotService = timeSlotService;
     }
-
-    /**
-     * {@code POST  /hospitals} : Create a new hospital.
-     *
-     * @param hospitalDTO the hospitalDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new hospitalDTO, or with status {@code 400 (Bad Request)} if the hospital has already an ID.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    //    @PostMapping("/hospitals")
-    //    public ResponseEntity<HospitalDTO> createHospital(@Valid @RequestBody HospitalDTO hospitalDTO) throws URISyntaxException {
-    //        log.debug("REST request to save Hospital : {}", hospitalDTO);
-    //        if (hospitalDTO.getId() != null) {
-    //            throw new BadRequestAlertException("A new hospital cannot already have an ID", ENTITY_NAME, "idexists");
-    //        }
-    //        HospitalDTO result = hospitalService.save(hospitalDTO);
-    //        return ResponseEntity
-    //            .created(new URI("/api/hospitals/" + result.getId()))
-    //            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-    //            .body(result);
-    //    }
 
     /**
      * {@code PUT  /hospitals/:id} : Updates an existing hospital.
@@ -134,42 +116,6 @@ public class HospitalResource {
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, hospitalDTO.getId().toString()))
             .body(result);
-    }
-
-    /**
-     * {@code PATCH  /hospitals/:id} : Partial updates given fields of an existing hospital, field will ignore if it is null
-     *
-     * @param id the id of the hospitalDTO to save.
-     * @param hospitalDTO the hospitalDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated hospitalDTO,
-     * or with status {@code 400 (Bad Request)} if the hospitalDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the hospitalDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the hospitalDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PatchMapping(value = "/hospitals/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<HospitalDTO> partialUpdateHospital(
-        @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody HospitalDTO hospitalDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update Hospital partially : {}, {}", id, hospitalDTO);
-        if (hospitalDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, hospitalDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!hospitalRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        Optional<HospitalDTO> result = hospitalService.partialUpdate(hospitalDTO);
-
-        return ResponseUtil.wrapOrNotFound(
-            result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, hospitalDTO.getId().toString())
-        );
     }
 
     /**
@@ -433,6 +379,61 @@ public class HospitalResource {
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, departmentDTO.getId().toString()))
+            .body(result);
+    }
+
+    @DeleteMapping("/hospitals/manage/packs/time-slots/{id}/inactive")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Void> inactiveTimeSlot(@PathVariable Long id) {
+        log.debug("REST request inactive time slot : {}", id);
+        timeSlotService.inactiveTimeSlot(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/hospitals/manage/packs/time-slots/{id}/active")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Void> activeTimeSlot(@PathVariable Long id) {
+        log.debug("REST request inactive time slot : {}", id);
+        timeSlotService.activeTimeSlot(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/hospitals/manage/packs/{id}/time-slots")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<TimeSlotResponseDTO>> allTimeSlotByPack(@PathVariable Long id) {
+        log.debug("REST request to get all time slot in Pack : {}", id);
+        List<TimeSlotResponseDTO> list = timeSlotService.allTimeSlotByPack(id);
+        return ResponseEntity.ok().body(list);
+    }
+
+    @GetMapping("/hospitals/packs/{id}/time-slots")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<TimeSlotResponseDTO>> timeSlotActiveByPack(@PathVariable Long id) {
+        log.debug("REST request to get all time slot active in Pack : {}", id);
+        List<TimeSlotResponseDTO> list = timeSlotService.listTimeSlotByPack(id);
+        return ResponseEntity.ok().body(list);
+    }
+
+    @PutMapping("/hospitals/manage/packs/time-slots/{id}")
+    public ResponseEntity<TimeSlotResponseDTO> updateTimeSlot(
+        @PathVariable(value = "id", required = false) final Long id,
+        @Valid @RequestBody CreateTimeSlotDTO timeSlotDTO
+    ) throws URISyntaxException {
+        log.debug("REST request to update TimeSlot : {}, {}", id, timeSlotDTO);
+        TimeSlotResponseDTO result = timeSlotService.update(timeSlotDTO, id);
+        return ResponseEntity
+            .ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, String.valueOf(id)))
+            .body(result);
+    }
+
+    @PostMapping("/hospitals/manage/packs/time-slots")
+    public ResponseEntity<TimeSlotResponseDTO> createTimeSlot(@Valid @RequestBody CreateTimeSlotDTO timeSlotDTO) throws URISyntaxException {
+        log.debug("REST request to save TimeSlot : {}", timeSlotDTO);
+        TimeSlotResponseDTO result = timeSlotService.save(timeSlotDTO);
+        return ResponseEntity
+            .created(new URI("/api/time-slots/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
 }

@@ -45,4 +45,18 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
         "GROUP BY d.id"
     )
     Page<Doctor> pageDoctorByHospitalForUser(Pageable pageable, @Param("hospitalId") Integer hospitalId, @Param("keyword") String keyword);
+
+    @Query(
+        value = "SELECT d FROM Doctor d " +
+        "JOIN Department dp ON d.department.id = dp.id " +
+        "WHERE d.active = TRUE AND " +
+        "(" +
+        "   (:keyword IS NULL OR d.name LIKE %:keyword%) OR " +
+        "   (:keyword IS NULL OR d.specialize LIKE %:keyword%) OR " +
+        "   (:keyword IS NULL OR d.degree LIKE %:keyword%) OR " +
+        "   (:keyword IS NULL OR dp.departmentName LIKE %:keyword%)" +
+        ") " +
+        "GROUP BY d.id"
+    )
+    Page<Doctor> pageDoctorForUser(Pageable pageable, @Param("keyword") String keyword);
 }

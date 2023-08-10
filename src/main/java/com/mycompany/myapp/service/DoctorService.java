@@ -107,18 +107,6 @@ public class DoctorService {
     }
 
     /**
-     * Get all the doctors.
-     *
-     * @param pageable the pagination information.
-     * @return the list of entities.
-     */
-    @Transactional(readOnly = true)
-    public Page<DoctorDTO> findAll(Pageable pageable) {
-        log.debug("Request to get all Doctors");
-        return doctorRepository.findAll(pageable).map(doctorMapper::toDto);
-    }
-
-    /**
      * Get one doctor by id.
      *
      * @param id the id of the entity.
@@ -196,5 +184,10 @@ public class DoctorService {
             .limit(5)
             .collect(Collectors.toList());
         return doctors.stream().map(mapperService::mapToDto).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<DoctorResponseDTO> pageAllDoctor(Pageable pageable, String keyword) {
+        return doctorRepository.pageDoctorForUser(pageable, keyword).map(mapperService::mapToDto);
     }
 }

@@ -1,9 +1,13 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.repository.DoctorRepository;
+import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.DoctorService;
+import com.mycompany.myapp.service.TimeSlotService;
 import com.mycompany.myapp.service.dto.DoctorDTO;
+import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
 import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
+import com.mycompany.myapp.service.dto.response.TimeSlotResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -43,10 +48,12 @@ public class DoctorResource {
     private final DoctorService doctorService;
 
     private final DoctorRepository doctorRepository;
+    private final TimeSlotService timeSlotService;
 
-    public DoctorResource(DoctorService doctorService, DoctorRepository doctorRepository) {
+    public DoctorResource(DoctorService doctorService, DoctorRepository doctorRepository, TimeSlotService timeSlotService) {
         this.doctorService = doctorService;
         this.doctorRepository = doctorRepository;
+        this.timeSlotService = timeSlotService;
     }
 
     /**
@@ -84,56 +91,6 @@ public class DoctorResource {
     }
 
     /**
-     * {@code PATCH  /doctors/:id} : Partial updates given fields of an existing doctor, field will ignore if it is null
-     *
-     * @param id the id of the doctorDTO to save.
-     * @param doctorDTO the doctorDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated doctorDTO,
-     * or with status {@code 400 (Bad Request)} if the doctorDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the doctorDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the doctorDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PatchMapping(value = "/doctors/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<DoctorDTO> partialUpdateDoctor(
-        @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody DoctorDTO doctorDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update Doctor partially : {}, {}", id, doctorDTO);
-        if (doctorDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, doctorDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!doctorRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        Optional<DoctorDTO> result = doctorService.partialUpdate(doctorDTO);
-
-        return ResponseUtil.wrapOrNotFound(
-            result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, doctorDTO.getId().toString())
-        );
-    }
-
-    /**
-     * {@code GET  /doctors} : get all the doctors.
-     *
-     * @param pageable the pagination information.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of doctors in body.
-     */
-    @GetMapping("/doctors")
-    public ResponseEntity<List<DoctorDTO>> getAllDoctors(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
-        log.debug("REST request to get a page of Doctors");
-        Page<DoctorDTO> page = doctorService.findAll(pageable);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
-    }
-
-    /**
      * {@code GET  /doctors/:id} : get the "id" doctor.
      *
      * @param id the id of the doctorDTO to retrieve.
@@ -150,5 +107,53 @@ public class DoctorResource {
     public ResponseEntity<List<DoctorResponseDTO>> listDoctorMostRate() {
         log.debug("REST request get list doctor most rate");
         return ResponseEntity.ok().body(doctorService.listDoctorMostRate());
+    }
+
+    @GetMapping("/doctors")
+    public ResponseEntity<Page<DoctorResponseDTO>> getALlDoctorsByHospital(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam(value = "keyword", required = false) String keyword
+    ) {
+        log.debug("REST request to get all doctors");
+        return ResponseEntity.ok().body(doctorService.pageAllDoctor(pageable, keyword));
+    }
+
+    @PutMapping("/doctors/time-slots/{id}")
+    public ResponseEntity<TimeSlotResponseDTO> updateTimeSlot(
+        @PathVariable(value = "id", required = false) final Long id,
+        @Valid @RequestBody CreateTimeSlotDTO timeSlotDTO
+    ) throws URISyntaxException {
+        log.debug("REST request to update TimeSlot : {}, {}", id, timeSlotDTO);
+        TimeSlotResponseDTO result = timeSlotService.update(timeSlotDTO, id);
+        return ResponseEntity
+            .ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, String.valueOf(id)))
+            .body(result);
+    }
+
+    @PostMapping("/doctors/time-slots")
+    public ResponseEntity<TimeSlotResponseDTO> createTimeSlot(@Valid @RequestBody CreateTimeSlotDTO timeSlotDTO) throws URISyntaxException {
+        log.debug("REST request to save TimeSlot : {}", timeSlotDTO);
+        TimeSlotResponseDTO result = timeSlotService.save(timeSlotDTO);
+        return ResponseEntity
+            .created(new URI("/api/time-slots/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    @GetMapping("/doctors/{id}/manage/time-slots")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<TimeSlotResponseDTO>> allTimeSlotByDoctor(@PathVariable Long id) {
+        log.debug("REST request to get all time slot active by doctor : {}", id);
+        List<TimeSlotResponseDTO> list = timeSlotService.allTimeSlotByDoctor(id);
+        return ResponseEntity.ok().body(list);
+    }
+
+    @GetMapping("/doctors/{id}/time-slots")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<TimeSlotResponseDTO>> timeSlotActiveByDoctor(@PathVariable Long id) {
+        log.debug("REST request to get all time slot active by doctor : {}", id);
+        List<TimeSlotResponseDTO> list = timeSlotService.listTimeSlotByDoctor(id);
+        return ResponseEntity.ok().body(list);
     }
 }

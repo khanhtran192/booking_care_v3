@@ -1,9 +1,6 @@
 package com.mycompany.myapp.domain.enumeration;
 
 public enum TimeSlotValue {
-    FULL_DAY("Cả ngày", 51),
-    MORNING("Buổi sáng", 50),
-    AFTERNOON("Buổi chiều", 49),
     ONE_AM("1:00 AM", 1),
     HALF_PAST_ONE_AM("1:30 AM", 2),
     TWO_AM("2:00 AM", 3),

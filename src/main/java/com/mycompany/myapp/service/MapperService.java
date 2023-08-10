@@ -8,7 +8,6 @@ import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
 import com.mycompany.myapp.service.dto.response.*;
-import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,12 +17,13 @@ public class MapperService {
 
     private final Logger log = LoggerFactory.getLogger(MapperService.class);
     private final PackRepository packRepository;
-
     private final DoctorRepository doctorRepository;
+    private final CheckUtilService checkUtilService;
 
-    public MapperService(PackRepository packRepository, DoctorRepository doctorRepository) {
+    public MapperService(PackRepository packRepository, DoctorRepository doctorRepository, CheckUtilService checkUtilService) {
         this.packRepository = packRepository;
         this.doctorRepository = doctorRepository;
+        this.checkUtilService = checkUtilService;
     }
 
     public HospitalInfoResponseDTO mapToDto(Hospital hospital) {
@@ -98,17 +98,17 @@ public class MapperService {
             throw new NotFoundException("Pack and doctor can not be null");
         } else if (createTimeSlotDTO.getPackId() != null && createTimeSlotDTO.getDoctorId() != null) {
             throw new BadRequestException("can not has both pack and doctor");
-        } else if (
-            createTimeSlotDTO.getStartTime() == null && createTimeSlotDTO.getEndTime() == null && createTimeSlotDTO.getTime() == null
-        ) {
+        } else if (createTimeSlotDTO.getStartTime() == null || createTimeSlotDTO.getEndTime() == null) {
             throw new BadRequestException("time cannot be null");
-        }
-        if (createTimeSlotDTO.getStartTime() != null && createTimeSlotDTO.getEndTime() != null && createTimeSlotDTO.getTime() == null) {
+        } else {
             if (
                 TimeSlotValue.valueOf(createTimeSlotDTO.getStartTime()).getNumber() >=
                 TimeSlotValue.valueOf(createTimeSlotDTO.getEndTime()).getNumber()
             ) {
                 throw new BadRequestException("Start time cannot equal or after end time");
+            }
+            if (!checkUtilService.checkTimeSlot(createTimeSlotDTO)) {
+                throw new BadRequestException("The time period conflicts with the existing time period.");
             }
             timeSlot.setStartTime(TimeSlotValue.valueOf(createTimeSlotDTO.getStartTime()));
             timeSlot.setEndTime(TimeSlotValue.valueOf(createTimeSlotDTO.getEndTime()));
@@ -117,21 +117,10 @@ public class MapperService {
                 " : " +
                 TimeSlotValue.valueOf(createTimeSlotDTO.getEndTime()).getValue()
             );
-        } else if (
-            (createTimeSlotDTO.getStartTime() != null || createTimeSlotDTO.getEndTime() != null) && createTimeSlotDTO.getTime() != null
-        ) {
-            throw new BadRequestException("Invalid time slot");
-        } else if (createTimeSlotDTO.getTime() != null) {
-            if (Arrays.asList("Cả ngày", "Buổi sáng", "Buổi chiều").contains(createTimeSlotDTO.getTime())) {
-                throw new BadRequestException("If start and end time be null, time only can be Cả ngày, Buổi sáng or Buổi chiều");
-            }
-            timeSlot.setTime(TimeSlotValue.valueOf(createTimeSlotDTO.getTime()).getValue());
-            timeSlot.setStartTime(null);
-            timeSlot.setEndTime(null);
         }
         timeSlot.setPrice(createTimeSlotDTO.getPrice());
         timeSlot.setDescription(createTimeSlotDTO.getDescription());
-        timeSlot.setStatus(createTimeSlotDTO.getStatus());
+        timeSlot.setActive(createTimeSlotDTO.getActive());
         if (createTimeSlotDTO.getPackId() != null && createTimeSlotDTO.getPackId() != 0) {
             timeSlot.setPack(
                 packRepository
@@ -153,17 +142,17 @@ public class MapperService {
             throw new NotFoundException("Pack and doctor can not be null");
         } else if (createTimeSlotDTO.getPackId() != null && createTimeSlotDTO.getDoctorId() != null) {
             throw new BadRequestException("can not has both pack and doctor");
-        } else if (
-            createTimeSlotDTO.getStartTime() == null && createTimeSlotDTO.getEndTime() == null && createTimeSlotDTO.getTime() == null
-        ) {
+        } else if (createTimeSlotDTO.getStartTime() == null || createTimeSlotDTO.getEndTime() == null) {
             throw new BadRequestException("time cannot be null");
-        }
-        if (createTimeSlotDTO.getStartTime() != null && createTimeSlotDTO.getEndTime() != null && createTimeSlotDTO.getTime() == null) {
+        } else {
             if (
                 TimeSlotValue.valueOf(createTimeSlotDTO.getStartTime()).getNumber() >=
                 TimeSlotValue.valueOf(createTimeSlotDTO.getEndTime()).getNumber()
             ) {
                 throw new BadRequestException("Start time cannot equal or after end time");
+            }
+            if (!checkUtilService.checkTimeSlot(createTimeSlotDTO)) {
+                throw new BadRequestException("The time period conflicts with the existing time period.");
             }
             timeSlot.setStartTime(TimeSlotValue.valueOf(createTimeSlotDTO.getStartTime()));
             timeSlot.setEndTime(TimeSlotValue.valueOf(createTimeSlotDTO.getEndTime()));
@@ -172,21 +161,10 @@ public class MapperService {
                 " : " +
                 TimeSlotValue.valueOf(createTimeSlotDTO.getEndTime()).getValue()
             );
-        } else if (
-            (createTimeSlotDTO.getStartTime() != null || createTimeSlotDTO.getEndTime() != null) && createTimeSlotDTO.getTime() != null
-        ) {
-            throw new BadRequestException("Invalid time slot");
-        } else if (createTimeSlotDTO.getTime() != null) {
-            if (Arrays.asList("Cả ngày", "Buổi sáng", "Buổi chiều").contains(createTimeSlotDTO.getTime())) {
-                throw new BadRequestException("If start and end time be null, time only can be Cả ngày, Buổi sáng or Buổi chiều");
-            }
-            timeSlot.setTime(TimeSlotValue.valueOf(createTimeSlotDTO.getTime()).getValue());
-            timeSlot.setStartTime(null);
-            timeSlot.setEndTime(null);
         }
         timeSlot.setPrice(createTimeSlotDTO.getPrice());
         timeSlot.setDescription(createTimeSlotDTO.getDescription());
-        timeSlot.setStatus(createTimeSlotDTO.getStatus());
+        timeSlot.setActive(createTimeSlotDTO.getActive());
         if (createTimeSlotDTO.getPackId() != null && createTimeSlotDTO.getPackId() != 0) {
             timeSlot.setPack(
                 packRepository
@@ -208,7 +186,7 @@ public class MapperService {
             TimeSlotResponseDTO timeSlotResponseDTO = new TimeSlotResponseDTO();
             timeSlotResponseDTO.setId(timeSlot.getId());
             timeSlotResponseDTO.setDescription(timeSlot.getDescription());
-            timeSlotResponseDTO.setStatus(timeSlot.getStatus());
+            timeSlotResponseDTO.setStatus(timeSlot.getActive());
             timeSlotResponseDTO.setPrice(timeSlot.getPrice());
             timeSlotResponseDTO.setPack(mapToDto(timeSlot.getPack()));
             timeSlotResponseDTO.setDoctor(mapToDto(timeSlot.getDoctor()));

@@ -74,26 +74,6 @@ public class DepartmentService {
     }
 
     /**
-     * Partially update a department.
-     *
-     * @param departmentDTO the entity to update partially.
-     * @return the persisted entity.
-     */
-    public Optional<DepartmentDTO> partialUpdate(DepartmentDTO departmentDTO) {
-        log.debug("Request to partially update Department : {}", departmentDTO);
-
-        return departmentRepository
-            .findById(departmentDTO.getId())
-            .map(existingDepartment -> {
-                departmentMapper.partialUpdate(existingDepartment, departmentDTO);
-
-                return existingDepartment;
-            })
-            .map(departmentRepository::save)
-            .map(departmentMapper::toDto);
-    }
-
-    /**
      * Get all the departments.
      *
      * @param pageable the pagination information.
@@ -115,16 +95,6 @@ public class DepartmentService {
     public Optional<DepartmentResponseDTO> findOne(Long id) {
         log.debug("Request to get Department : {}", id);
         return departmentRepository.findById(id).map(mapperService::mapToDto);
-    }
-
-    /**
-     * Delete the department by id.
-     *
-     * @param id the id of the entity.
-     */
-    public void delete(Long id) {
-        log.debug("Request to delete Department : {}", id);
-        departmentRepository.deleteById(id);
     }
 
     public List<DoctorResponseDTO> findAllByDepartment(Long id) {

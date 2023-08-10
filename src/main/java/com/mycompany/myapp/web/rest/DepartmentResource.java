@@ -53,50 +53,6 @@ public class DepartmentResource {
     }
 
     /**
-     * {@code POST  /departments} : Create a new department.
-     *
-     * @param departmentDTO the departmentDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new departmentDTO, or with status {@code 400 (Bad Request)} if the department has already an ID.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-
-    /**
-     * {@code PATCH  /departments/:id} : Partial updates given fields of an existing department, field will ignore if it is null
-     *
-     * @param id the id of the departmentDTO to save.
-     * @param departmentDTO the departmentDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated departmentDTO,
-     * or with status {@code 400 (Bad Request)} if the departmentDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the departmentDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the departmentDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PatchMapping(value = "/departments/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<DepartmentDTO> partialUpdateDepartment(
-        @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody DepartmentDTO departmentDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update Department partially : {}, {}", id, departmentDTO);
-        if (departmentDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, departmentDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!departmentRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        Optional<DepartmentDTO> result = departmentService.partialUpdate(departmentDTO);
-
-        return ResponseUtil.wrapOrNotFound(
-            result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, departmentDTO.getId().toString())
-        );
-    }
-
-    /**
      * {@code GET  /departments} : get all the departments.
      *
      * @param pageable the pagination information.

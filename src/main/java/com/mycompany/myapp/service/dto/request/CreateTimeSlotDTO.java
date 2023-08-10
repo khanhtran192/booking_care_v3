@@ -4,29 +4,18 @@ import javax.validation.constraints.NotNull;
 
 public class CreateTimeSlotDTO {
 
-    private String time;
-
     private String startTime;
     private String endTime;
-
     private String description;
 
     @NotNull
     private Double price;
 
-    private Boolean status;
+    private Boolean active;
 
     private Long doctorId;
 
     private Long packId;
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
 
     public String getDescription() {
         return description;
@@ -44,12 +33,12 @@ public class CreateTimeSlotDTO {
         this.price = price;
     }
 
-    public Boolean getStatus() {
-        return status;
+    public Boolean getActive() {
+        return active;
     }
 
-    public void setStatus(Boolean status) {
-        this.status = status;
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Long getDoctorId() {

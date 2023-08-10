@@ -1,5 +1,7 @@
 package com.mycompany.myapp.service;
 
+import com.mycompany.myapp.domain.Doctor;
+import com.mycompany.myapp.domain.Pack;
 import com.mycompany.myapp.domain.TimeSlot;
 import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import com.mycompany.myapp.exception.BadRequestException;
@@ -37,11 +39,24 @@ public class TimeSlotService {
     private final TimeSlotMapper timeSlotMapper;
 
     private final MapperService mapperService;
+    private final CheckUtilService checkUtilService;
+    private final DoctorRepository doctorRepository;
+    private final PackRepository packRepository;
 
-    public TimeSlotService(TimeSlotRepository timeSlotRepository, TimeSlotMapper timeSlotMapper, MapperService mapperService) {
+    public TimeSlotService(
+        TimeSlotRepository timeSlotRepository,
+        TimeSlotMapper timeSlotMapper,
+        MapperService mapperService,
+        CheckUtilService checkUtilService,
+        DoctorRepository doctorRepository,
+        PackRepository packRepository
+    ) {
         this.timeSlotRepository = timeSlotRepository;
         this.timeSlotMapper = timeSlotMapper;
         this.mapperService = mapperService;
+        this.checkUtilService = checkUtilService;
+        this.doctorRepository = doctorRepository;
+        this.packRepository = packRepository;
     }
 
     /**
@@ -72,38 +87,6 @@ public class TimeSlotService {
     }
 
     /**
-     * Partially update a timeSlot.
-     *
-     * @param timeSlotDTO the entity to update partially.
-     * @return the persisted entity.
-     */
-    public Optional<TimeSlotDTO> partialUpdate(TimeSlotDTO timeSlotDTO) {
-        log.debug("Request to partially update TimeSlot : {}", timeSlotDTO);
-
-        return timeSlotRepository
-            .findById(timeSlotDTO.getId())
-            .map(existingTimeSlot -> {
-                timeSlotMapper.partialUpdate(existingTimeSlot, timeSlotDTO);
-
-                return existingTimeSlot;
-            })
-            .map(timeSlotRepository::save)
-            .map(timeSlotMapper::toDto);
-    }
-
-    /**
-     * Get all the timeSlots.
-     *
-     * @param pageable the pagination information.
-     * @return the list of entities.
-     */
-    @Transactional(readOnly = true)
-    public Page<TimeSlotResponseDTO> findAll(Pageable pageable) {
-        log.debug("Request to get all TimeSlots");
-        return timeSlotRepository.findAll(pageable).map(mapperService::mapToDto);
-    }
-
-    /**
      * Get one timeSlot by id.
      *
      * @param id the id of the entity.
@@ -115,17 +98,48 @@ public class TimeSlotService {
         return timeSlotRepository.findById(id).map(mapperService::mapToDto);
     }
 
-    /**
-     * Delete the timeSlot by id.
-     *
-     * @param id the id of the entity.
-     */
-    public void delete(Long id) {
-        log.debug("Request to delete TimeSlot : {}", id);
-        timeSlotRepository.deleteById(id);
-    }
-
     public List<TimeSlotValueResponseDTO> timeSlotValues() {
         return Arrays.stream(TimeSlotValue.values()).map(mapperService::mapToDto).collect(Collectors.toList());
+    }
+
+    public void inactiveTimeSlot(Long id) {
+        TimeSlot timeSlot = timeSlotRepository.findById(id).orElseThrow(() -> new NotFoundException("TimeSlot: " + id + "not found"));
+        timeSlot.setActive(false);
+        timeSlotRepository.save(timeSlot);
+    }
+
+    public void activeTimeSlot(Long id) {
+        TimeSlot timeSlot = timeSlotRepository.findById(id).orElseThrow(() -> new NotFoundException("TimeSlot: " + id + "not found"));
+        if (!checkUtilService.checkActiveTimeSlot(timeSlot)) {
+            throw new BadRequestException("The time period conflicts with the existing time period.");
+        } else {
+            timeSlot.setActive(true);
+            timeSlotRepository.save(timeSlot);
+            log.debug("TimeSlot active successfully");
+        }
+    }
+
+    public List<TimeSlotResponseDTO> listTimeSlotByDoctor(Long doctorId) {
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow(() -> new NotFoundException("Doctor: " + doctorId + "not found"));
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllByDoctorAndActiveIsTrue(doctor);
+        return timeSlots.stream().map(mapperService::mapToDto).collect(Collectors.toList());
+    }
+
+    public List<TimeSlotResponseDTO> allTimeSlotByDoctor(Long doctorId) {
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow(() -> new NotFoundException("Doctor: " + doctorId + "not found"));
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllByDoctor(doctor);
+        return timeSlots.stream().map(mapperService::mapToDto).collect(Collectors.toList());
+    }
+
+    public List<TimeSlotResponseDTO> listTimeSlotByPack(Long packId) {
+        Pack pack = packRepository.findById(packId).orElseThrow(() -> new NotFoundException("Pack: " + packId + "not found"));
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllByPackAndActiveIsTrue(pack);
+        return timeSlots.stream().map(mapperService::mapToDto).collect(Collectors.toList());
+    }
+
+    public List<TimeSlotResponseDTO> allTimeSlotByPack(Long packId) {
+        Pack pack = packRepository.findById(packId).orElseThrow(() -> new NotFoundException("Pack: " + packId + "not found"));
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllByPack(pack);
+        return timeSlots.stream().map(mapperService::mapToDto).collect(Collectors.toList());
     }
 }

@@ -39,8 +39,8 @@ public class TimeSlot implements Serializable {
     @Column(name = "price", nullable = false)
     private Double price;
 
-    @Column(name = "status")
-    private Boolean status;
+    @Column(name = "active")
+    private Boolean active;
 
     @ManyToOne
     @JsonIgnoreProperties(value = { "timeSlots", "orders", "department" }, allowSetters = true)
@@ -104,12 +104,12 @@ public class TimeSlot implements Serializable {
         this.price = price;
     }
 
-    public Boolean getStatus() {
-        return this.status;
+    public Boolean getActive() {
+        return this.active;
     }
 
-    public TimeSlot status(Boolean status) {
-        this.setStatus(status);
+    public TimeSlot active(Boolean active) {
+        this.setActive(active);
         return this;
     }
 
@@ -129,8 +129,8 @@ public class TimeSlot implements Serializable {
         this.endTime = endTime;
     }
 
-    public void setStatus(Boolean status) {
-        this.status = status;
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Doctor getDoctor() {
@@ -186,7 +186,7 @@ public class TimeSlot implements Serializable {
             ", time='" + getTime() + "'" +
             ", description='" + getDescription() + "'" +
             ", price=" + getPrice() +
-            ", status='" + getStatus() + "'" +
+            ", status='" + getActive() + "'" +
             "}";
     }
 }

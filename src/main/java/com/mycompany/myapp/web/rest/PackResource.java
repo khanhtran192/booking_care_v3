@@ -47,84 +47,6 @@ public class PackResource {
     }
 
     /**
-     * {@code POST  /packs} : Create a new pack.
-     *
-     * @param packDTO the packDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new packDTO, or with status {@code 400 (Bad Request)} if the pack has already an ID.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-
-    /**
-     * {@code PUT  /packs/:id} : Updates an existing pack.
-     *
-     * @param id the id of the packDTO to save.
-     * @param packDTO the packDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated packDTO,
-     * or with status {@code 400 (Bad Request)} if the packDTO is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the packDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PutMapping("/packs/{id}")
-    public ResponseEntity<PackResponseDTO> updatePack(
-        @PathVariable(value = "id", required = false) final Long id,
-        @RequestBody CreatePackDTO packDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to update Pack : {}, {}", id, packDTO);
-        if (packDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, packDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!packRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        PackResponseDTO result = packService.update(packDTO, id);
-        return ResponseEntity
-            .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, packDTO.getId().toString()))
-            .body(result);
-    }
-
-    /**
-     * {@code PATCH  /packs/:id} : Partial updates given fields of an existing pack, field will ignore if it is null
-     *
-     * @param id the id of the packDTO to save.
-     * @param packDTO the packDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated packDTO,
-     * or with status {@code 400 (Bad Request)} if the packDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the packDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the packDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PatchMapping(value = "/packs/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<PackDTO> partialUpdatePack(
-        @PathVariable(value = "id", required = false) final Long id,
-        @RequestBody PackDTO packDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update Pack partially : {}, {}", id, packDTO);
-        if (packDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, packDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!packRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        Optional<PackDTO> result = packService.partialUpdate(packDTO);
-
-        return ResponseUtil.wrapOrNotFound(
-            result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, packDTO.getId().toString())
-        );
-    }
-
-    /**
      * {@code GET  /packs} : get all the packs.
      *
      * @param pageable the pagination information.
@@ -153,19 +75,4 @@ public class PackResource {
         Optional<PackResponseDTO> packDTO = packService.findOne(id);
         return ResponseUtil.wrapOrNotFound(packDTO);
     }
-    /**
-     * {@code DELETE  /packs/:id} : delete the "id" pack.
-     *
-     * @param id the id of the packDTO to delete.
-     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
-     */
-    //    @DeleteMapping("/packs/{id}")
-    //    public ResponseEntity<Void> deletePack(@PathVariable Long id) {
-    //        log.debug("REST request to delete Pack : {}", id);
-    //        packService.delete(id);
-    //        return ResponseEntity
-    //            .noContent()
-    //            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-    //            .build();
-    //    }
 }

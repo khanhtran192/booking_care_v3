@@ -81,26 +81,6 @@ public class HospitalService {
     }
 
     /**
-     * Partially update a hospital.
-     *
-     * @param hospitalDTO the entity to update partially.
-     * @return the persisted entity.
-     */
-    public Optional<HospitalDTO> partialUpdate(HospitalDTO hospitalDTO) {
-        log.debug("Request to partially update Hospital : {}", hospitalDTO);
-
-        return hospitalRepository
-            .findById(hospitalDTO.getId())
-            .map(existingHospital -> {
-                hospitalMapper.partialUpdate(existingHospital, hospitalDTO);
-
-                return existingHospital;
-            })
-            .map(hospitalRepository::save)
-            .map(hospitalMapper::toDto);
-    }
-
-    /**
      * Get all the hospitals.
      *
      * @param pageable the pagination information.
