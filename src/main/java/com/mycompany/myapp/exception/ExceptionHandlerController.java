@@ -26,4 +26,13 @@ public class ExceptionHandlerController {
         messageResponse.setCode(e.getCode());
         return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body(messageResponse);
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Object> handlerBadRequestException(BadRequestException e) {
+        MessageResponse messageResponse = new MessageResponse();
+        messageResponse.setMessage(e.getMessage());
+        messageResponse.setDate(LocalDateTime.now());
+        messageResponse.setCode(e.getCode());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(messageResponse);
+    }
 }

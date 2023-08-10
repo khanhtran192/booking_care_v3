@@ -4,6 +4,8 @@ public class TimeSlotResponseDTO {
 
     private Long id;
     private String time;
+    private TimeSlotValueResponseDTO startTime;
+    private TimeSlotValueResponseDTO endTime;
     private String description;
     private Double price;
     private Boolean status;
@@ -64,5 +66,21 @@ public class TimeSlotResponseDTO {
 
     public void setPack(PackResponseDTO pack) {
         this.pack = pack;
+    }
+
+    public TimeSlotValueResponseDTO getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(TimeSlotValueResponseDTO startTime) {
+        this.startTime = startTime;
+    }
+
+    public TimeSlotValueResponseDTO getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(TimeSlotValueResponseDTO endTime) {
+        this.endTime = endTime;
     }
 }

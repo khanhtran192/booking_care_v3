@@ -62,7 +62,15 @@ public enum TimeSlotValue {
         this.number = number;
     }
 
-    TimeSlotValue findByValue(String value) {
+    public String getValue() {
+        return value;
+    }
+
+    public Integer getNumber() {
+        return number;
+    }
+
+    public TimeSlotValue findByValue(String value) {
         TimeSlotValue result = null;
         for (TimeSlotValue timeSlotValue : TimeSlotValue.values()) {
             if (timeSlotValue.value.equals(value)) {

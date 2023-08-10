@@ -4,8 +4,10 @@ import javax.validation.constraints.NotNull;
 
 public class CreateTimeSlotDTO {
 
-    @NotNull
     private String time;
+
+    private String startTime;
+    private String endTime;
 
     private String description;
 
@@ -64,5 +66,21 @@ public class CreateTimeSlotDTO {
 
     public void setPackId(Long packId) {
         this.packId = packId;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 }

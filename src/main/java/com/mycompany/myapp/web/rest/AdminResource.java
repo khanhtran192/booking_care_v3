@@ -1,8 +1,6 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
-import com.mycompany.myapp.service.DoctorService;
 import com.mycompany.myapp.service.HospitalService;
 import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.service.dto.request.CreateHospitalDTO;
@@ -22,8 +20,6 @@ import tech.jhipster.web.util.HeaderUtil;
 public class AdminResource {
 
     private final Logger log = LoggerFactory.getLogger(AccountResource.class);
-
-    private static final String ENTITY_NAME = "admin";
 
     @Value("${jhipster.clientApp.name}")
     private String applicationName;

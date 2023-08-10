@@ -1,10 +1,12 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import com.mycompany.myapp.repository.TimeSlotRepository;
 import com.mycompany.myapp.service.TimeSlotService;
 import com.mycompany.myapp.service.dto.TimeSlotDTO;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
 import com.mycompany.myapp.service.dto.response.TimeSlotResponseDTO;
+import com.mycompany.myapp.service.dto.response.TimeSlotValueResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -60,9 +62,6 @@ public class TimeSlotResource {
     @PostMapping("/time-slots")
     public ResponseEntity<TimeSlotResponseDTO> createTimeSlot(@Valid @RequestBody CreateTimeSlotDTO timeSlotDTO) throws URISyntaxException {
         log.debug("REST request to save TimeSlot : {}", timeSlotDTO);
-        //        if (timeSlotDTO.getId() != null) {
-        //            throw new BadRequestAlertException("A new timeSlot cannot already have an ID", ENTITY_NAME, "idexists");
-        //        }
         TimeSlotResponseDTO result = timeSlotService.save(timeSlotDTO);
         return ResponseEntity
             .created(new URI("/api/time-slots/" + result.getId()))
@@ -86,13 +85,6 @@ public class TimeSlotResource {
         @Valid @RequestBody CreateTimeSlotDTO timeSlotDTO
     ) throws URISyntaxException {
         log.debug("REST request to update TimeSlot : {}, {}", id, timeSlotDTO);
-        //        if (id == null) {
-        //            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        //        }
-        //        if (!Objects.equals(id, timeSlotDTO.getId())) {
-        //            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        //        }
-
         if (!timeSlotRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
@@ -181,5 +173,10 @@ public class TimeSlotResource {
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @GetMapping("/time-slots/time-slot-values")
+    public ResponseEntity<List<TimeSlotValueResponseDTO>> getTimeSlot() {
+        return ResponseEntity.ok().body(timeSlotService.timeSlotValues());
     }
 }

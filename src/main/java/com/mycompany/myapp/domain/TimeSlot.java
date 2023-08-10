@@ -1,6 +1,7 @@
 package com.mycompany.myapp.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import java.io.Serializable;
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -24,6 +25,12 @@ public class TimeSlot implements Serializable {
     @NotNull
     @Column(name = "time", nullable = false)
     private String time;
+
+    @Column(name = "start_time")
+    private TimeSlotValue startTime;
+
+    @Column(name = "end_time")
+    private TimeSlotValue endTime;
 
     @Column(name = "description")
     private String description;
@@ -104,6 +111,22 @@ public class TimeSlot implements Serializable {
     public TimeSlot status(Boolean status) {
         this.setStatus(status);
         return this;
+    }
+
+    public TimeSlotValue getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(TimeSlotValue startTime) {
+        this.startTime = startTime;
+    }
+
+    public TimeSlotValue getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(TimeSlotValue endTime) {
+        this.endTime = endTime;
     }
 
     public void setStatus(Boolean status) {

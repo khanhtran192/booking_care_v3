@@ -1,6 +1,8 @@
 package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.TimeSlot;
+import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
+import com.mycompany.myapp.exception.BadRequestException;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.repository.PackRepository;
@@ -8,8 +10,12 @@ import com.mycompany.myapp.repository.TimeSlotRepository;
 import com.mycompany.myapp.service.dto.TimeSlotDTO;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
 import com.mycompany.myapp.service.dto.response.TimeSlotResponseDTO;
+import com.mycompany.myapp.service.dto.response.TimeSlotValueResponseDTO;
 import com.mycompany.myapp.service.mapper.TimeSlotMapper;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -32,20 +38,9 @@ public class TimeSlotService {
 
     private final MapperService mapperService;
 
-    private final PackRepository packRepository;
-    private final DoctorRepository doctorRepository;
-
-    public TimeSlotService(
-        TimeSlotRepository timeSlotRepository,
-        TimeSlotMapper timeSlotMapper,
-        PackRepository packRepository,
-        DoctorRepository doctorRepository,
-        MapperService mapperService
-    ) {
+    public TimeSlotService(TimeSlotRepository timeSlotRepository, TimeSlotMapper timeSlotMapper, MapperService mapperService) {
         this.timeSlotRepository = timeSlotRepository;
         this.timeSlotMapper = timeSlotMapper;
-        this.packRepository = packRepository;
-        this.doctorRepository = doctorRepository;
         this.mapperService = mapperService;
     }
 
@@ -57,9 +52,9 @@ public class TimeSlotService {
      */
     public TimeSlotResponseDTO save(CreateTimeSlotDTO timeSlotDTO) {
         log.debug("Request to save TimeSlot : {}", timeSlotDTO);
-        TimeSlot timeSlot = mapToEntity(timeSlotDTO);
+        TimeSlot timeSlot = mapperService.mapToEntity(timeSlotDTO);
         timeSlot = timeSlotRepository.save(timeSlot);
-        return mapToDto(timeSlot);
+        return mapperService.mapToDto(timeSlot);
     }
 
     /**
@@ -71,9 +66,9 @@ public class TimeSlotService {
     public TimeSlotResponseDTO update(CreateTimeSlotDTO timeSlotDTO, Long id) {
         log.debug("Request to update TimeSlot : {}", timeSlotDTO);
         TimeSlot timeSlot = timeSlotRepository.findById(id).orElseThrow(() -> new NotFoundException("TimeSlot: " + id + "not found"));
-        timeSlot = mapToEntity(timeSlotDTO, timeSlot);
+        timeSlot = mapperService.mapToEntity(timeSlotDTO, timeSlot);
         timeSlot = timeSlotRepository.save(timeSlot);
-        return mapToDto(timeSlot);
+        return mapperService.mapToDto(timeSlot);
     }
 
     /**
@@ -105,7 +100,7 @@ public class TimeSlotService {
     @Transactional(readOnly = true)
     public Page<TimeSlotResponseDTO> findAll(Pageable pageable) {
         log.debug("Request to get all TimeSlots");
-        return timeSlotRepository.findAll(pageable).map(this::mapToDto);
+        return timeSlotRepository.findAll(pageable).map(mapperService::mapToDto);
     }
 
     /**
@@ -117,7 +112,7 @@ public class TimeSlotService {
     @Transactional(readOnly = true)
     public Optional<TimeSlotResponseDTO> findOne(Long id) {
         log.debug("Request to get TimeSlot : {}", id);
-        return timeSlotRepository.findById(id).map(timeSlot -> mapToDto(timeSlot));
+        return timeSlotRepository.findById(id).map(mapperService::mapToDto);
     }
 
     /**
@@ -130,67 +125,7 @@ public class TimeSlotService {
         timeSlotRepository.deleteById(id);
     }
 
-    public TimeSlot mapToEntity(CreateTimeSlotDTO timeSlotDTO) {
-        if (timeSlotDTO.getPackId() == null && timeSlotDTO.getDoctorId() == null) {
-            throw new NotFoundException("Pack and doctor can not be null");
-        } else if (timeSlotDTO.getPackId() != null && timeSlotDTO.getDoctorId() != null) {
-            throw new RuntimeException("can not has both pack and doctor");
-        }
-        TimeSlot timeSlot = new TimeSlot();
-        timeSlot.setTime(timeSlotDTO.getTime());
-        timeSlot.setDescription(timeSlotDTO.getDescription());
-        timeSlot.setPrice(timeSlotDTO.getPrice());
-        timeSlot.setStatus(timeSlotDTO.getStatus());
-        if (timeSlotDTO.getPackId() != null && timeSlotDTO.getPackId() != 0) {
-            timeSlot.setPack(
-                packRepository
-                    .findById(timeSlotDTO.getPackId())
-                    .orElseThrow(() -> new NotFoundException("Pack: " + timeSlotDTO.getPackId() + "not found"))
-            );
-        } else if (timeSlotDTO.getDoctorId() != null && timeSlotDTO.getDoctorId() != 0) {
-            timeSlot.setDoctor(
-                doctorRepository
-                    .findById(timeSlotDTO.getDoctorId())
-                    .orElseThrow(() -> new NotFoundException("Doctor: " + timeSlotDTO.getDoctorId() + "not found"))
-            );
-        }
-        return timeSlot;
-    }
-
-    public TimeSlot mapToEntity(CreateTimeSlotDTO timeSlotDTO, TimeSlot timeSlot) {
-        if (timeSlotDTO.getPackId() == null && timeSlotDTO.getDoctorId() == null) {
-            throw new NotFoundException("Pack and doctor can not be null");
-        } else if (timeSlotDTO.getPackId() != null && timeSlotDTO.getDoctorId() != null) {
-            throw new RuntimeException("can not has both pack and doctor");
-        }
-        timeSlot.setTime(timeSlotDTO.getTime());
-        timeSlot.setDescription(timeSlotDTO.getDescription());
-        timeSlot.setPrice(timeSlotDTO.getPrice());
-        timeSlot.setStatus(timeSlotDTO.getStatus());
-        if (timeSlotDTO.getPackId() != null && timeSlotDTO.getPackId() != 0) {
-            timeSlot.setPack(
-                packRepository
-                    .findById(timeSlotDTO.getPackId())
-                    .orElseThrow(() -> new NotFoundException("Pack: " + timeSlotDTO.getPackId() + "not found"))
-            );
-        } else if (timeSlotDTO.getDoctorId() != null && timeSlotDTO.getDoctorId() != 0) {
-            timeSlot.setDoctor(
-                doctorRepository
-                    .findById(timeSlotDTO.getDoctorId())
-                    .orElseThrow(() -> new NotFoundException("Doctor: " + timeSlotDTO.getDoctorId() + "not found"))
-            );
-        }
-        return timeSlot;
-    }
-
-    public TimeSlotResponseDTO mapToDto(TimeSlot timeSlot) {
-        TimeSlotResponseDTO timeSlotResponseDTO = new TimeSlotResponseDTO();
-        timeSlotResponseDTO.setId(timeSlot.getId());
-        timeSlotResponseDTO.setDescription(timeSlot.getDescription());
-        timeSlotResponseDTO.setStatus(timeSlot.getStatus());
-        timeSlotResponseDTO.setPrice(timeSlot.getPrice());
-        timeSlotResponseDTO.setPack(mapperService.mapToDto(timeSlot.getPack()));
-        timeSlotResponseDTO.setDoctor(mapperService.mapToDto(timeSlot.getDoctor()));
-        return timeSlotResponseDTO;
+    public List<TimeSlotValueResponseDTO> timeSlotValues() {
+        return Arrays.stream(TimeSlotValue.values()).map(mapperService::mapToDto).collect(Collectors.toList());
     }
 }
