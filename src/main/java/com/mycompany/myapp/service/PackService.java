@@ -1,7 +1,9 @@
 package com.mycompany.myapp.service;
 
+import com.mycompany.myapp.domain.Doctor;
 import com.mycompany.myapp.domain.Hospital;
 import com.mycompany.myapp.domain.Pack;
+import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.exception.AlreadyExistedException;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.HospitalRepository;
@@ -9,12 +11,12 @@ import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.service.dto.PackDTO;
 import com.mycompany.myapp.service.dto.request.CreatePackDTO;
+import com.mycompany.myapp.service.dto.response.PackMostBookingDTO;
 import com.mycompany.myapp.service.dto.response.PackResponseDTO;
 import com.mycompany.myapp.service.mapper.HospitalMapper;
 import com.mycompany.myapp.service.mapper.PackMapper;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -144,8 +146,25 @@ public class PackService {
         packRepository.save(pack);
     }
 
-    List<PackResponseDTO> listMostBooking() {
+    public List<PackMostBookingDTO> listMostBooking() {
         List<Pack> packs = packRepository.findAllByActiveIsTrue();
-        return null;
+        return packs
+            .stream()
+            .map(pack -> {
+                PackMostBookingDTO p = new PackMostBookingDTO();
+                p.setPack(mapperService.mapToDto(pack));
+                p.setQuantity(
+                    orderRepository
+                        .orderByPack(
+                            pack,
+                            Arrays.asList(OrderStatus.COMPLETE, OrderStatus.PENDING, OrderStatus.APPROVED, OrderStatus.REJECTED)
+                        )
+                        .size()
+                );
+                return p;
+            })
+            .sorted((Comparator.comparing(PackMostBookingDTO::getQuantity)).reversed())
+            .limit(5)
+            .collect(Collectors.toList());
     }
 }

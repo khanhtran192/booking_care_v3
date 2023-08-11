@@ -2,6 +2,7 @@ package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.service.PackService;
+import com.mycompany.myapp.service.dto.response.PackMostBookingDTO;
 import com.mycompany.myapp.service.dto.response.PackResponseDTO;
 import java.util.List;
 import java.util.Optional;
@@ -33,11 +34,8 @@ public class PackResource {
 
     private final PackService packService;
 
-    private final PackRepository packRepository;
-
     public PackResource(PackService packService, PackRepository packRepository) {
         this.packService = packService;
-        this.packRepository = packRepository;
     }
 
     /**
@@ -68,5 +66,10 @@ public class PackResource {
         log.debug("REST request to get Pack : {}", id);
         Optional<PackResponseDTO> packDTO = packService.findOne(id);
         return ResponseUtil.wrapOrNotFound(packDTO);
+    }
+
+    @GetMapping("/packs/most-booking")
+    public List<PackMostBookingDTO> getMostBooking() {
+        return packService.listMostBooking();
     }
 }

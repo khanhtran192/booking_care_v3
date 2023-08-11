@@ -180,7 +180,7 @@ public class DoctorService {
             .findAll()
             .stream()
             .filter(Doctor::getActive)
-            .sorted((Comparator.comparing(Doctor::getRate)))
+            .sorted((Comparator.comparing(Doctor::getRate)).reversed())
             .limit(5)
             .collect(Collectors.toList());
         return doctors.stream().map(mapperService::mapToDto).collect(Collectors.toList());
