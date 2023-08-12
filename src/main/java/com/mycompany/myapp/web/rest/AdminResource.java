@@ -2,6 +2,7 @@ package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.HospitalService;
+import com.mycompany.myapp.service.MailService;
 import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.service.dto.request.CreateHospitalDTO;
 import org.slf4j.Logger;
@@ -9,10 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 
 @RestController
@@ -26,11 +24,14 @@ public class AdminResource {
 
     private final HospitalService hospitalService;
 
+    private final MailService mailService;
+
     private final UserService userService;
 
-    public AdminResource(HospitalService hospitalService, UserService userService) {
+    public AdminResource(HospitalService hospitalService, UserService userService, MailService mailService) {
         this.hospitalService = hospitalService;
         this.userService = userService;
+        this.mailService = mailService;
     }
 
     @PostMapping("/hospitals")

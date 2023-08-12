@@ -48,6 +48,8 @@ public class Doctor implements Serializable {
     @Column(name = "rate")
     private Double rate;
 
+    private Double star;
+
     @Column(name = "specialize")
     private String specialize;
 
@@ -147,6 +149,14 @@ public class Doctor implements Serializable {
     public Doctor dateOfBirth(Instant dateOfBirth) {
         this.setDateOfBirth(dateOfBirth);
         return this;
+    }
+
+    public Double getStar() {
+        return star;
+    }
+
+    public void setStar(Double star) {
+        this.star = star;
     }
 
     public void setDateOfBirth(Instant dateOfBirth) {

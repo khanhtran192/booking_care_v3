@@ -2,13 +2,17 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Department;
 import com.mycompany.myapp.domain.Doctor;
+import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.repository.HospitalRepository;
+import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
 import com.mycompany.myapp.service.dto.response.DoctorCreatedDTO;
+import com.mycompany.myapp.service.dto.response.DoctorMostBookingDTO;
 import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
+import com.mycompany.myapp.service.dto.response.OrderResponseDTO;
 import com.mycompany.myapp.service.mapper.DepartmentMapper;
 import com.mycompany.myapp.service.mapper.DoctorMapper;
 import com.mycompany.myapp.service.mapper.HospitalMapper;
@@ -41,6 +45,7 @@ public class DoctorService {
     private final HospitalRepository hospitalRepository;
     private final HospitalMapper hospitalMapper;
     private final DepartmentMapper departmentMapper;
+    private final OrderRepository orderRepository;
 
     public DoctorService(
         DoctorRepository doctorRepository,
@@ -49,7 +54,8 @@ public class DoctorService {
         HospitalRepository hospitalRepository,
         HospitalMapper hospitalMapper,
         DepartmentMapper departmentMapper,
-        MapperService mapperService
+        MapperService mapperService,
+        OrderRepository orderRepository
     ) {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
@@ -58,6 +64,7 @@ public class DoctorService {
         this.hospitalMapper = hospitalMapper;
         this.departmentMapper = departmentMapper;
         this.mapperService = mapperService;
+        this.orderRepository = orderRepository;
     }
 
     /**
@@ -175,12 +182,12 @@ public class DoctorService {
         userService.activeDoctor(id);
     }
 
-    public List<DoctorResponseDTO> listDoctorMostRate() {
+    public List<DoctorResponseDTO> listDoctorMostStar() {
         List<Doctor> doctors = doctorRepository
             .findAll()
             .stream()
             .filter(Doctor::getActive)
-            .sorted((Comparator.comparing(Doctor::getRate)).reversed())
+            .sorted((Comparator.comparing(Doctor::getStar)).reversed())
             .limit(5)
             .collect(Collectors.toList());
         return doctors.stream().map(mapperService::mapToDto).collect(Collectors.toList());
@@ -189,5 +196,50 @@ public class DoctorService {
     @Transactional(readOnly = true)
     public Page<DoctorResponseDTO> pageAllDoctor(Pageable pageable, String keyword) {
         return doctorRepository.pageDoctorForUser(pageable, keyword).map(mapperService::mapToDto);
+    }
+
+    public void rateDoctor(Long id, Double rate) {
+        Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor: " + id + " not found"));
+        Double newRate = doctor.getRate() + 1;
+        Double newStar = ((doctor.getStar() * doctor.getRate()) + rate) / newRate;
+        doctor.setRate(newRate);
+        doctor.setStar(newStar);
+        doctorRepository.save(doctor);
+    }
+
+    public List<DoctorMostBookingDTO> listDoctorMostBooking() {
+        List<Doctor> doctors = doctorRepository.findAllByActiveIsTrue();
+        return doctors
+            .stream()
+            .map(doctor -> {
+                DoctorMostBookingDTO p = new DoctorMostBookingDTO();
+                p.setDoctor(mapperService.mapToDto(doctor));
+                p.setQuantity(
+                    orderRepository
+                        .orderByDoctor(
+                            doctor,
+                            Arrays.asList(OrderStatus.COMPLETE, OrderStatus.PENDING, OrderStatus.APPROVED, OrderStatus.REJECTED)
+                        )
+                        .size()
+                );
+                return p;
+            })
+            .sorted((Comparator.comparing(DoctorMostBookingDTO::getQuantity)).reversed())
+            .collect(Collectors.toList());
+    }
+
+    public List<OrderResponseDTO> findAllByDoctorAndStatus(Long id, List<String> status) {
+        Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor not found"));
+        try {
+            List<OrderStatus> orderStatuses = status.stream().map(OrderStatus::valueOf).collect(Collectors.toList());
+            return orderRepository
+                .findAllbyDoctorAndStatus(doctor, orderStatuses)
+                .stream()
+                .map(mapperService::mapToDto)
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("get all order by doctor {} error: {}", doctor.getName(), e.getMessage());
+            return Collections.emptyList();
+        }
     }
 }

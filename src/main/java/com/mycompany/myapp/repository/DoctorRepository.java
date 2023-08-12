@@ -59,4 +59,6 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
         "GROUP BY d.id"
     )
     Page<Doctor> pageDoctorForUser(Pageable pageable, @Param("keyword") String keyword);
+
+    List<Doctor> findAllByActiveIsTrue();
 }

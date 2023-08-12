@@ -76,7 +76,7 @@ public class OrderResource {
      * or with status {@code 500 (Internal Server Error)} if the orderDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/orders/{id}")
+    @PutMapping("/order/{id}")
     public ResponseEntity<OrderDTO> updateOrder(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody OrderDTO orderDTO

@@ -20,6 +20,8 @@ public class DoctorResponseDTO {
 
     private Double rate;
 
+    private Double star;
+
     private String specialize;
 
     private DepartmentResponseDTO department;
@@ -66,13 +68,13 @@ public class DoctorResponseDTO {
         this.dateOfBirth = dateOfBirth;
     }
 
-    //    public HospitalDTO getHospital() {
-    //        return hospital;
-    //    }
-    //
-    //    public void setHospital(HospitalDTO hospital) {
-    //        this.hospital = hospital;
-    //    }
+    public Double getStar() {
+        return star;
+    }
+
+    public void setStar(Double star) {
+        this.star = star;
+    }
 
     public String getDegree() {
         return degree;

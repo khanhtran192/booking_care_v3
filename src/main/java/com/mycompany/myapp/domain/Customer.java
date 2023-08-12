@@ -48,6 +48,9 @@ public class Customer implements Serializable {
     @Column(name = "id_card")
     private String idCard;
 
+    @Column(name = "user_booking")
+    private Long userBooking;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "gender")
     private Gender gender;
@@ -147,6 +150,14 @@ public class Customer implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Long getUserBooking() {
+        return userBooking;
+    }
+
+    public void setUserBooking(Long userBooking) {
+        this.userBooking = userBooking;
     }
 
     public String getPhoneNumber() {

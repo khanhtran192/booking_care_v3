@@ -75,6 +75,7 @@ public class MapperService {
         doctorResponseDTO.setDegree(doctor.getDegree());
         doctorResponseDTO.setSpecialize(doctor.getSpecialize());
         doctorResponseDTO.setDepartment(mapToDto(doctor.getDepartment()));
+        doctorResponseDTO.setStar(doctor.getStar());
         return doctorResponseDTO;
     }
 
@@ -208,5 +209,29 @@ public class MapperService {
         timeSlotValueResponseDTO.setValue(timeSlotValue.getValue());
         timeSlotValueResponseDTO.setNumber(timeSlotValue.getNumber());
         return timeSlotValueResponseDTO;
+    }
+
+    public CustomerResponseDTO mapToDto(Customer customer) {
+        CustomerResponseDTO customerResponseDTO = new CustomerResponseDTO();
+        customerResponseDTO.setId(customer.getId());
+        customerResponseDTO.setFullName(customer.getFullName());
+        customerResponseDTO.setEmail(customer.getEmail());
+        customerResponseDTO.setDateOfBirth(customer.getDateOfBirth());
+        customerResponseDTO.setPhoneNumber(customer.getPhoneNumber());
+        return customerResponseDTO;
+    }
+
+    public OrderResponseDTO mapToDto(Order order) {
+        OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
+        orderResponseDTO.setCustomer(mapToDto(order.getCustomer()));
+        orderResponseDTO.setDoctor(mapToDto(order.getDoctor()));
+        orderResponseDTO.setPack(mapToDto(order.getPack()));
+        orderResponseDTO.setTimeSlot(mapToDto(order.getTimeslot()));
+        orderResponseDTO.setPrice(order.getPrice());
+        orderResponseDTO.setStatus(order.getStatus());
+        orderResponseDTO.setSymptom(order.getSymptom());
+        orderResponseDTO.setDate(order.getDate());
+        orderResponseDTO.setAddress(orderResponseDTO.getAddress());
+        return orderResponseDTO;
     }
 }

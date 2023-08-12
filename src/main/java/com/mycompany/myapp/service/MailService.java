@@ -1,6 +1,12 @@
 package com.mycompany.myapp.service;
 
+import com.mycompany.myapp.domain.Customer;
+import com.mycompany.myapp.domain.Order;
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.exception.NotFoundException;
+import com.mycompany.myapp.repository.HospitalRepository;
+import com.mycompany.myapp.repository.OrderRepository;
+import com.mycompany.myapp.repository.UserRepository;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import javax.mail.MessagingException;
@@ -39,16 +45,27 @@ public class MailService {
 
     private final SpringTemplateEngine templateEngine;
 
+    private final UserRepository userRepository;
+
+    private final OrderRepository orderRepository;
+    private final HospitalRepository hospitalRepository;
+
     public MailService(
         JHipsterProperties jHipsterProperties,
         JavaMailSender javaMailSender,
         MessageSource messageSource,
-        SpringTemplateEngine templateEngine
+        SpringTemplateEngine templateEngine,
+        UserRepository userRepository,
+        OrderRepository orderRepository,
+        HospitalRepository hospitalRepository
     ) {
         this.jHipsterProperties = jHipsterProperties;
         this.javaMailSender = javaMailSender;
         this.messageSource = messageSource;
         this.templateEngine = templateEngine;
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+        this.hospitalRepository = hospitalRepository;
     }
 
     @Async
@@ -90,6 +107,80 @@ public class MailService {
         String content = templateEngine.process(templateName, context);
         String subject = messageSource.getMessage(titleKey, null, locale);
         sendEmail(user.getEmail(), subject, content, false, true);
+    }
+
+    @Async
+    public void sendEmailOrder(User user, String templateName, String titleKey, Order order) {
+        if (user.getEmail() == null) {
+            log.debug("Email doesn't exist for user '{}'", user.getLogin());
+            return;
+        }
+        Locale locale = Locale.forLanguageTag(user.getLangKey());
+        Context context = new Context(locale);
+        context.setVariable(USER, user);
+        context.setVariable("order", order);
+        context.setVariable("customer", order.getCustomer());
+        context.setVariable(BASE_URL, jHipsterProperties.getMail().getBaseUrl());
+        String content = templateEngine.process(templateName, context);
+        String subject = messageSource.getMessage(titleKey, null, locale);
+        sendEmail(user.getEmail(), subject, content, false, true);
+    }
+
+    public void sendMailApproveOrder(Order order) {
+        Customer customer = order.getCustomer();
+        User user = userRepository.findById(customer.getUserBooking()).orElseThrow(() -> new NotFoundException("User not found"));
+        sendEmailOrder(user, "mail/approveOrder", "email.order.title", order);
+    }
+
+    public void sendMailRejectOrder(Order order) {
+        Customer customer = order.getCustomer();
+        User user = userRepository.findById(customer.getUserBooking()).orElseThrow(() -> new NotFoundException("User not found"));
+        sendEmailOrder(user, "mail/rejectOrder", "email.order.title", order);
+    }
+
+    public void sendMailComplete(Order order) {
+        Customer customer = order.getCustomer();
+        User user = userRepository.findById(customer.getUserBooking()).orElseThrow(() -> new NotFoundException("User not found"));
+        sendEmailOrder(user, "mail/completeOrder", "email.order.title", order);
+    }
+
+    public void sendMailCancelOrder(Order order) {
+        User user = null;
+        if (order.getDoctor() != null) {
+            user = userRepository.findById(order.getDoctor().getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
+        } else {
+            user =
+                userRepository
+                    .findById(order.getPack().getHospital().getUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+        }
+        sendEmailOrder(user, "mail/cancelOrder", "email.order.cancel.title", order);
+    }
+
+    public void sendMailOrder(Order order) {
+        User user = null;
+        if (order.getDoctor() != null) {
+            user = userRepository.findById(order.getDoctor().getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
+        } else {
+            user =
+                userRepository
+                    .findById(order.getPack().getHospital().getUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+        }
+        sendEmailOrder(user, "mail/newOrder", "email.order.new.title", order);
+    }
+
+    public void sendMailChangeOrder(Order order) {
+        User user = null;
+        if (order.getDoctor() != null) {
+            user = userRepository.findById(order.getDoctor().getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
+        } else {
+            user =
+                userRepository
+                    .findById(order.getPack().getHospital().getUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+        }
+        sendEmailOrder(user, "mail/changeOrder", "email.order.change.title", order);
     }
 
     @Async
