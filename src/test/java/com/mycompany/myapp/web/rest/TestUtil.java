@@ -65,7 +65,7 @@ public final class TestUtil {
     }
 
     /**
-     * A matcher that tests that the examined string represents the same instant as the reference datetime.
+     * A matcher that tests that the examined string represents the same LocalDate as the reference datetime.
      */
     public static class ZonedDateTimeMatcher extends TypeSafeDiagnosingMatcher<String> {
 
@@ -91,16 +91,16 @@ public final class TestUtil {
 
         @Override
         public void describeTo(Description description) {
-            description.appendText("a String representing the same Instant as ").appendValue(date);
+            description.appendText("a String representing the same LocalDate as ").appendValue(date);
         }
     }
 
     /**
-     * Creates a matcher that matches when the examined string represents the same instant as the reference datetime.
+     * Creates a matcher that matches when the examined string represents the same LocalDate as the reference datetime.
      *
      * @param date the reference datetime against which the examined string is checked.
      */
-    public static ZonedDateTimeMatcher sameInstant(ZonedDateTime date) {
+    public static ZonedDateTimeMatcher sameLocalDate(ZonedDateTime date) {
         return new ZonedDateTimeMatcher(date);
     }
 

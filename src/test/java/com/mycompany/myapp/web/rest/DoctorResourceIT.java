@@ -10,7 +10,7 @@ import com.mycompany.myapp.domain.Doctor;
 import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.mapper.DoctorMapper;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
@@ -42,8 +42,8 @@ class DoctorResourceIT {
     private static final String DEFAULT_PHONE_NUMBER = "AAAAAAAAAA";
     private static final String UPDATED_PHONE_NUMBER = "BBBBBBBBBB";
 
-    private static final Instant DEFAULT_DATE_OF_BIRTH = Instant.ofEpochMilli(0L);
-    private static final Instant UPDATED_DATE_OF_BIRTH = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    private static final LocalDate DEFAULT_DATE_OF_BIRTH = LocalDate.ofEpochMilli(0L);
+    private static final LocalDate UPDATED_DATE_OF_BIRTH = LocalDate.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final Integer DEFAULT_HOSPITAL_ID = 1;
     private static final Integer UPDATED_HOSPITAL_ID = 2;

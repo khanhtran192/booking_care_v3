@@ -11,7 +11,7 @@ import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.service.dto.OrderDTO;
 import com.mycompany.myapp.service.mapper.OrderMapper;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
@@ -40,8 +40,8 @@ class OrderResourceIT {
     private static final String DEFAULT_SYMPTOM = "AAAAAAAAAA";
     private static final String UPDATED_SYMPTOM = "BBBBBBBBBB";
 
-    private static final Instant DEFAULT_DATE = Instant.ofEpochMilli(0L);
-    private static final Instant UPDATED_DATE = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    private static final LocalDate DEFAULT_DATE = LocalDate.ofEpochMilli(0L);
+    private static final LocalDate UPDATED_DATE = LocalDate.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final OrderStatus DEFAULT_STATUS = OrderStatus.PENDING;
     private static final OrderStatus UPDATED_STATUS = OrderStatus.APPROVED;

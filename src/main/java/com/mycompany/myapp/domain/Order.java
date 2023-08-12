@@ -3,7 +3,8 @@ package com.mycompany.myapp.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDate;
 import javax.persistence.*;
 
 /**
@@ -29,7 +30,7 @@ public class Order implements Serializable {
     private String symptom;
 
     @Column(name = "date")
-    private Instant date;
+    private LocalDate date;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -96,16 +97,16 @@ public class Order implements Serializable {
         this.symptom = symptom;
     }
 
-    public Instant getDate() {
+    public LocalDate getDate() {
         return this.date;
     }
 
-    public Order date(Instant date) {
+    public Order date(LocalDate date) {
         this.setDate(date);
         return this;
     }
 
-    public void setDate(Instant date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

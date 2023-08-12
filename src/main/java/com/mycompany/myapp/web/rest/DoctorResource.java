@@ -12,6 +12,8 @@ import com.mycompany.myapp.service.dto.response.TimeSlotResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -176,5 +179,13 @@ public class DoctorResource {
         @RequestParam(name = "status", required = false) List<String> status
     ) {
         return ResponseEntity.ok().body(doctorService.findAllByDoctorAndStatus(id, status));
+    }
+
+    @GetMapping("/doctors/{id}/time-slot-free")
+    public ResponseEntity<List<TimeSlotResponseDTO>> listTimeSlotFree(
+        @PathVariable Long id,
+        @RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        return ResponseEntity.ok().body(timeSlotService.listTimeSlotFreeOfDoctor(id, date));
     }
 }

@@ -1,15 +1,20 @@
 package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Doctor;
+import com.mycompany.myapp.domain.Order;
 import com.mycompany.myapp.domain.Pack;
 import com.mycompany.myapp.domain.TimeSlot;
+import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import com.mycompany.myapp.exception.BadRequestException;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DoctorRepository;
+import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.repository.TimeSlotRepository;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +29,18 @@ public class CheckUtilService {
     private final DoctorRepository doctorRepository;
     private final PackRepository packRepository;
 
-    public CheckUtilService(TimeSlotRepository timeSlotRepository, DoctorRepository doctorRepository, PackRepository packRepository) {
+    private final OrderRepository orderRepository;
+
+    public CheckUtilService(
+        TimeSlotRepository timeSlotRepository,
+        DoctorRepository doctorRepository,
+        PackRepository packRepository,
+        OrderRepository orderRepository
+    ) {
         this.timeSlotRepository = timeSlotRepository;
         this.doctorRepository = doctorRepository;
         this.packRepository = packRepository;
+        this.orderRepository = orderRepository;
     }
 
     public Boolean checkTimeSlot(CreateTimeSlotDTO createTimeSlotDTO) {
@@ -106,5 +119,18 @@ public class CheckUtilService {
             }
             return true;
         }
+    }
+
+    public Boolean checkTimeSlotFree(TimeSlot timeSlot, Doctor doctor, LocalDate date) {
+        List<Order> orders = orderRepository.findAllByDoctorAndDateAndTimeslotAndStatusIn(
+            doctor,
+            date,
+            timeSlot,
+            Arrays.asList(OrderStatus.APPROVED)
+        );
+        if (orders.isEmpty()) {
+            return true;
+        }
+        return false;
     }
 }

@@ -1,6 +1,8 @@
 package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Order;
+import com.mycompany.myapp.domain.enumeration.OrderStatus;
+import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.service.dto.OrderDTO;
 import com.mycompany.myapp.service.dto.request.CreateOrderDTO;
@@ -31,13 +33,16 @@ public class OrderService {
     private final PackService packService;
     private final TimeSlotService timeSlotService;
 
+    private final MailService mailService;
+
     public OrderService(
         OrderRepository orderRepository,
         OrderMapper orderMapper,
         CustomerService customerService,
         DoctorService doctorService,
         PackService packService,
-        TimeSlotService timeSlotService
+        TimeSlotService timeSlotService,
+        MailService mailService
     ) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
@@ -45,6 +50,7 @@ public class OrderService {
         this.doctorService = doctorService;
         this.packService = packService;
         this.timeSlotService = timeSlotService;
+        this.mailService = mailService;
     }
 
     /**
@@ -127,5 +133,33 @@ public class OrderService {
     public void delete(Long id) {
         log.debug("Request to delete Order : {}", id);
         orderRepository.deleteById(id);
+    }
+
+    public void approveOrder(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order not found"));
+        order.setStatus(OrderStatus.APPROVED);
+        orderRepository.save(order);
+        mailService.sendMailApproveOrder(order);
+    }
+
+    public void rejectOrder(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order not found"));
+        order.setStatus(OrderStatus.REJECTED);
+        orderRepository.save(order);
+        mailService.sendMailRejectOrder(order);
+    }
+
+    public void cancelOrder(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order not found"));
+        order.setStatus(OrderStatus.CANCELED);
+        orderRepository.save(order);
+        mailService.sendMailCancelOrder(order);
+    }
+
+    public void completeOrder(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order not found"));
+        order.setStatus(OrderStatus.COMPLETE);
+        orderRepository.save(order);
+        mailService.sendMailComplete(order);
     }
 }

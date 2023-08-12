@@ -2,7 +2,7 @@ package com.mycompany.myapp.service.dto;
 
 import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -17,7 +17,7 @@ public class OrderDTO implements Serializable {
 
     private String symptom;
 
-    private Instant date;
+    private LocalDate date;
 
     private OrderStatus status;
 
@@ -55,11 +55,11 @@ public class OrderDTO implements Serializable {
         this.symptom = symptom;
     }
 
-    public Instant getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Instant date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

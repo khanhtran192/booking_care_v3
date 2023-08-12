@@ -2,7 +2,7 @@ package com.mycompany.myapp.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -37,7 +37,7 @@ public class Doctor implements Serializable {
     private String phoneNumber;
 
     @Column(name = "date_of_birth")
-    private Instant dateOfBirth;
+    private LocalDate dateOfBirth;
 
     @Column(name = "hospital_id")
     private Integer hospitalId;
@@ -142,11 +142,11 @@ public class Doctor implements Serializable {
         this.phoneNumber = phoneNumber;
     }
 
-    public Instant getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return this.dateOfBirth;
     }
 
-    public Doctor dateOfBirth(Instant dateOfBirth) {
+    public Doctor dateOfBirth(LocalDate dateOfBirth) {
         this.setDateOfBirth(dateOfBirth);
         return this;
     }
@@ -159,7 +159,7 @@ public class Doctor implements Serializable {
         this.star = star;
     }
 
-    public void setDateOfBirth(Instant dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

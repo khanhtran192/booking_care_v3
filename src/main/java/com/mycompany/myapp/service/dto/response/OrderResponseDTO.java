@@ -1,7 +1,7 @@
 package com.mycompany.myapp.service.dto.response;
 
 import com.mycompany.myapp.domain.enumeration.OrderStatus;
-import java.time.Instant;
+import java.time.LocalDate;
 
 public class OrderResponseDTO {
 
@@ -11,7 +11,7 @@ public class OrderResponseDTO {
 
     private String symptom;
 
-    private Instant date;
+    private LocalDate date;
 
     private OrderStatus status;
 
@@ -49,11 +49,11 @@ public class OrderResponseDTO {
         this.symptom = symptom;
     }
 
-    public Instant getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Instant date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

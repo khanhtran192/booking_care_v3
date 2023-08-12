@@ -15,7 +15,7 @@ import com.mycompany.myapp.service.dto.AdminUserDTO;
 import com.mycompany.myapp.service.dto.UserDTO;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
 import com.mycompany.myapp.service.dto.request.CreateHospitalDTO;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -86,7 +86,7 @@ public class UserService {
         log.debug("Reset user password for reset key {}", key);
         return userRepository
             .findOneByResetKey(key)
-            .filter(user -> user.getResetDate().isAfter(Instant.now().minus(1, ChronoUnit.DAYS)))
+            .filter(user -> user.getResetDate().isAfter(LocalDate.now().minus(1, ChronoUnit.DAYS)))
             .map(user -> {
                 user.setPassword(passwordEncoder.encode(newPassword));
                 user.setResetKey(null);
@@ -101,7 +101,7 @@ public class UserService {
             .filter(User::isActivated)
             .map(user -> {
                 user.setResetKey(RandomUtil.generateResetKey());
-                user.setResetDate(Instant.now());
+                user.setResetDate(LocalDate.now());
                 return user;
             });
     }
@@ -173,7 +173,7 @@ public class UserService {
         String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
         user.setPassword(encryptedPassword);
         user.setResetKey(RandomUtil.generateResetKey());
-        user.setResetDate(Instant.now());
+        user.setResetDate(LocalDate.now());
         user.setActivated(true);
         if (userDTO.getAuthorities() != null) {
             Set<Authority> authorities = userDTO
@@ -304,7 +304,7 @@ public class UserService {
     @Scheduled(cron = "0 0 1 * * ?")
     public void removeNotActivatedUsers() {
         userRepository
-            .findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(Instant.now().minus(3, ChronoUnit.DAYS))
+            .findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(LocalDate.now().minus(3, ChronoUnit.DAYS))
             .forEach(user -> {
                 log.debug("Deleting not activated user {}", user.getLogin());
                 userRepository.delete(user);
@@ -353,7 +353,7 @@ public class UserService {
                 user.setResetKey(RandomUtil.generateResetKey());
                 user.setActivated(true);
                 user.setAuthorities((new HashSet<>(authorities)));
-                user.setResetDate(Instant.now());
+                user.setResetDate(LocalDate.now());
                 userRepository.save(user);
                 log.debug(CREATE_USER_SUCCESS, user);
             }
@@ -406,7 +406,7 @@ public class UserService {
             user.setResetKey(RandomUtil.generateResetKey());
             user.setActivated(true);
             user.setAuthorities((new HashSet<>(authorities)));
-            user.setResetDate(Instant.now());
+            user.setResetDate(LocalDate.now());
             userRepository.save(user);
             log.debug(CREATE_USER_SUCCESS, user);
 

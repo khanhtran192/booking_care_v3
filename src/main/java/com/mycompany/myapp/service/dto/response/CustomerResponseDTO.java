@@ -1,13 +1,13 @@
 package com.mycompany.myapp.service.dto.response;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 public class CustomerResponseDTO {
 
     private Long id;
     private String fullName;
-    private Instant dateOfBirth;
+    private LocalDate dateOfBirth;
     private String address;
     private String phoneNumber;
     private String email;
@@ -36,11 +36,11 @@ public class CustomerResponseDTO {
         this.fullName = fullName;
     }
 
-    public Instant getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Instant dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

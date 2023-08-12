@@ -3,7 +3,7 @@ package com.mycompany.myapp.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mycompany.myapp.config.Constants;
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -78,7 +78,7 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
     private String resetKey;
 
     @Column(name = "reset_date")
-    private Instant resetDate = null;
+    private LocalDate resetDate = null;
 
     @JsonIgnore
     @ManyToMany
@@ -171,11 +171,11 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
         this.resetKey = resetKey;
     }
 
-    public Instant getResetDate() {
+    public LocalDate getResetDate() {
         return resetDate;
     }
 
-    public void setResetDate(Instant resetDate) {
+    public void setResetDate(LocalDate resetDate) {
         this.resetDate = resetDate;
     }
 

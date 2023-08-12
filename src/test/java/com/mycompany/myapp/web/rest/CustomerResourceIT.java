@@ -11,7 +11,7 @@ import com.mycompany.myapp.domain.enumeration.Gender;
 import com.mycompany.myapp.repository.CustomerRepository;
 import com.mycompany.myapp.service.dto.CustomerDTO;
 import com.mycompany.myapp.service.mapper.CustomerMapper;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
@@ -46,8 +46,8 @@ class CustomerResourceIT {
     private static final String DEFAULT_ADDRESS = "AAAAAAAAAA";
     private static final String UPDATED_ADDRESS = "BBBBBBBBBB";
 
-    private static final Instant DEFAULT_DATE_OF_BIRTH = Instant.ofEpochMilli(0L);
-    private static final Instant UPDATED_DATE_OF_BIRTH = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    private static final LocalDate DEFAULT_DATE_OF_BIRTH = LocalDate.ofEpochMilli(0L);
+    private static final LocalDate UPDATED_DATE_OF_BIRTH = LocalDate.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String DEFAULT_EMAIL = "AAAAAAAAAA";
     private static final String UPDATED_EMAIL = "BBBBBBBBBB";

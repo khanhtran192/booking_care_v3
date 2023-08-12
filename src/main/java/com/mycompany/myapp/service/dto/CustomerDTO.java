@@ -2,7 +2,7 @@ package com.mycompany.myapp.service.dto;
 
 import com.mycompany.myapp.domain.enumeration.Gender;
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -21,7 +21,7 @@ public class CustomerDTO implements Serializable {
 
     private String address;
 
-    private Instant dateOfBirth;
+    private LocalDate dateOfBirth;
 
     private String email;
 
@@ -71,11 +71,11 @@ public class CustomerDTO implements Serializable {
         this.address = address;
     }
 
-    public Instant getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Instant dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

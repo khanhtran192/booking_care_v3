@@ -7,6 +7,7 @@ import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import com.mycompany.myapp.exception.BadRequestException;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DoctorRepository;
+import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.repository.TimeSlotRepository;
 import com.mycompany.myapp.service.dto.TimeSlotDTO;
@@ -14,10 +15,14 @@ import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
 import com.mycompany.myapp.service.dto.response.TimeSlotResponseDTO;
 import com.mycompany.myapp.service.dto.response.TimeSlotValueResponseDTO;
 import com.mycompany.myapp.service.mapper.TimeSlotMapper;
+import io.undertow.servlet.core.ApplicationListeners;
+import java.time.LocalDate;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.persistence.criteria.CriteriaBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -42,6 +47,7 @@ public class TimeSlotService {
     private final CheckUtilService checkUtilService;
     private final DoctorRepository doctorRepository;
     private final PackRepository packRepository;
+    private final OrderRepository orderRepository;
 
     public TimeSlotService(
         TimeSlotRepository timeSlotRepository,
@@ -49,7 +55,8 @@ public class TimeSlotService {
         MapperService mapperService,
         CheckUtilService checkUtilService,
         DoctorRepository doctorRepository,
-        PackRepository packRepository
+        PackRepository packRepository,
+        OrderRepository orderRepository
     ) {
         this.timeSlotRepository = timeSlotRepository;
         this.timeSlotMapper = timeSlotMapper;
@@ -57,6 +64,7 @@ public class TimeSlotService {
         this.checkUtilService = checkUtilService;
         this.doctorRepository = doctorRepository;
         this.packRepository = packRepository;
+        this.orderRepository = orderRepository;
     }
 
     /**
@@ -141,5 +149,15 @@ public class TimeSlotService {
         Pack pack = packRepository.findById(packId).orElseThrow(() -> new NotFoundException("Pack: " + packId + "not found"));
         List<TimeSlot> timeSlots = timeSlotRepository.findAllByPack(pack);
         return timeSlots.stream().map(mapperService::mapToDto).collect(Collectors.toList());
+    }
+
+    public List<TimeSlotResponseDTO> listTimeSlotFreeOfDoctor(Long id, LocalDate date) {
+        Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor: " + id + "not found"));
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllByDoctorAndActiveIsTrue(doctor);
+        return timeSlots
+            .stream()
+            .filter(timeSlot -> checkUtilService.checkTimeSlotFree(timeSlot, doctor, date))
+            .map(mapperService::mapToDto)
+            .collect(Collectors.toList());
     }
 }

@@ -2,7 +2,7 @@ package com.mycompany.myapp.service.dto.response;
 
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
-import java.time.Instant;
+import java.time.LocalDate;
 
 public class DoctorResponseDTO {
 
@@ -14,7 +14,7 @@ public class DoctorResponseDTO {
 
     private String phoneNumber;
 
-    private Instant dateOfBirth;
+    private LocalDate dateOfBirth;
 
     private String degree;
 
@@ -60,11 +60,11 @@ public class DoctorResponseDTO {
         this.phoneNumber = phoneNumber;
     }
 
-    public Instant getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Instant dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

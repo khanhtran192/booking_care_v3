@@ -1,7 +1,7 @@
 package com.mycompany.myapp.service.dto;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Objects;
 import javax.validation.constraints.*;
 
@@ -20,7 +20,7 @@ public class DoctorDTO implements Serializable {
 
     private String phoneNumber;
 
-    private Instant dateOfBirth;
+    private LocalDate dateOfBirth;
 
     private Integer hospitalId;
 
@@ -66,11 +66,11 @@ public class DoctorDTO implements Serializable {
         this.phoneNumber = phoneNumber;
     }
 
-    public Instant getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Instant dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
