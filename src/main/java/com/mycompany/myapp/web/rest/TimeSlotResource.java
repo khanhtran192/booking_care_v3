@@ -38,18 +38,10 @@ public class TimeSlotResource {
 
     private final Logger log = LoggerFactory.getLogger(TimeSlotResource.class);
 
-    private static final String ENTITY_NAME = "timeSlot";
-
-    @Value("${jhipster.clientApp.name}")
-    private String applicationName;
-
     private final TimeSlotService timeSlotService;
 
-    private final TimeSlotRepository timeSlotRepository;
-
-    public TimeSlotResource(TimeSlotService timeSlotService, TimeSlotRepository timeSlotRepository) {
+    public TimeSlotResource(TimeSlotService timeSlotService) {
         this.timeSlotService = timeSlotService;
-        this.timeSlotRepository = timeSlotRepository;
     }
 
     /**

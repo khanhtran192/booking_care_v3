@@ -27,14 +27,9 @@ public class PackResource {
 
     private final Logger log = LoggerFactory.getLogger(PackResource.class);
 
-    private static final String ENTITY_NAME = "pack";
-
-    @Value("${jhipster.clientApp.name}")
-    private String applicationName;
-
     private final PackService packService;
 
-    public PackResource(PackService packService, PackRepository packRepository) {
+    public PackResource(PackService packService) {
         this.packService = packService;
     }
 

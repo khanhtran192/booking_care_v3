@@ -101,56 +101,6 @@ public class OrderResource {
     }
 
     /**
-     * {@code PATCH  /orders/:id} : Partial updates given fields of an existing order, field will ignore if it is null
-     *
-     * @param id the id of the orderDTO to save.
-     * @param orderDTO the orderDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated orderDTO,
-     * or with status {@code 400 (Bad Request)} if the orderDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the orderDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the orderDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PatchMapping(value = "/orders/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<OrderDTO> partialUpdateOrder(
-        @PathVariable(value = "id", required = false) final Long id,
-        @RequestBody OrderDTO orderDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update Order partially : {}, {}", id, orderDTO);
-        if (orderDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, orderDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!orderRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        Optional<OrderDTO> result = orderService.partialUpdate(orderDTO);
-
-        return ResponseUtil.wrapOrNotFound(
-            result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, orderDTO.getId().toString())
-        );
-    }
-
-    /**
-     * {@code GET  /orders} : get all the orders.
-     *
-     * @param pageable the pagination information.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of orders in body.
-     */
-    @GetMapping("/orders")
-    public ResponseEntity<List<OrderDTO>> getAllOrders(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
-        log.debug("REST request to get a page of Orders");
-        Page<OrderDTO> page = orderService.findAll(pageable);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
-    }
-
-    /**
      * {@code GET  /orders/:id} : get the "id" order.
      *
      * @param id the id of the orderDTO to retrieve.
