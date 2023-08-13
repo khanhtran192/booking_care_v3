@@ -17,6 +17,9 @@ public class HospitalInfoResponseDTO {
 
     private String phoneNumber;
 
+    private String logo;
+    private String backgroundImage;
+
     private FacilityType type;
 
     public Long getId() {
@@ -37,6 +40,22 @@ public class HospitalInfoResponseDTO {
 
     public String getAddress() {
         return address;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
+    }
+
+    public String getBackgroundImage() {
+        return backgroundImage;
+    }
+
+    public void setBackgroundImage(String backgroundImage) {
+        this.backgroundImage = backgroundImage;
     }
 
     public void setAddress(String address) {

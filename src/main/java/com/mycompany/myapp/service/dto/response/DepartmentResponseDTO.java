@@ -9,6 +9,16 @@ public class DepartmentResponseDTO {
     @NotNull
     private String departmentName;
 
+    private String logo;
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
+    }
+
     private String description;
     private Boolean active;
     private HospitalInfoResponseDTO hospital;

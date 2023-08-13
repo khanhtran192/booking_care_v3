@@ -7,6 +7,8 @@ public class PackResponseDTO {
     private String name;
 
     private String description;
+    private String logo;
+    private String backgroundImage;
 
     private String price;
 
@@ -46,6 +48,14 @@ public class PackResponseDTO {
 
     public HospitalInfoResponseDTO getHospital() {
         return hospital;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 
     public void setHospital(HospitalInfoResponseDTO hospital) {

@@ -3,6 +3,7 @@ package com.mycompany.myapp.web.rest;
 import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.DoctorService;
+import com.mycompany.myapp.service.OrderService;
 import com.mycompany.myapp.service.TimeSlotService;
 import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
@@ -48,11 +49,18 @@ public class DoctorResource {
 
     private final DoctorRepository doctorRepository;
     private final TimeSlotService timeSlotService;
+    private final OrderService orderService;
 
-    public DoctorResource(DoctorService doctorService, DoctorRepository doctorRepository, TimeSlotService timeSlotService) {
+    public DoctorResource(
+        DoctorService doctorService,
+        DoctorRepository doctorRepository,
+        TimeSlotService timeSlotService,
+        OrderService orderService
+    ) {
         this.doctorService = doctorService;
         this.doctorRepository = doctorRepository;
         this.timeSlotService = timeSlotService;
+        this.orderService = orderService;
     }
 
     /**
@@ -187,5 +195,19 @@ public class DoctorResource {
         @RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
         return ResponseEntity.ok().body(timeSlotService.listTimeSlotFreeOfDoctor(id, date));
+    }
+
+    @PutMapping("/doctors/orders/{id}/approved")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    public ResponseEntity<Void> approveOrder(@PathVariable Long id) {
+        orderService.approveOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/doctors/orders/{id}/rejected")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    public ResponseEntity<Void> rejectedOrder(@PathVariable Long id) {
+        orderService.rejectOrder(id);
+        return ResponseEntity.noContent().build();
     }
 }

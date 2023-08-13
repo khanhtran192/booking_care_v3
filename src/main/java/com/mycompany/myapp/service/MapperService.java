@@ -1,10 +1,12 @@
 package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.*;
+import com.mycompany.myapp.domain.enumeration.ImageType;
 import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import com.mycompany.myapp.exception.BadRequestException;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DoctorRepository;
+import com.mycompany.myapp.repository.ImageRepository;
 import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
 import com.mycompany.myapp.service.dto.response.*;
@@ -19,11 +21,18 @@ public class MapperService {
     private final PackRepository packRepository;
     private final DoctorRepository doctorRepository;
     private final CheckUtilService checkUtilService;
+    private final ImageRepository imageRepository;
 
-    public MapperService(PackRepository packRepository, DoctorRepository doctorRepository, CheckUtilService checkUtilService) {
+    public MapperService(
+        PackRepository packRepository,
+        DoctorRepository doctorRepository,
+        CheckUtilService checkUtilService,
+        ImageRepository imageRepository
+    ) {
         this.packRepository = packRepository;
         this.doctorRepository = doctorRepository;
         this.checkUtilService = checkUtilService;
+        this.imageRepository = imageRepository;
     }
 
     public HospitalInfoResponseDTO mapToDto(Hospital hospital) {
@@ -37,6 +46,11 @@ public class MapperService {
             hospitalInfoResponseDTO.setAddress(hospital.getAddress());
             hospitalInfoResponseDTO.setEmail(hospital.getEmail());
             hospitalInfoResponseDTO.setPhoneNumber(hospital.getPhoneNumber());
+            hospitalInfoResponseDTO.setLogo(imageRepository.findByHospitalIdAndType(hospital.getId(), ImageType.LOGO).getPath());
+            hospitalInfoResponseDTO.setBackgroundImage(
+                imageRepository.findByHospitalIdAndType(hospital.getId(), ImageType.DESCRIPTION).getPath()
+            );
+            hospitalInfoResponseDTO.setType(hospital.getType());
             return hospitalInfoResponseDTO;
         } catch (Exception e) {
             log.error("map to hospital dto info error: {}", e.getMessage());
@@ -55,6 +69,7 @@ public class MapperService {
             departmentResponseDTO.setId(department.getId());
             departmentResponseDTO.setHospital(mapToDto(department.getHospital()));
             departmentResponseDTO.setActive(department.getActive());
+            departmentResponseDTO.setLogo(imageRepository.findByDepartmentIdAndType(department.getId(), ImageType.LOGO).getPath());
             return departmentResponseDTO;
         } catch (Exception e) {
             log.error("map to department dto error: {}", e.getMessage());
@@ -76,6 +91,7 @@ public class MapperService {
         doctorResponseDTO.setSpecialize(doctor.getSpecialize());
         doctorResponseDTO.setDepartment(mapToDto(doctor.getDepartment()));
         doctorResponseDTO.setStar(doctor.getStar());
+        doctorResponseDTO.setAvatar(imageRepository.findByDoctorIdAndType(doctor.getId(), ImageType.AVATAR).getPath());
         return doctorResponseDTO;
     }
 
@@ -90,6 +106,7 @@ public class MapperService {
         dto.setDescription(pack.getDescription());
         dto.setPrice(pack.getPrice());
         dto.setHospital(mapToDto(pack.getHospital()));
+        dto.setLogo(imageRepository.findByPackId(pack.getId()).getPath());
         return dto;
     }
 
