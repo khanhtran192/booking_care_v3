@@ -114,3 +114,11 @@ jhipster:
 # ===================================================================
 
 # application:
+
+minio:
+  bucket:
+    name: bookingcare
+  access:
+    key: bookingcare
+    secret: bookingcare
+  url: http://localhost:7001

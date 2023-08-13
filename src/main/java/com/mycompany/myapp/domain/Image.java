@@ -36,6 +36,9 @@ public class Image implements Serializable {
     @Column(name = "doctor_id")
     private Long doctorId;
 
+    @Column(name = "pack_id")
+    private Long packId;
+
     @Column(name = "department_id")
     private Long departmentId;
 
@@ -74,6 +77,14 @@ public class Image implements Serializable {
     public Image path(String path) {
         this.setPath(path);
         return this;
+    }
+
+    public Long getPackId() {
+        return packId;
+    }
+
+    public void setPackId(Long packId) {
+        this.packId = packId;
     }
 
     public void setPath(String path) {

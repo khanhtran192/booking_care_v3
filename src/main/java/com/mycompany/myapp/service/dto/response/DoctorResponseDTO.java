@@ -17,6 +17,7 @@ public class DoctorResponseDTO {
     private LocalDate dateOfBirth;
 
     private String degree;
+    private String avatar;
 
     private Double rate;
 
@@ -82,6 +83,14 @@ public class DoctorResponseDTO {
 
     public void setDegree(String degree) {
         this.degree = degree;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public Double getRate() {
