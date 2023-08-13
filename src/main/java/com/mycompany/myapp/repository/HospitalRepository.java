@@ -46,4 +46,6 @@ public interface HospitalRepository extends JpaRepository<Hospital, Long> {
         "GROUP BY h.id"
     )
     Page<Hospital> listHospital(Pageable pageable, @Param("keyword") String keyword);
+
+    Hospital findHospitalByUserId(Long userId);
 }
