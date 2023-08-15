@@ -2,6 +2,7 @@ package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.Pack;
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.domain.enumeration.FacilityType;
 import com.mycompany.myapp.repository.DepartmentRepository;
 import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.repository.PackRepository;
@@ -435,5 +436,10 @@ public class HospitalResource {
             .created(new URI("/api/time-slots/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
+    }
+
+    @GetMapping("/hospitals/facility-type")
+    public ResponseEntity<List<FacilityType>> listFacilities() {
+        return ResponseEntity.ok(hospitalService.listFacilities());
     }
 }

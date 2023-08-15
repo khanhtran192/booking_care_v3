@@ -2,6 +2,7 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Hospital;
 import com.mycompany.myapp.domain.Pack;
+import com.mycompany.myapp.domain.enumeration.FacilityType;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
@@ -146,5 +147,9 @@ public class HospitalService {
         hospital.setActive(true);
         hospitalRepository.save(hospital);
         userService.activeHospital(id);
+    }
+
+    public List<FacilityType> listFacilities() {
+        return List.of(FacilityType.values());
     }
 }
