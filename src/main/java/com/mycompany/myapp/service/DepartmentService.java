@@ -2,16 +2,18 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Department;
 import com.mycompany.myapp.domain.Hospital;
+import com.mycompany.myapp.domain.Image;
+import com.mycompany.myapp.domain.enumeration.ImageType;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DepartmentRepository;
+import com.mycompany.myapp.repository.ImageRepository;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
-import com.mycompany.myapp.service.dto.DoctorDTO;
+import com.mycompany.myapp.service.dto.FileDTO;
 import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
 import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
 import com.mycompany.myapp.service.mapper.DepartmentMapper;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -34,17 +36,23 @@ public class DepartmentService {
     private final DoctorService doctorService;
 
     private final MapperService mapperService;
+    private final MinioService minioService;
+    private final ImageRepository imageRepository;
 
     public DepartmentService(
         DepartmentRepository departmentRepository,
         DepartmentMapper departmentMapper,
         DoctorService doctorService,
-        MapperService mapperService
+        MapperService mapperService,
+        MinioService minioService,
+        ImageRepository imageRepository
     ) {
         this.departmentRepository = departmentRepository;
         this.departmentMapper = departmentMapper;
         this.doctorService = doctorService;
         this.mapperService = mapperService;
+        this.minioService = minioService;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -124,5 +132,41 @@ public class DepartmentService {
             .orElseThrow(() -> new NotFoundException("Department: " + id + " not found"));
         department.setActive(true);
         departmentRepository.save(department);
+    }
+
+    public void uploadLogo(Long id, FileDTO fileDTO) {
+        Department department = departmentRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Department: " + id + " not found"));
+        String name = minioService.uploadFile(fileDTO);
+        String path = minioService.getObject(name);
+        Image image = new Image();
+        image.setName(name);
+        image.setPath(path);
+        image.setDepartmentId(department.getId());
+        image.setType(ImageType.LOGO);
+        Image old = imageRepository.findByDepartmentIdAndType(id, ImageType.LOGO);
+        if (old != null) {
+            imageRepository.delete(old);
+        }
+        imageRepository.save(image);
+    }
+
+    public void uploadBackground(Long id, FileDTO file) {
+        Department department = departmentRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Department: " + id + " not found"));
+        String name = minioService.uploadFile(file);
+        String path = minioService.getObject(name);
+        Image image = new Image();
+        image.setName(name);
+        image.setPath(path);
+        image.setDepartmentId(department.getId());
+        image.setType(ImageType.DESCRIPTION);
+        Image old = imageRepository.findByDepartmentIdAndType(id, ImageType.DESCRIPTION);
+        if (old != null) {
+            imageRepository.delete(old);
+        }
+        imageRepository.save(image);
     }
 }

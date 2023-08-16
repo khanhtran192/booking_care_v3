@@ -1,12 +1,13 @@
 package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Hospital;
-import com.mycompany.myapp.domain.Pack;
+import com.mycompany.myapp.domain.Image;
 import com.mycompany.myapp.domain.enumeration.FacilityType;
+import com.mycompany.myapp.domain.enumeration.ImageType;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.HospitalRepository;
-import com.mycompany.myapp.service.dto.DepartmentDTO;
-import com.mycompany.myapp.service.dto.DoctorDTO;
+import com.mycompany.myapp.repository.ImageRepository;
+import com.mycompany.myapp.service.dto.FileDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
 import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
 import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
@@ -14,7 +15,6 @@ import com.mycompany.myapp.service.dto.response.HospitalInfoResponseDTO;
 import com.mycompany.myapp.service.mapper.HospitalMapper;
 import java.util.List;
 import java.util.Optional;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -40,19 +40,28 @@ public class HospitalService {
     private final UserService userService;
 
     private final DepartmentService departmentService;
+    private final MapperService mapperService;
+    private final MinioService minioService;
+    private final ImageRepository imageRepository;
 
     public HospitalService(
         HospitalRepository hospitalRepository,
         HospitalMapper hospitalMapper,
         DoctorService doctorService,
         DepartmentService departmentService,
-        UserService userService
+        UserService userService,
+        MapperService mapperService,
+        MinioService minioService,
+        ImageRepository imageRepository
     ) {
         this.hospitalRepository = hospitalRepository;
         this.hospitalMapper = hospitalMapper;
         this.doctorService = doctorService;
         this.departmentService = departmentService;
         this.userService = userService;
+        this.mapperService = mapperService;
+        this.minioService = minioService;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -88,15 +97,15 @@ public class HospitalService {
      * @return the list of entities.
      */
     @Transactional(readOnly = true)
-    public Page<HospitalDTO> findAllForUser(Pageable pageable, String keyword) {
+    public Page<HospitalInfoResponseDTO> findAllForUser(Pageable pageable, String keyword) {
         log.debug("Request to get all Hospitals");
-        return hospitalRepository.listHospitalForUser(pageable, keyword).map(hospitalMapper::toDto);
+        return hospitalRepository.listHospitalForUser(pageable, keyword).map(mapperService::mapToDto);
     }
 
     @Transactional(readOnly = true)
-    public Page<HospitalDTO> findAll(Pageable pageable, String keyword) {
+    public Page<HospitalInfoResponseDTO> findAll(Pageable pageable, String keyword) {
         log.debug("Request to get all Hospitals");
-        return hospitalRepository.listHospital(pageable, keyword).map(hospitalMapper::toDto);
+        return hospitalRepository.listHospital(pageable, keyword).map(mapperService::mapToDto);
     }
 
     /**
@@ -151,5 +160,37 @@ public class HospitalService {
 
     public List<FacilityType> listFacilities() {
         return List.of(FacilityType.values());
+    }
+
+    public void uploadLogo(Long id, FileDTO fileDTO) {
+        Hospital hospital = hospitalRepository.findById(id).orElseThrow(() -> new NotFoundException("Hospital: " + id + " not found"));
+        String name = minioService.uploadFile(fileDTO);
+        String path = minioService.getObject(name);
+        Image image = new Image();
+        image.setName(name);
+        image.setPath(path);
+        image.setHospitalId(hospital.getId());
+        image.setType(ImageType.LOGO);
+        Image old = imageRepository.findByHospitalIdAndType(id, ImageType.LOGO);
+        if (old != null) {
+            imageRepository.delete(old);
+        }
+        imageRepository.save(image);
+    }
+
+    public void uploadBackground(Long id, FileDTO file) {
+        Hospital hospital = hospitalRepository.findById(id).orElseThrow(() -> new NotFoundException("Hospital: " + id + " not found"));
+        String name = minioService.uploadFile(file);
+        String path = minioService.getObject(name);
+        Image image = new Image();
+        image.setName(name);
+        image.setPath(path);
+        image.setHospitalId(hospital.getId());
+        image.setType(ImageType.DESCRIPTION);
+        Image old = imageRepository.findByHospitalIdAndType(id, ImageType.DESCRIPTION);
+        if (old != null) {
+            imageRepository.delete(old);
+        }
+        imageRepository.save(image);
     }
 }

@@ -219,11 +219,9 @@ public class MapperService {
             } else if (timeSlot.getDoctor() != null) {
                 timeSlotResponseDTO.setDoctor(mapToDto(timeSlot.getDoctor()));
             }
-            if (timeSlot.getStartTime() != null) {
-                timeSlotResponseDTO.setStartTime(mapToDto(timeSlot.getStartTime()));
-            } else if (timeSlot.getEndTime() != null) {
-                timeSlotResponseDTO.setEndTime(mapToDto(timeSlot.getEndTime()));
-            }
+            timeSlotResponseDTO.setStartTime(mapToDto(timeSlot.getStartTime()));
+            timeSlotResponseDTO.setEndTime(mapToDto(timeSlot.getEndTime()));
+            timeSlotResponseDTO.setTime(timeSlot.getTime());
             return timeSlotResponseDTO;
         } catch (Exception e) {
             log.error("map time slot to dto failed: {}", e.getMessage());

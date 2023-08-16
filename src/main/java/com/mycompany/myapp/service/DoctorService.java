@@ -2,12 +2,16 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Department;
 import com.mycompany.myapp.domain.Doctor;
+import com.mycompany.myapp.domain.Image;
+import com.mycompany.myapp.domain.enumeration.ImageType;
 import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.repository.HospitalRepository;
+import com.mycompany.myapp.repository.ImageRepository;
 import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.service.dto.DoctorDTO;
+import com.mycompany.myapp.service.dto.FileDTO;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
 import com.mycompany.myapp.service.dto.response.DoctorCreatedDTO;
 import com.mycompany.myapp.service.dto.response.DoctorMostBookingDTO;
@@ -46,6 +50,8 @@ public class DoctorService {
     private final HospitalMapper hospitalMapper;
     private final DepartmentMapper departmentMapper;
     private final OrderRepository orderRepository;
+    private final MinioService minioService;
+    private final ImageRepository imageRepository;
 
     public DoctorService(
         DoctorRepository doctorRepository,
@@ -55,7 +61,9 @@ public class DoctorService {
         HospitalMapper hospitalMapper,
         DepartmentMapper departmentMapper,
         MapperService mapperService,
-        OrderRepository orderRepository
+        OrderRepository orderRepository,
+        MinioService minioService,
+        ImageRepository imageRepository
     ) {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
@@ -65,6 +73,8 @@ public class DoctorService {
         this.departmentMapper = departmentMapper;
         this.mapperService = mapperService;
         this.orderRepository = orderRepository;
+        this.minioService = minioService;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -241,5 +251,21 @@ public class DoctorService {
             log.error("get all order by doctor {} error: {}", doctor.getName(), e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    public void uploadAvatar(FileDTO file, Long id) {
+        Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor not found"));
+        String name = minioService.uploadFile(file);
+        String path = minioService.getObject(name);
+        Image image = new Image();
+        image.setName(name);
+        image.setType(ImageType.AVATAR);
+        image.setPath(path);
+        image.setDoctorId(doctor.getId());
+        Image old = imageRepository.findByDoctorIdAndType(id, ImageType.AVATAR);
+        if (old != null) {
+            imageRepository.delete(old);
+        }
+        imageRepository.save(image);
     }
 }

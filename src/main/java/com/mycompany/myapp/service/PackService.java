@@ -1,20 +1,20 @@
 package com.mycompany.myapp.service;
 
-import com.mycompany.myapp.domain.Doctor;
 import com.mycompany.myapp.domain.Hospital;
+import com.mycompany.myapp.domain.Image;
 import com.mycompany.myapp.domain.Pack;
+import com.mycompany.myapp.domain.enumeration.ImageType;
 import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.exception.AlreadyExistedException;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.HospitalRepository;
+import com.mycompany.myapp.repository.ImageRepository;
 import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.repository.PackRepository;
-import com.mycompany.myapp.service.dto.PackDTO;
+import com.mycompany.myapp.service.dto.FileDTO;
 import com.mycompany.myapp.service.dto.request.CreatePackDTO;
 import com.mycompany.myapp.service.dto.response.PackMostBookingDTO;
 import com.mycompany.myapp.service.dto.response.PackResponseDTO;
-import com.mycompany.myapp.service.mapper.HospitalMapper;
-import com.mycompany.myapp.service.mapper.PackMapper;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -40,17 +40,23 @@ public class PackService {
     private final HospitalRepository hospitalRepository;
 
     private final MapperService mapperService;
+    private final MinioService minioService;
+    private final ImageRepository imageRepository;
 
     public PackService(
         PackRepository packRepository,
         HospitalRepository hospitalRepository,
         MapperService mapperService,
-        OrderRepository orderRepository
+        OrderRepository orderRepository,
+        MinioService minioService,
+        ImageRepository imageRepository
     ) {
         this.packRepository = packRepository;
         this.hospitalRepository = hospitalRepository;
         this.mapperService = mapperService;
         this.orderRepository = orderRepository;
+        this.minioService = minioService;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -166,5 +172,21 @@ public class PackService {
             .sorted((Comparator.comparing(PackMostBookingDTO::getQuantity)).reversed())
             .limit(5)
             .collect(Collectors.toList());
+    }
+
+    public void uploadLogo(Long id, FileDTO fileDTO) {
+        Pack pack = packRepository.findById(id).orElseThrow(() -> new NotFoundException("pack: " + id + " not found"));
+        String name = minioService.uploadFile(fileDTO);
+        String path = minioService.getObject(name);
+        Image image = new Image();
+        image.setName(name);
+        image.setPath(path);
+        image.setPackId(pack.getId());
+        image.setType(ImageType.LOGO);
+        Image old = imageRepository.findByPackId(id);
+        if (old != null) {
+            imageRepository.delete(old);
+        }
+        imageRepository.save(image);
     }
 }

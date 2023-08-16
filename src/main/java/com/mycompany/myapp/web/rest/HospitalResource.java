@@ -9,10 +9,7 @@ import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.repository.TimeSlotRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.*;
-import com.mycompany.myapp.service.dto.AdminUserDTO;
-import com.mycompany.myapp.service.dto.DepartmentDTO;
-import com.mycompany.myapp.service.dto.DoctorDTO;
-import com.mycompany.myapp.service.dto.HospitalDTO;
+import com.mycompany.myapp.service.dto.*;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
 import com.mycompany.myapp.service.dto.request.CreatePackDTO;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
@@ -126,24 +123,24 @@ public class HospitalResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of hospitals in body.
      */
     @GetMapping("/hospitals")
-    public ResponseEntity<List<HospitalDTO>> getAllHospitalsForUser(
+    public ResponseEntity<List<HospitalInfoResponseDTO>> getAllHospitalsForUser(
         @org.springdoc.api.annotations.ParameterObject Pageable pageable,
         @RequestParam(value = "keyword", required = false) String keyword
     ) {
         log.debug("REST request to get a page of Hospitals");
-        Page<HospitalDTO> page = hospitalService.findAllForUser(pageable, keyword);
+        Page<HospitalInfoResponseDTO> page = hospitalService.findAllForUser(pageable, keyword);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     @GetMapping("/hospitals/manage")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<List<HospitalDTO>> getAllHospitals(
+    public ResponseEntity<List<HospitalInfoResponseDTO>> getAllHospitals(
         @org.springdoc.api.annotations.ParameterObject Pageable pageable,
         @RequestParam(value = "keyword", required = false) String keyword
     ) {
         log.debug("REST request to get a page of Hospitals");
-        Page<HospitalDTO> page = hospitalService.findAll(pageable, keyword);
+        Page<HospitalInfoResponseDTO> page = hospitalService.findAll(pageable, keyword);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -441,5 +438,40 @@ public class HospitalResource {
     @GetMapping("/hospitals/facility-type")
     public ResponseEntity<List<FacilityType>> listFacilities() {
         return ResponseEntity.ok(hospitalService.listFacilities());
+    }
+
+    @PostMapping("/hospitals/{id}/manage/upload/logo")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    public ResponseEntity<Void> uploadHospitalLogo(@PathVariable Long id, @ModelAttribute FileDTO file) {
+        hospitalService.uploadLogo(id, file);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/hospitals/{id}/manage/upload/background")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    public ResponseEntity<Void> uploadHospitalBackground(@PathVariable Long id, @ModelAttribute FileDTO file) {
+        hospitalService.uploadBackground(id, file);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/hospitals/manage/departments/{id}/upload/logo")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.HOSPITAL + "\")")
+    public ResponseEntity<Void> uploadDepartmentLogo(@PathVariable Long id, @ModelAttribute FileDTO file) {
+        departmentService.uploadLogo(id, file);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/hospitals/manage/departments/{id}/upload/background")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.HOSPITAL + "\")")
+    public ResponseEntity<Void> uploadDepartmentBackground(@PathVariable Long id, @ModelAttribute FileDTO file) {
+        departmentService.uploadBackground(id, file);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/hospitals/manage/packs/{id}/upload/logo")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.HOSPITAL + "\")")
+    public ResponseEntity<Void> uploadPackLogo(@PathVariable Long id, @ModelAttribute FileDTO file) {
+        packService.uploadLogo(id, file);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -6,6 +6,7 @@ import com.mycompany.myapp.service.DoctorService;
 import com.mycompany.myapp.service.OrderService;
 import com.mycompany.myapp.service.TimeSlotService;
 import com.mycompany.myapp.service.dto.DoctorDTO;
+import com.mycompany.myapp.service.dto.FileDTO;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
 import com.mycompany.myapp.service.dto.response.DoctorMostBookingDTO;
 import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
@@ -13,7 +14,6 @@ import com.mycompany.myapp.service.dto.response.TimeSlotResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -208,6 +208,13 @@ public class DoctorResource {
     @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
     public ResponseEntity<Void> rejectedOrder(@PathVariable Long id) {
         orderService.rejectOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/doctors/{id}/manage/upload")
+    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    public ResponseEntity<Void> uploadDoctorImage(@PathVariable Long id, @ModelAttribute FileDTO file) {
+        doctorService.uploadAvatar(file, id);
         return ResponseEntity.noContent().build();
     }
 }
