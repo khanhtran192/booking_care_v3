@@ -214,8 +214,11 @@ public class MapperService {
             timeSlotResponseDTO.setDescription(timeSlot.getDescription());
             timeSlotResponseDTO.setStatus(timeSlot.getActive());
             timeSlotResponseDTO.setPrice(timeSlot.getPrice());
-            timeSlotResponseDTO.setPack(mapToDto(timeSlot.getPack()));
-            timeSlotResponseDTO.setDoctor(mapToDto(timeSlot.getDoctor()));
+            if (timeSlot.getPack() != null) {
+                timeSlotResponseDTO.setPack(mapToDto(timeSlot.getPack()));
+            } else if (timeSlot.getDoctor() != null) {
+                timeSlotResponseDTO.setDoctor(mapToDto(timeSlot.getDoctor()));
+            }
             if (timeSlot.getStartTime() != null) {
                 timeSlotResponseDTO.setStartTime(mapToDto(timeSlot.getStartTime()));
             } else if (timeSlot.getEndTime() != null) {

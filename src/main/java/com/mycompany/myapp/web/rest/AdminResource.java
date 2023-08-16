@@ -50,10 +50,13 @@ public class AdminResource {
 
     @GetMapping("/admin/add-hospital")
     public ResponseEntity<Void> addHospital() {
-        //        dataService.createAccountHospital();
-        //        dataService.createPack();
-        //        dataService.createDepartment();
-        dataService.createAccountDoctor();
+        //                dataService.createAccountHospital();
+        //                dataService.createPack();
+        //                dataService.createDepartment();
+        //        dataService.createAccountDoctor();
+        //        dataService.createDocTor();
+        //        dataService.createAccountDoctor();
+        dataService.createDataTimeSlot();
         return ResponseEntity.noContent().build();
     }
 }

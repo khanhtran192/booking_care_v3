@@ -50,10 +50,19 @@ public class TimeSlot implements Serializable {
     @JsonIgnoreProperties(value = { "timeSlots", "orders", "hospital" }, allowSetters = true)
     private Pack pack;
 
+    public TimeSlot() {}
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public Long getId() {
         return this.id;
+    }
+
+    public TimeSlot(TimeSlotValue startTime, TimeSlotValue endTime, Double price) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.time = startTime.getValue() + " - " + endTime.getValue();
+        this.price = price;
     }
 
     public TimeSlot id(Long id) {

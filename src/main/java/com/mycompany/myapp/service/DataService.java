@@ -1,8 +1,8 @@
 package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.*;
+import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import com.mycompany.myapp.repository.*;
-import com.mycompany.myapp.web.rest.HospitalResource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -23,6 +23,8 @@ public class DataService {
     private final PackRepository packageRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+
+    private final TimeSlotRepository timeSlotRepository;
 
     private static Random random = new Random();
 
@@ -58,7 +60,8 @@ public class DataService {
         DepartmentRepository departmentRepository,
         PackRepository packageRepository,
         UserService userService,
-        UserRepository userRepository
+        UserRepository userRepository,
+        TimeSlotRepository timeSlotRepository
     ) {
         this.hospitalRepository = hospitalRepository;
         this.doctorRepository = doctorRepository;
@@ -66,6 +69,7 @@ public class DataService {
         this.packageRepository = packageRepository;
         this.userService = userService;
         this.userRepository = userRepository;
+        this.timeSlotRepository = timeSlotRepository;
     }
 
     public void createAccountHospital() {
@@ -85,13 +89,15 @@ public class DataService {
         List<Department> departments = departmentRepository.findAll();
         for (Hospital hospital : hospitals) {
             List<Department> sublist = new ArrayList<>(departments);
-            for (int i = sublist.size() - 1; i >= 15; i--) {
+            int randomNumber = random.nextInt(39) + 1;
+            for (int i = sublist.size() - 1; i >= randomNumber; i--) {
                 int randomIndex = random.nextInt(i + 1);
                 Department temp = sublist.get(i);
                 sublist.set(i, sublist.get(randomIndex));
                 sublist.set(randomIndex, temp);
             }
-            for (Department department : sublist) {
+            List<Department> newList = sublist.subList(sublist.size() - randomNumber, sublist.size());
+            for (Department department : newList) {
                 Department newDepartment = new Department();
                 newDepartment.setActive(true);
                 newDepartment.setDescription(department.getDescription());
@@ -124,13 +130,15 @@ public class DataService {
         List<Department> departments = departmentRepository.findAll();
         for (Department department : departments) {
             List<Doctor> sublist = new ArrayList<>(doctors);
+            int randomNumber = random.nextInt(5) + 1;
             for (int i = sublist.size() - 1; i >= 3; i--) {
                 int randomIndex = random.nextInt(i + 1);
                 Doctor temp = sublist.get(i);
                 sublist.set(i, sublist.get(randomIndex));
                 sublist.set(randomIndex, temp);
             }
-            for (Doctor doctor : sublist) {
+            List<Doctor> newList = sublist.subList(sublist.size() - randomNumber, sublist.size());
+            for (Doctor doctor : newList) {
                 try {
                     String randomName =
                         firstNames[random.nextInt(firstNames.length)] +
@@ -164,5 +172,34 @@ public class DataService {
             doctor.setEmail(user.getEmail());
             doctorRepository.save(doctor);
         }
+    }
+
+    public void createDataTimeSlot() {
+        TimeSlot timeSlot1 = new TimeSlot(TimeSlotValue.EIGHT_AM, TimeSlotValue.HALF_PAST_ELEVENT_AM, 300000.0);
+        TimeSlot timeSlot2 = new TimeSlot(TimeSlotValue.SEVEN_AM, TimeSlotValue.EIGHT_PM, 250000.0);
+        TimeSlot timeSlot3 = new TimeSlot(TimeSlotValue.NINE_AM, TimeSlotValue.TEN_AM, 200000.0);
+        TimeSlot timeSlot4 = new TimeSlot(TimeSlotValue.ELEVENT_AM, TimeSlotValue.TWELVE_AM, 250000.0);
+        TimeSlot timeSlot5 = new TimeSlot(TimeSlotValue.TWO_PM, TimeSlotValue.HALF_PAST_TWO_PM, 200000.0);
+        TimeSlot timeSlot6 = new TimeSlot(TimeSlotValue.THREE_AM, TimeSlotValue.HALF_PAST_THREE_PM, 200000.0);
+        TimeSlot timeSlot7 = new TimeSlot(TimeSlotValue.FOUR_PM, TimeSlotValue.FIVE_PM, 200000.0);
+        List<TimeSlot> timeSlots = List.of(timeSlot1, timeSlot2, timeSlot3, timeSlot4, timeSlot5, timeSlot6, timeSlot7);
+        List<Doctor> doctors = doctorRepository.findAll();
+        List<Pack> packs = packageRepository.findAll();
+        packs
+            .parallelStream()
+            .forEach(pack -> {
+                List<TimeSlot> sublist = new ArrayList<>(timeSlots);
+                for (int i = sublist.size() - 1; i >= 3; i--) {
+                    int randomIndex = random.nextInt(i + 1);
+                    TimeSlot temp = sublist.get(i);
+                    sublist.set(i, sublist.get(randomIndex));
+                    sublist.set(randomIndex, temp);
+                }
+                List<TimeSlot> newList = sublist.subList(sublist.size() - 3, sublist.size());
+                for (TimeSlot timeSlot : newList) {
+                    timeSlot.setPack(pack);
+                    timeSlotRepository.save(timeSlot);
+                }
+            });
     }
 }
