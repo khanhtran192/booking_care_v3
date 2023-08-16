@@ -46,7 +46,7 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
     @Column(name = "first_name", length = 50)
     private String firstName;
 
-    @Size(max = 50)
+    @Size(max = 255)
     @Column(name = "last_name", length = 50)
     private String lastName;
 

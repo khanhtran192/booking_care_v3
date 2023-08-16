@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
-    List<Department> findAllByHospital(Hospital hospital);
+    List<Department> findAllByHospital_Id(Long id);
 
     @Query(
         value = "SELECT d FROM Department d " +

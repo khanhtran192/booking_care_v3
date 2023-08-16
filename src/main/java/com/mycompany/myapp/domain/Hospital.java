@@ -28,7 +28,7 @@ public class Hospital implements Serializable {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @NotNull
+    //    @NotNull
     @Column(name = "address", nullable = false)
     private String address;
 
@@ -66,6 +66,8 @@ public class Hospital implements Serializable {
     @OneToMany(mappedBy = "hospital")
     @JsonIgnoreProperties(value = { "timeSlots", "orders", "hospital" }, allowSetters = true)
     private Set<Pack> packs = new HashSet<>();
+
+    public Hospital() {}
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
@@ -311,5 +313,27 @@ public class Hospital implements Serializable {
             ", type='" + getType() + "'" +
             ", procedure='" + getProcedure() + "'" +
             "}";
+    }
+
+    public Hospital(
+        String name,
+        String address,
+        String email,
+        String phoneNumber,
+        String description,
+        String workDay,
+        String workTime,
+        FacilityType type,
+        String procedure
+    ) {
+        this.name = name;
+        this.address = address;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.description = description;
+        this.workDay = workDay;
+        this.workTime = workTime;
+        this.type = type;
+        this.procedure = procedure;
     }
 }

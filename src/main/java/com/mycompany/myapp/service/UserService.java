@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ import tech.jhipster.security.RandomUtil;
  * Service class for managing users.
  */
 @Service
-@Transactional
+//@Transactional
 public class UserService {
 
     private static final String CREATE_USER_SUCCESS = "Created Information for User: {}";
@@ -400,6 +401,8 @@ public class UserService {
             );
             User user = new User();
             user.setLogin(hospital.getLogin());
+            user.setFirstName("");
+            user.setLastName(hospital.getName());
             user.setEmail(hospital.getEmail().toLowerCase());
             user.setLangKey(Constants.DEFAULT_LANGUAGE);
             user.setPassword(passwordEncoder.encode(RandomUtil.generatePassword()));
@@ -456,5 +459,45 @@ public class UserService {
         user.setAuthorities(new HashSet<>(authorities));
         userRepository.save(user);
         log.debug("Delete role doctor of user: {}", user);
+    }
+
+    public User createHospitalData(Hospital hospital, String login) {
+        List<Authority> authorities = authorityRepository.findAllById(
+            Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.HOSPITAL)
+        );
+        User user = new User();
+        user.setLogin(login);
+        user.setFirstName("");
+        user.setLastName(hospital.getName());
+        user.setEmail(login + "@gmail.com");
+        user.setLangKey(Constants.DEFAULT_LANGUAGE);
+        user.setPassword(passwordEncoder.encode("benhvien"));
+        user.setActivated(true);
+        user.setAuthorities((new HashSet<>(authorities)));
+        user.setResetDate(LocalDate.now());
+        user.setCreatedDate(LocalDate.now());
+        user.setCreatedBy("admin");
+        log.debug(CREATE_USER_SUCCESS, user);
+        return userRepository.save(user);
+    }
+
+    public User createDoctorData(Doctor doctor, String login) {
+        List<Authority> authorities = authorityRepository.findAllById(
+            Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.DOCTOR)
+        );
+        User user = new User();
+        user.setLogin(login);
+        user.setFirstName("");
+        user.setLastName(doctor.getName());
+        user.setEmail(login + "@gmail.com");
+        user.setLangKey(Constants.DEFAULT_LANGUAGE);
+        user.setPassword(passwordEncoder.encode("bacsi"));
+        user.setActivated(true);
+        user.setAuthorities((new HashSet<>(authorities)));
+        user.setResetDate(LocalDate.now());
+        user.setCreatedDate(LocalDate.now());
+        user.setCreatedBy("admin");
+        log.debug(CREATE_USER_SUCCESS, user);
+        return userRepository.save(user);
     }
 }

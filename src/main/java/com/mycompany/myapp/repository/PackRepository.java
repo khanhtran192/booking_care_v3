@@ -35,4 +35,6 @@ public interface PackRepository extends JpaRepository<Pack, Long> {
     );
 
     List<Pack> findAllByActiveIsTrue();
+
+    List<Pack> findAllByHospital(Hospital hospital);
 }

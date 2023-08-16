@@ -1,6 +1,7 @@
 package com.mycompany.myapp.repository;
 
 import com.mycompany.myapp.domain.Hospital;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
@@ -14,6 +15,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface HospitalRepository extends JpaRepository<Hospital, Long> {
     Boolean existsByEmail(String email);
+
+    @Query("SELECT h FROM Hospital h WHERE h.userId = null ")
+    List<Hospital> findAllByUserIdNull();
 
     @Query(
         value = "SELECT h FROM Hospital h " +

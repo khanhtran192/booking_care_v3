@@ -1,6 +1,7 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.security.AuthoritiesConstants;
+import com.mycompany.myapp.service.DataService;
 import com.mycompany.myapp.service.HospitalService;
 import com.mycompany.myapp.service.MailService;
 import com.mycompany.myapp.service.UserService;
@@ -27,11 +28,13 @@ public class AdminResource {
     private final MailService mailService;
 
     private final UserService userService;
+    private final DataService dataService;
 
-    public AdminResource(HospitalService hospitalService, UserService userService, MailService mailService) {
+    public AdminResource(HospitalService hospitalService, UserService userService, MailService mailService, DataService dataService) {
         this.hospitalService = hospitalService;
         this.userService = userService;
         this.mailService = mailService;
+        this.dataService = dataService;
     }
 
     @PostMapping("/hospitals")
@@ -43,5 +46,14 @@ public class AdminResource {
             .noContent()
             .headers(HeaderUtil.createAlert(applicationName, "userManagement.created", createHospitalDTO.getName()))
             .build();
+    }
+
+    @GetMapping("/admin/add-hospital")
+    public ResponseEntity<Void> addHospital() {
+        //        dataService.createAccountHospital();
+        //        dataService.createPack();
+        //        dataService.createDepartment();
+        dataService.createAccountDoctor();
+        return ResponseEntity.noContent().build();
     }
 }
