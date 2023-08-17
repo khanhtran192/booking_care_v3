@@ -1,36 +1,32 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.domain.Pack;
-import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.domain.enumeration.FacilityType;
 import com.mycompany.myapp.repository.DepartmentRepository;
 import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.repository.PackRepository;
-import com.mycompany.myapp.repository.TimeSlotRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.*;
 import com.mycompany.myapp.service.dto.*;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
+import com.mycompany.myapp.service.dto.request.CreateOrderDTO;
 import com.mycompany.myapp.service.dto.request.CreatePackDTO;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
 import com.mycompany.myapp.service.dto.response.*;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
-import com.mycompany.myapp.web.rest.errors.EmailAlreadyUsedException;
-import com.mycompany.myapp.web.rest.errors.LoginAlreadyUsedException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +43,6 @@ import tech.jhipster.web.util.ResponseUtil;
 public class HospitalResource {
 
     private final Logger log = LoggerFactory.getLogger(HospitalResource.class);
-
     private static final String ENTITY_NAME = "hospital";
 
     @Value("${jhipster.clientApp.name}")
@@ -61,6 +56,8 @@ public class HospitalResource {
     private final DepartmentService departmentService;
     private final DepartmentRepository departmentRepository;
     private final TimeSlotService timeSlotService;
+    private final OrderService orderService;
+    private final CustomerService customerService;
 
     public HospitalResource(
         HospitalService hospitalService,
@@ -70,7 +67,9 @@ public class HospitalResource {
         DepartmentService departmentService,
         PackRepository packRepository,
         DepartmentRepository departmentRepository,
-        TimeSlotService timeSlotService
+        TimeSlotService timeSlotService,
+        OrderService orderService,
+        CustomerService customerService
     ) {
         this.hospitalService = hospitalService;
         this.hospitalRepository = hospitalRepository;
@@ -80,6 +79,8 @@ public class HospitalResource {
         this.packRepository = packRepository;
         this.departmentRepository = departmentRepository;
         this.timeSlotService = timeSlotService;
+        this.orderService = orderService;
+        this.customerService = customerService;
     }
 
     /**
@@ -473,5 +474,33 @@ public class HospitalResource {
     public ResponseEntity<Void> uploadPackLogo(@PathVariable Long id, @ModelAttribute FileDTO file) {
         packService.uploadLogo(id, file);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/hospitals/{id}/manage/customer")
+    public ResponseEntity<Page<CustomerResponseDTO>> getCustomerByHospital(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @PathVariable Long id
+    ) {
+        Page<CustomerResponseDTO> page = customerService.listCustomerByHospial(id, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page);
+    }
+
+    @GetMapping("/hospitals/packs/{id}/time-slot-free")
+    public ResponseEntity<List<TimeSlotResponseDTO>> listTimeSlotFree(
+        @PathVariable Long id,
+        @RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        return ResponseEntity.ok().body(timeSlotService.listTimeSlotFreeOfPack(id, date));
+    }
+
+    @PostMapping("/hospitals/doctors/{id}/booking")
+    public ResponseEntity<OrderResponseDTO> createOrderDoctor(@PathVariable Long id, @RequestBody CreateOrderDTO request) {
+        return ResponseEntity.ok().body(orderService.createOrderDoctor(id, request));
+    }
+
+    @PostMapping("/hospitals/packs/{id}/booking")
+    public ResponseEntity<OrderResponseDTO> createOrderPack(@PathVariable Long id, @RequestBody CreateOrderDTO request) {
+        return ResponseEntity.ok().body(orderService.createOrderPack(id, request));
     }
 }

@@ -343,4 +343,12 @@ public class DataService {
             diagnoseRepository.save(diagnose);
         }
     }
+
+    public void addHospitalId() {
+        List<Order> orders = orderRepository.findAll();
+        for (Order order : orders) {
+            order.setHospitalId(Long.valueOf(order.getDoctor().getHospitalId()));
+            orderRepository.save(order);
+        }
+    }
 }

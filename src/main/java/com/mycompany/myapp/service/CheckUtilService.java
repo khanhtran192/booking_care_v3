@@ -137,4 +137,21 @@ public class CheckUtilService {
             return false;
         }
     }
+
+    public Boolean checkTimeSlotFree(TimeSlot timeSlot, Pack pack, LocalDate date) {
+        try {
+            List<Order> orders = orderRepository.findAllByPackAndDateAndTimeslotAndStatusIn(
+                pack,
+                date,
+                timeSlot,
+                Arrays.asList(OrderStatus.APPROVED)
+            );
+            if (orders.isEmpty()) {
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

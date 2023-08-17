@@ -1,5 +1,6 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.DataService;
 import com.mycompany.myapp.service.HospitalService;
@@ -57,7 +58,8 @@ public class AdminResource {
         //        dataService.createDocTor();
         //        dataService.createAccountDoctor();
         //        dataService.createDataTimeSlot();
-        dataService.createDianose();
+        //        dataService.addHospitalId();
+        User user = userService.getUserWithAuthorities().orElse(null);
         return ResponseEntity.noContent().build();
     }
 }

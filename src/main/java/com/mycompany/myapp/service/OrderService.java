@@ -1,13 +1,16 @@
 package com.mycompany.myapp.service;
 
-import com.mycompany.myapp.domain.Order;
+import com.mycompany.myapp.domain.*;
 import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.exception.NotFoundException;
-import com.mycompany.myapp.repository.OrderRepository;
+import com.mycompany.myapp.repository.*;
 import com.mycompany.myapp.service.dto.OrderDTO;
 import com.mycompany.myapp.service.dto.request.CreateOrderDTO;
+import com.mycompany.myapp.service.dto.response.OrderResponseDTO;
 import com.mycompany.myapp.service.mapper.OrderMapper;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -27,30 +30,52 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     private final OrderMapper orderMapper;
+    private final HospitalRepository hospitalRepository;
 
     private final CustomerService customerService;
     private final DoctorService doctorService;
     private final PackService packService;
     private final TimeSlotService timeSlotService;
+    private final TimeSlotRepository timeSlotRepository;
+
+    private final CustomerRepository customerRepository;
+    private final UserService userService;
+    private final DoctorRepository doctorRepository;
 
     private final MailService mailService;
+    private final MapperService mapperService;
+    private final PackRepository packRepository;
 
     public OrderService(
         OrderRepository orderRepository,
         OrderMapper orderMapper,
+        HospitalRepository hospitalRepository,
         CustomerService customerService,
         DoctorService doctorService,
         PackService packService,
         TimeSlotService timeSlotService,
-        MailService mailService
+        TimeSlotRepository timeSlotRepository,
+        CustomerRepository customerRepository,
+        UserService userService,
+        DoctorRepository doctorRepository,
+        MailService mailService,
+        MapperService mapperService,
+        PackRepository packRepository
     ) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
+        this.hospitalRepository = hospitalRepository;
         this.customerService = customerService;
         this.doctorService = doctorService;
         this.packService = packService;
         this.timeSlotService = timeSlotService;
+        this.timeSlotRepository = timeSlotRepository;
+        this.customerRepository = customerRepository;
+        this.userService = userService;
+        this.doctorRepository = doctorRepository;
         this.mailService = mailService;
+        this.mapperService = mapperService;
+        this.packRepository = packRepository;
     }
 
     /**
@@ -60,12 +85,7 @@ public class OrderService {
      * @return the persisted entity.
      */
     public OrderDTO save(CreateOrderDTO orderDTO) {
-        log.debug("Request to save Order : {}", orderDTO);
-        OrderDTO dto = new OrderDTO();
-
-        Order order = orderMapper.toEntity(dto);
-        order = orderRepository.save(order);
-        return orderMapper.toDto(order);
+        return null;
     }
 
     /**
@@ -79,26 +99,6 @@ public class OrderService {
         Order order = orderMapper.toEntity(orderDTO);
         order = orderRepository.save(order);
         return orderMapper.toDto(order);
-    }
-
-    /**
-     * Partially update a order.
-     *
-     * @param orderDTO the entity to update partially.
-     * @return the persisted entity.
-     */
-    public Optional<OrderDTO> partialUpdate(OrderDTO orderDTO) {
-        log.debug("Request to partially update Order : {}", orderDTO);
-
-        return orderRepository
-            .findById(orderDTO.getId())
-            .map(existingOrder -> {
-                orderMapper.partialUpdate(existingOrder, orderDTO);
-
-                return existingOrder;
-            })
-            .map(orderRepository::save)
-            .map(orderMapper::toDto);
     }
 
     /**
@@ -120,19 +120,9 @@ public class OrderService {
      * @return the entity.
      */
     @Transactional(readOnly = true)
-    public Optional<OrderDTO> findOne(Long id) {
+    public Optional<OrderResponseDTO> findOne(Long id) {
         log.debug("Request to get Order : {}", id);
-        return orderRepository.findById(id).map(orderMapper::toDto);
-    }
-
-    /**
-     * Delete the order by id.
-     *
-     * @param id the id of the entity.
-     */
-    public void delete(Long id) {
-        log.debug("Request to delete Order : {}", id);
-        orderRepository.deleteById(id);
+        return orderRepository.findById(id).map(mapperService::mapToDto);
     }
 
     public void approveOrder(Long id) {
@@ -161,5 +151,90 @@ public class OrderService {
         order.setStatus(OrderStatus.COMPLETE);
         orderRepository.save(order);
         mailService.sendMailComplete(order);
+    }
+
+    public OrderResponseDTO createOrderDoctor(Long id, CreateOrderDTO create) {
+        User user = userService.getUserWithAuthorities().orElseThrow(() -> new NotFoundException("user not found"));
+        Customer customer = customerRepository.findByUserBooking(user.getId());
+        if (customer == null) {
+            throw new NotFoundException("Customer not found");
+        }
+        Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor not found"));
+        TimeSlot timeSlot = timeSlotRepository
+            .findById(create.getTimeslot())
+            .orElseThrow(() -> new NotFoundException("Time slot not found"));
+        Hospital hospital = hospitalRepository
+            .findById(Long.valueOf(doctor.getHospitalId()))
+            .orElseThrow(() -> new NotFoundException("Hospital not found"));
+        Order order = new Order();
+        order.setDoctor(doctor);
+        order.setCustomer(customer);
+        order.setAddress(hospital.getAddress());
+        order.setHospitalId(hospital.getId());
+        order.setTimeslot(timeSlot);
+        order.setPrice(timeSlot.getPrice());
+        order.setStatus(OrderStatus.PENDING);
+        order.setDate(create.getDate());
+        order.setSymptom(create.getSymptom());
+        order = orderRepository.save(order);
+        mailService.sendMailHaveNewOrder(order);
+        return mapperService.mapToDto(order);
+    }
+
+    public OrderResponseDTO createOrderPack(Long id, CreateOrderDTO create) {
+        User user = userService.getUserWithAuthorities().orElseThrow(() -> new NotFoundException("user not found"));
+        Customer customer = customerRepository.findByUserBooking(user.getId());
+        if (customer == null) {
+            throw new NotFoundException("Customer not found");
+        }
+        Pack pack = packRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor not found"));
+        TimeSlot timeSlot = timeSlotRepository
+            .findById(create.getTimeslot())
+            .orElseThrow(() -> new NotFoundException("Time slot not found"));
+        Hospital hospital = pack.getHospital();
+        Order order = new Order();
+        order.setPack(pack);
+        order.setCustomer(customer);
+        order.setAddress(hospital.getAddress());
+        order.setHospitalId(hospital.getId());
+        order.setTimeslot(timeSlot);
+        order.setPrice(timeSlot.getPrice());
+        order.setStatus(OrderStatus.PENDING);
+        order.setDate(create.getDate());
+        order.setSymptom(create.getSymptom());
+        order = orderRepository.save(order);
+        mailService.sendMailHaveNewOrder(order);
+        return mapperService.mapToDto(order);
+    }
+
+    public List<OrderResponseDTO> listOrderPersonal() {
+        User user = userService.getUserWithAuthorities().orElseThrow(() -> new NotFoundException("user not found"));
+        Customer customer = customerRepository.findByUserBooking(user.getId());
+        if (customer == null) {
+            throw new NotFoundException("Customer not found");
+        }
+        List<Order> orders = orderRepository.findAllByCustomer(customer);
+        return orders.stream().map(mapperService::mapToDto).collect(Collectors.toList());
+    }
+
+    public OrderResponseDTO updateOrder(Long id, CreateOrderDTO create) {
+        TimeSlot timeSlot = timeSlotRepository
+            .findById(create.getTimeslot())
+            .orElseThrow(() -> new NotFoundException("Time slot not found"));
+        Order order = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order not found"));
+        order.setTimeslot(timeSlot);
+        order.setPrice(timeSlot.getPrice());
+        order.setStatus(OrderStatus.PENDING);
+        order.setDate(create.getDate());
+        order.setSymptom(create.getSymptom());
+        order = orderRepository.save(order);
+        mailService.sendMailChangeOrder(order);
+        return mapperService.mapToDto(order);
+    }
+
+    public List<OrderResponseDTO> listOrderByPack(Long id) {
+        Pack pack = packRepository.findById(id).orElseThrow(() -> new NotFoundException("pack not found"));
+        List<Order> orders = orderRepository.findAllByPack(pack);
+        return orders.stream().map(mapperService::mapToDto).collect(Collectors.toList());
     }
 }

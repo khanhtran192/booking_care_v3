@@ -1,6 +1,7 @@
 package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.*;
+import com.mycompany.myapp.domain.enumeration.Gender;
 import com.mycompany.myapp.domain.enumeration.ImageType;
 import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import com.mycompany.myapp.exception.BadRequestException;
@@ -8,6 +9,8 @@ import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DoctorRepository;
 import com.mycompany.myapp.repository.ImageRepository;
 import com.mycompany.myapp.repository.PackRepository;
+import com.mycompany.myapp.service.dto.CustomerDTO;
+import com.mycompany.myapp.service.dto.request.CreateCustomerDTO;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
 import com.mycompany.myapp.service.dto.response.*;
 import org.slf4j.Logger;
@@ -250,8 +253,12 @@ public class MapperService {
     public OrderResponseDTO mapToDto(Order order) {
         OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
         orderResponseDTO.setCustomer(mapToDto(order.getCustomer()));
-        orderResponseDTO.setDoctor(mapToDto(order.getDoctor()));
-        orderResponseDTO.setPack(mapToDto(order.getPack()));
+        if (order.getDoctor() != null) {
+            orderResponseDTO.setDoctor(mapToDto(order.getDoctor()));
+        }
+        if (order.getPack() != null) {
+            orderResponseDTO.setPack(mapToDto(order.getPack()));
+        }
         orderResponseDTO.setTimeSlot(mapToDto(order.getTimeslot()));
         orderResponseDTO.setPrice(order.getPrice());
         orderResponseDTO.setStatus(order.getStatus());
@@ -259,5 +266,15 @@ public class MapperService {
         orderResponseDTO.setDate(order.getDate());
         orderResponseDTO.setAddress(orderResponseDTO.getAddress());
         return orderResponseDTO;
+    }
+
+    public Customer mapToEntity(CreateCustomerDTO dto) {
+        Customer customer = new Customer();
+        customer.setFullName(dto.getFullName());
+        customer.setDateOfBirth(dto.getDateOfBirth());
+        customer.setPhoneNumber(dto.getPhoneNumber());
+        customer.setGender(Gender.valueOf(dto.getGender()));
+        customer.setIdCard(dto.getIdCard());
+        return customer;
     }
 }

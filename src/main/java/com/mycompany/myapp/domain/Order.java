@@ -39,6 +39,9 @@ public class Order implements Serializable {
     @Column(name = "price")
     private Double price;
 
+    @Column(name = "hospital_id")
+    private Long hospitalId;
+
     @JsonIgnoreProperties(value = { "doctor", "pack" }, allowSetters = true)
     @ManyToOne
     //    @JoinColumn(unique = true)
@@ -130,6 +133,14 @@ public class Order implements Serializable {
     public Order price(Double price) {
         this.setPrice(price);
         return this;
+    }
+
+    public Long getHospitalId() {
+        return hospitalId;
+    }
+
+    public void setHospitalId(Long hospitalId) {
+        this.hospitalId = hospitalId;
     }
 
     public void setPrice(Double price) {

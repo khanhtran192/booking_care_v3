@@ -157,7 +157,7 @@ public class MailService {
         sendEmailOrder(user, "mail/cancelOrder", "email.order.cancel.title", order);
     }
 
-    public void sendMailOrder(Order order) {
+    public void sendMailHaveNewOrder(Order order) {
         User user = null;
         if (order.getDoctor() != null) {
             user = userRepository.findById(order.getDoctor().getUserId()).orElseThrow(() -> new NotFoundException("User not found"));

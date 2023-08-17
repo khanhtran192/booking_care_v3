@@ -1,9 +1,6 @@
 package com.mycompany.myapp.repository;
 
-import com.mycompany.myapp.domain.Doctor;
-import com.mycompany.myapp.domain.Order;
-import com.mycompany.myapp.domain.Pack;
-import com.mycompany.myapp.domain.TimeSlot;
+import com.mycompany.myapp.domain.*;
 import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import java.time.LocalDate;
 import java.util.List;
@@ -27,4 +24,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllbyDoctorAndStatus(@Param("doctor") Doctor doctor, @Param("status") List<OrderStatus> status);
 
     List<Order> findAllByDoctorAndDateAndTimeslotAndStatusIn(Doctor doctor, LocalDate date, TimeSlot timeSlot, List<OrderStatus> status);
+    List<Order> findAllByPackAndDateAndTimeslotAndStatusIn(Pack pack, LocalDate date, TimeSlot timeSlot, List<OrderStatus> status);
+
+    List<Order> findAllByCustomer(Customer customer);
+
+    List<Order> findAllByPack(Pack pack);
+    List<Order> findAllByDoctor(Doctor doctor);
 }
