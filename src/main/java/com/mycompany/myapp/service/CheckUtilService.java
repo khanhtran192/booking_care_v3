@@ -122,15 +122,19 @@ public class CheckUtilService {
     }
 
     public Boolean checkTimeSlotFree(TimeSlot timeSlot, Doctor doctor, LocalDate date) {
-        List<Order> orders = orderRepository.findAllByDoctorAndDateAndTimeslotAndStatusIn(
-            doctor,
-            date,
-            timeSlot,
-            Arrays.asList(OrderStatus.APPROVED)
-        );
-        if (orders.isEmpty()) {
-            return true;
+        try {
+            List<Order> orders = orderRepository.findAllByDoctorAndDateAndTimeslotAndStatusIn(
+                doctor,
+                date,
+                timeSlot,
+                Arrays.asList(OrderStatus.APPROVED)
+            );
+            if (orders.isEmpty()) {
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
         }
-        return false;
     }
 }

@@ -3,6 +3,8 @@ package com.mycompany.myapp.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
@@ -49,6 +51,18 @@ public class TimeSlot implements Serializable {
     @ManyToOne
     @JsonIgnoreProperties(value = { "timeSlots", "orders", "hospital" }, allowSetters = true)
     private Pack pack;
+
+    @OneToMany(mappedBy = "timeslot")
+    @JsonIgnoreProperties(value = { "customer", "customer", "doctor", "pack" }, allowSetters = true)
+    private Set<Order> orders = new HashSet<>();
+
+    public Set<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(Set<Order> orders) {
+        this.orders = orders;
+    }
 
     public TimeSlot() {}
 

@@ -40,8 +40,8 @@ public class Order implements Serializable {
     private Double price;
 
     @JsonIgnoreProperties(value = { "doctor", "pack" }, allowSetters = true)
-    @OneToOne
-    @JoinColumn(unique = true)
+    @ManyToOne
+    //    @JoinColumn(unique = true)
     private TimeSlot timeslot;
 
     @ManyToOne
