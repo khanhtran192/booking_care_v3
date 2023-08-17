@@ -1,18 +1,23 @@
 package com.mycompany.myapp.service;
 
+import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.domain.*;
+import com.mycompany.myapp.domain.enumeration.Gender;
+import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import com.mycompany.myapp.repository.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import com.mycompany.myapp.security.AuthoritiesConstants;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+//@Transactional
 public class DataService {
 
     private final Logger log = LoggerFactory.getLogger(DataService.class);
@@ -23,9 +28,15 @@ public class DataService {
     private final PackRepository packageRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
 
     private final TimeSlotRepository timeSlotRepository;
+    private final AuthorityRepository authorityRepository;
 
+    private final PasswordEncoder passwordEncoder;
+    private final CustomerRepository customerRepository;
+    private final TimeSlotService timeSlotService;
+    private final DiagnoseRepository diagnoseRepository;
     private static Random random = new Random();
 
     private static String[] firstNames = { "Trần", "Lê", "Nguyễn", "Lý", "Vũ", "Võ", "Hoàng", "Đào", "Phạm", "Trương" };
@@ -61,7 +72,13 @@ public class DataService {
         PackRepository packageRepository,
         UserService userService,
         UserRepository userRepository,
-        TimeSlotRepository timeSlotRepository
+        OrderRepository orderRepository,
+        TimeSlotRepository timeSlotRepository,
+        AuthorityRepository authorityRepository,
+        PasswordEncoder passwordEncoder,
+        CustomerRepository customerRepository,
+        TimeSlotService timeSlotService,
+        DiagnoseRepository diagnoseRepository
     ) {
         this.hospitalRepository = hospitalRepository;
         this.doctorRepository = doctorRepository;
@@ -69,7 +86,13 @@ public class DataService {
         this.packageRepository = packageRepository;
         this.userService = userService;
         this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
         this.timeSlotRepository = timeSlotRepository;
+        this.authorityRepository = authorityRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.customerRepository = customerRepository;
+        this.timeSlotService = timeSlotService;
+        this.diagnoseRepository = diagnoseRepository;
     }
 
     public void createAccountHospital() {
@@ -183,7 +206,6 @@ public class DataService {
         TimeSlot timeSlot6 = new TimeSlot(TimeSlotValue.THREE_AM, TimeSlotValue.HALF_PAST_THREE_PM, 200000.0);
         TimeSlot timeSlot7 = new TimeSlot(TimeSlotValue.FOUR_PM, TimeSlotValue.FIVE_PM, 200000.0);
         List<TimeSlot> timeSlots = List.of(timeSlot1, timeSlot2, timeSlot3, timeSlot4, timeSlot5, timeSlot6, timeSlot7);
-        List<Doctor> doctors = doctorRepository.findAll();
         List<Pack> packs = packageRepository.findAll();
         packs
             .parallelStream()
@@ -201,5 +223,124 @@ public class DataService {
                     timeSlotRepository.save(timeSlot);
                 }
             });
+    }
+
+    public void createUser() {
+        for (int i = 0; i <= 3000; i++) {
+            List<Authority> authorities = authorityRepository.findAllById(Arrays.asList(AuthoritiesConstants.USER));
+            User user = new User();
+            user.setLogin("user" + i);
+            user.setFirstName(firstNames[random.nextInt(firstNames.length)]);
+            user.setLastName(lastNames[random.nextInt(lastNames.length)]);
+            user.setEmail("user" + i + "@gmail.com");
+            user.setLangKey(Constants.DEFAULT_LANGUAGE);
+            user.setPassword(passwordEncoder.encode("user"));
+            user.setActivated(true);
+            user.setAuthorities((new HashSet<>(authorities)));
+            user.setResetDate(LocalDate.now());
+            user.setCreatedDate(LocalDate.now());
+            user.setCreatedBy("admin");
+            userRepository.save(user);
+        }
+    }
+
+    public void createCustomer() {
+        Authority roleUser = authorityRepository.findAllById(Arrays.asList(AuthoritiesConstants.USER)).get(0);
+        List<User> users = userRepository
+            .findAll()
+            .stream()
+            .filter(user -> !Objects.equals(user.getLogin(), "user"))
+            .filter(user -> user.getAuthorities().contains(roleUser) && user.getAuthorities().size() == 1)
+            .collect(Collectors.toList());
+        for (User user : users) {
+            LocalDate startDate = LocalDate.of(1960, 1, 1);
+            LocalDate endDate = LocalDate.of(2023, 12, 31);
+
+            // Tính toán số ngày trong khoảng thời gian
+            long daysRange = ChronoUnit.DAYS.between(startDate, endDate);
+
+            // Tạo ngẫu nhiên một số nguyên trong khoảng số ngày
+            long randomDays = (long) (Math.random() * daysRange);
+
+            // Tính toán ngày ngẫu nhiên
+            LocalDate randomDate = startDate.plusDays(randomDays);
+
+            long min = 100_000_000_000L; // Số nhỏ nhất có 12 chữ số
+            long max = 999_999_999_999L; // Số lớn nhất có 12 chữ số
+
+            long randomNumber = min + (long) (random.nextDouble() * (max - min + 1));
+
+            Customer customer = new Customer();
+            customer.setEmail(user.getEmail());
+            customer.setAddress("");
+            customer.setPhoneNumber("0961532911");
+            customer.setFirstName(user.getFirstName());
+            customer.setLastName(user.getLastName());
+            customer.setFullName(user.getFirstName() + " " + user.getLastName());
+            customer.setGender(Gender.NAM);
+            customer.setDateOfBirth(randomDate);
+            customer.setUserBooking(user.getId());
+            customer.setIdCard(String.valueOf(randomNumber));
+            customerRepository.save(customer);
+        }
+    }
+
+    public void createOrder() {
+        List<Customer> customers = customerRepository.findAll();
+        Hospital hospital1 = hospitalRepository.findById(1L).orElse(null);
+        Hospital hospital2 = hospitalRepository.findById(2L).orElse(null);
+        List<Doctor> doctors1 = doctorRepository.findDoctorByHospitalId(Math.toIntExact(hospital1.getId()));
+        List<Doctor> doctors2 = doctorRepository.findDoctorByHospitalId(Math.toIntExact(hospital2.getId()));
+        List<Doctor> doctor = new ArrayList<>(doctors1);
+        doctor.addAll(doctors2);
+        List<OrderStatus> orderStatuses = List.of(OrderStatus.PENDING, OrderStatus.APPROVED, OrderStatus.REJECTED, OrderStatus.CANCELED);
+        for (Customer customer : customers) {
+            LocalDate startDate = LocalDate.of(2021, 1, 1);
+            LocalDate endDate = LocalDate.of(2023, 12, 31);
+
+            // Tính toán số ngày trong khoảng thời gian
+            long daysRange = ChronoUnit.DAYS.between(startDate, endDate);
+
+            // Tạo ngẫu nhiên một số nguyên trong khoảng số ngày
+            long randomDays = (long) (Math.random() * daysRange);
+
+            // Tính toán ngày ngẫu nhiên
+            LocalDate randomDate = startDate.plusDays(randomDays);
+            int i = random.nextInt(doctor.size() - 1);
+            int j = random.nextInt(orderStatuses.size() - 1);
+            Doctor d = doctor.get(i);
+            List<TimeSlot> timeSlots = timeSlotService.timeSlotFreeOfDoctor(d.getId(), randomDate);
+            if (timeSlots.size() != 0) {
+                int k = random.nextInt(timeSlots.size());
+                TimeSlot timeSlot = timeSlots.get(k);
+                Order order = new Order();
+                order.setDoctor(d);
+                if (randomDate.isBefore(LocalDate.now())) {
+                    order.setStatus(OrderStatus.COMPLETE);
+                } else {
+                    order.setStatus(orderStatuses.get(j));
+                }
+                order.setCustomer(customer);
+                order.setDate(randomDate);
+                order.setTimeslot(timeSlot);
+                order.setPrice(timeSlots.get(k).getPrice());
+                //                order.setSymptom("mệt");
+                order.setAddress("");
+                orderRepository.save(order);
+            }
+        }
+    }
+
+    public void createDianose() {
+        List<Order> orders = orderRepository
+            .findAll()
+            .stream()
+            .filter(order -> order.getStatus() == OrderStatus.COMPLETE)
+            .collect(Collectors.toList());
+        for (Order order : orders) {
+            Diagnose diagnose = new Diagnose();
+            diagnose.setOrder(order);
+            diagnoseRepository.save(diagnose);
+        }
     }
 }

@@ -160,4 +160,13 @@ public class TimeSlotService {
             .map(mapperService::mapToDto)
             .collect(Collectors.toList());
     }
+
+    public List<TimeSlot> timeSlotFreeOfDoctor(Long id, LocalDate date) {
+        Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor: " + id + "not found"));
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllByDoctorAndActiveIsTrue(doctor);
+        return timeSlots
+            .stream()
+            .filter(timeSlot -> checkUtilService.checkTimeSlotFree(timeSlot, doctor, date))
+            .collect(Collectors.toList());
+    }
 }

@@ -61,4 +61,6 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     Page<Doctor> pageDoctorForUser(Pageable pageable, @Param("keyword") String keyword);
 
     List<Doctor> findAllByActiveIsTrue();
+
+    List<Doctor> findDoctorByHospitalId(Integer hospitalId);
 }

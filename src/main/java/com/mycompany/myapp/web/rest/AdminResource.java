@@ -56,7 +56,8 @@ public class AdminResource {
         //        dataService.createAccountDoctor();
         //        dataService.createDocTor();
         //        dataService.createAccountDoctor();
-        dataService.createDataTimeSlot();
+        //        dataService.createDataTimeSlot();
+        dataService.createDianose();
         return ResponseEntity.noContent().build();
     }
 }
