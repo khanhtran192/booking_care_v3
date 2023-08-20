@@ -1,13 +1,16 @@
 package com.mycompany.myapp.service.dto.request;
 
-import com.mycompany.myapp.domain.enumeration.Gender;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 
 public class CreateCustomerDTO {
 
     private String fullName;
     private String address;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
+
     private String phoneNumber;
     private String idCard;
     private String gender;

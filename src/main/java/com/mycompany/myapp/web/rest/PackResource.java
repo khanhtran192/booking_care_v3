@@ -1,14 +1,14 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.repository.PackRepository;
+import com.mycompany.myapp.service.OrderService;
 import com.mycompany.myapp.service.PackService;
+import com.mycompany.myapp.service.dto.response.OrderResponseDTO;
 import com.mycompany.myapp.service.dto.response.PackMostBookingDTO;
 import com.mycompany.myapp.service.dto.response.PackResponseDTO;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -28,9 +28,11 @@ public class PackResource {
     private final Logger log = LoggerFactory.getLogger(PackResource.class);
 
     private final PackService packService;
+    private final OrderService orderService;
 
-    public PackResource(PackService packService) {
+    public PackResource(PackService packService, OrderService orderService) {
         this.packService = packService;
+        this.orderService = orderService;
     }
 
     /**
@@ -40,14 +42,14 @@ public class PackResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of packs in body.
      */
     @GetMapping("/packs")
-    public ResponseEntity<List<PackResponseDTO>> getAllPacksForUser(
+    public ResponseEntity<Page<PackResponseDTO>> getAllPacksForUser(
         @org.springdoc.api.annotations.ParameterObject Pageable pageable,
         @RequestParam(value = "keyword", required = false) String keyword
     ) {
         log.debug("REST request to get a page of Packs");
         Page<PackResponseDTO> page = packService.findAll(pageable, true, null, keyword);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
+        return ResponseEntity.ok().headers(headers).body(page);
     }
 
     /**
@@ -66,5 +68,12 @@ public class PackResource {
     @GetMapping("/packs/most-booking")
     public List<PackMostBookingDTO> getMostBooking() {
         return packService.listMostBooking();
+    }
+
+    @GetMapping("/packs/{id}/orders")
+    public ResponseEntity<List<OrderResponseDTO>> getOrderByPack(@PathVariable Long id) {
+        log.debug("REST request to get Pack : {}", id);
+        List<OrderResponseDTO> orders = orderService.listOrderByPack(id);
+        return ResponseEntity.ok(orders);
     }
 }

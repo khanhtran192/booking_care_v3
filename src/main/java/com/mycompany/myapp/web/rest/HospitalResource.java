@@ -124,14 +124,14 @@ public class HospitalResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of hospitals in body.
      */
     @GetMapping("/hospitals")
-    public ResponseEntity<List<HospitalInfoResponseDTO>> getAllHospitalsForUser(
+    public ResponseEntity<Page<HospitalInfoResponseDTO>> getAllHospitalsForUser(
         @org.springdoc.api.annotations.ParameterObject Pageable pageable,
         @RequestParam(value = "keyword", required = false) String keyword
     ) {
         log.debug("REST request to get a page of Hospitals");
         Page<HospitalInfoResponseDTO> page = hospitalService.findAllForUser(pageable, keyword);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
+        return ResponseEntity.ok().headers(headers).body(page);
     }
 
     @GetMapping("/hospitals/manage")
@@ -196,7 +196,7 @@ public class HospitalResource {
     }
 
     @GetMapping("/hospitals/{id}/manage/departments")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Page<DepartmentResponseDTO>> getAllDepartmentByHospital(
         @org.springdoc.api.annotations.ParameterObject Pageable pageable,
         @PathVariable Long id,
@@ -217,14 +217,14 @@ public class HospitalResource {
     }
 
     @PostMapping("/hospitals/manage/doctors")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<DoctorCreatedDTO>> createDoctor(@Valid @RequestBody List<CreateDoctorDTO> doctorDTO) {
         log.debug("REST request to save doctor : {}", doctorDTO);
         return ResponseEntity.ok().body(doctorService.createDoctor(doctorDTO));
     }
 
     @DeleteMapping("/hospitals/manage/doctors/{id}/inactive")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
         log.debug("REST request to delete doctor : {}", id);
         doctorService.inactiveDoctorById(id);
@@ -235,7 +235,7 @@ public class HospitalResource {
     }
 
     @PutMapping("/hospitals/manage/hospital/{id}/active")
-    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> activeHospital(@PathVariable Long id) {
         log.debug("REST request to active hospital : {}", id);
         hospitalService.activeHospital(id);
@@ -243,7 +243,7 @@ public class HospitalResource {
     }
 
     @PutMapping("/hospitals/manage/doctors/{id}/active")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> activeDoctor(@PathVariable Long id) {
         log.debug("REST request to active doctor : {}", id);
         doctorService.acticeDoctor(id);
@@ -262,7 +262,7 @@ public class HospitalResource {
     }
 
     @GetMapping("/hospitals/{id}/manage/packs")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Page<PackResponseDTO>> pagePackByHospital(
         @org.springdoc.api.annotations.ParameterObject Pageable pageable,
         @PathVariable Long id,
@@ -274,7 +274,7 @@ public class HospitalResource {
     }
 
     @DeleteMapping("/hospitals/manage/packs/{id}/inactive")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> inactivePack(@PathVariable Long id) {
         log.debug("REST request inactive pack : {}", id);
         packService.delete(id);
@@ -282,7 +282,7 @@ public class HospitalResource {
     }
 
     @PutMapping("/hospitals/manage/packs/{id}/active")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> activePack(@PathVariable Long id) {
         log.debug("REST request active pack : {}", id);
         packService.activePack(id);
@@ -290,7 +290,7 @@ public class HospitalResource {
     }
 
     @DeleteMapping("/hospitals/manage/departments/{id}/inactive")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> inactiveDepartment(@PathVariable Long id) {
         log.debug("REST request inactive Department : {}", id);
         departmentService.inactiveDepartment(id);
@@ -298,7 +298,7 @@ public class HospitalResource {
     }
 
     @PutMapping("/hospitals/manage/departments/{id}/active/")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> activeDepartment(@PathVariable Long id) {
         log.debug("REST request active Department : {}", id);
         departmentService.activeDepartment(id);
@@ -306,7 +306,7 @@ public class HospitalResource {
     }
 
     @PostMapping("/hospitals/manage/departments")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<DepartmentResponseDTO> createDepartment(@Valid @RequestBody DepartmentDTO departmentDTO)
         throws URISyntaxException {
         log.debug("REST request to save Department : {}", departmentDTO);
@@ -382,7 +382,7 @@ public class HospitalResource {
     }
 
     @DeleteMapping("/hospitals/manage/packs/time-slots/{id}/inactive")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> inactiveTimeSlot(@PathVariable Long id) {
         log.debug("REST request inactive time slot : {}", id);
         timeSlotService.inactiveTimeSlot(id);
@@ -390,7 +390,7 @@ public class HospitalResource {
     }
 
     @PutMapping("/hospitals/manage/packs/time-slots/{id}/active")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> activeTimeSlot(@PathVariable Long id) {
         log.debug("REST request inactive time slot : {}", id);
         timeSlotService.activeTimeSlot(id);
@@ -398,7 +398,7 @@ public class HospitalResource {
     }
 
     @GetMapping("/hospitals/manage/packs/{id}/time-slots")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<TimeSlotResponseDTO>> allTimeSlotByPack(@PathVariable Long id) {
         log.debug("REST request to get all time slot in Pack : {}", id);
         List<TimeSlotResponseDTO> list = timeSlotService.allTimeSlotByPack(id);
@@ -406,7 +406,7 @@ public class HospitalResource {
     }
 
     @GetMapping("/hospitals/packs/{id}/time-slots")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<TimeSlotResponseDTO>> timeSlotActiveByPack(@PathVariable Long id) {
         log.debug("REST request to get all time slot active in Pack : {}", id);
         List<TimeSlotResponseDTO> list = timeSlotService.listTimeSlotByPack(id);
@@ -442,14 +442,14 @@ public class HospitalResource {
     }
 
     @PostMapping("/hospitals/{id}/manage/upload/logo")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
     public ResponseEntity<Void> uploadHospitalLogo(@PathVariable Long id, @ModelAttribute FileDTO file) {
         hospitalService.uploadLogo(id, file);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/hospitals/{id}/manage/upload/background")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
     public ResponseEntity<Void> uploadHospitalBackground(@PathVariable Long id, @ModelAttribute FileDTO file) {
         hospitalService.uploadBackground(id, file);
         return ResponseEntity.noContent().build();
@@ -463,14 +463,14 @@ public class HospitalResource {
     }
 
     @PostMapping("/hospitals/manage/departments/{id}/upload/background")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.HOSPITAL + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.HOSPITAL + "\")")
     public ResponseEntity<Void> uploadDepartmentBackground(@PathVariable Long id, @ModelAttribute FileDTO file) {
         departmentService.uploadBackground(id, file);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/hospitals/manage/packs/{id}/upload/logo")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.HOSPITAL + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.HOSPITAL + "\")")
     public ResponseEntity<Void> uploadPackLogo(@PathVariable Long id, @ModelAttribute FileDTO file) {
         packService.uploadLogo(id, file);
         return ResponseEntity.noContent().build();

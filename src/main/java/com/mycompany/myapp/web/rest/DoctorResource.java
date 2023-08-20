@@ -5,18 +5,16 @@ import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.DoctorService;
 import com.mycompany.myapp.service.OrderService;
 import com.mycompany.myapp.service.TimeSlotService;
-import com.mycompany.myapp.service.dto.DoctorDTO;
 import com.mycompany.myapp.service.dto.FileDTO;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
+import com.mycompany.myapp.service.dto.request.UpdateDoctorDTO;
 import com.mycompany.myapp.service.dto.response.DoctorMostBookingDTO;
 import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
 import com.mycompany.myapp.service.dto.response.TimeSlotResponseDTO;
-import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
 import org.slf4j.Logger;
@@ -74,26 +72,14 @@ public class DoctorResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/doctors/{id}")
-    public ResponseEntity<DoctorDTO> updateDoctor(
+    public ResponseEntity<DoctorResponseDTO> updateDoctor(
         @PathVariable(value = "id", required = false) final Long id,
-        @Valid @RequestBody DoctorDTO doctorDTO
+        @Valid @RequestBody UpdateDoctorDTO doctorDTO
     ) throws URISyntaxException {
-        log.debug("REST request to update Doctor : {}, {}", id, doctorDTO);
-        if (doctorDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, doctorDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!doctorRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        DoctorDTO result = doctorService.update(doctorDTO);
+        DoctorResponseDTO result = doctorService.update(doctorDTO, id);
         return ResponseEntity
             .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, doctorDTO.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, String.valueOf(id)))
             .body(result);
     }
 
@@ -104,9 +90,9 @@ public class DoctorResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the doctorDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/doctors/{id}")
-    public ResponseEntity<DoctorDTO> getDoctor(@PathVariable Long id) {
+    public ResponseEntity<DoctorResponseDTO> getDoctor(@PathVariable Long id) {
         log.debug("REST request to get Doctor : {}", id);
-        Optional<DoctorDTO> doctorDTO = doctorService.findOne(id);
+        Optional<DoctorResponseDTO> doctorDTO = doctorService.findOne(id);
         return ResponseUtil.wrapOrNotFound(doctorDTO);
     }
 
@@ -157,7 +143,7 @@ public class DoctorResource {
     }
 
     @GetMapping("/doctors/{id}/time-slots")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<TimeSlotResponseDTO>> timeSlotActiveByDoctor(@PathVariable Long id) {
         log.debug("REST request to get all time slot active by doctor : {}", id);
         List<TimeSlotResponseDTO> list = timeSlotService.listTimeSlotByDoctor(id);
@@ -181,7 +167,7 @@ public class DoctorResource {
     }
 
     @GetMapping("/doctors/{id}/orders")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
     public ResponseEntity<List> listOrdersByDoctor(
         @PathVariable Long id,
         @RequestParam(name = "status", required = false) List<String> status
@@ -198,21 +184,21 @@ public class DoctorResource {
     }
 
     @PutMapping("/doctors/orders/{id}/approved")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
     public ResponseEntity<Void> approveOrder(@PathVariable Long id) {
         orderService.approveOrder(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/doctors/orders/{id}/rejected")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
     public ResponseEntity<Void> rejectedOrder(@PathVariable Long id) {
         orderService.rejectOrder(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/doctors/{id}/manage/upload")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.ADMIN + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
     public ResponseEntity<Void> uploadDoctorImage(@PathVariable Long id, @ModelAttribute FileDTO file) {
         doctorService.uploadAvatar(file, id);
         return ResponseEntity.noContent().build();

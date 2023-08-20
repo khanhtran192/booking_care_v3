@@ -8,6 +8,8 @@ import com.mycompany.myapp.service.dto.OrderDTO;
 import com.mycompany.myapp.service.dto.request.CreateOrderDTO;
 import com.mycompany.myapp.service.dto.response.OrderResponseDTO;
 import com.mycompany.myapp.service.mapper.OrderMapper;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +35,6 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final HospitalRepository hospitalRepository;
 
-    private final CustomerService customerService;
-    private final DoctorService doctorService;
-    private final PackService packService;
-    private final TimeSlotService timeSlotService;
     private final TimeSlotRepository timeSlotRepository;
 
     private final CustomerRepository customerRepository;
@@ -65,10 +64,6 @@ public class OrderService {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
         this.hospitalRepository = hospitalRepository;
-        this.customerService = customerService;
-        this.doctorService = doctorService;
-        this.packService = packService;
-        this.timeSlotService = timeSlotService;
         this.timeSlotRepository = timeSlotRepository;
         this.customerRepository = customerRepository;
         this.userService = userService;
@@ -130,6 +125,27 @@ public class OrderService {
         order.setStatus(OrderStatus.APPROVED);
         orderRepository.save(order);
         mailService.sendMailApproveOrder(order);
+        if (order.getDoctor() != null) {
+            List<Order> orders = orderRepository.findAllByDoctorAndDateAndTimeslotAndStatusIn(
+                order.getDoctor(),
+                order.getDate(),
+                order.getTimeslot(),
+                List.of(OrderStatus.PENDING)
+            );
+            for (Order o : orders) {
+                rejectOrder(o.getId());
+            }
+        } else if (order.getPack() != null) {
+            List<Order> orders = orderRepository.findAllByPackAndDateAndTimeslotAndStatusIn(
+                order.getPack(),
+                order.getDate(),
+                order.getTimeslot(),
+                List.of(OrderStatus.PENDING)
+            );
+            for (Order o : orders) {
+                rejectOrder(o.getId());
+            }
+        }
     }
 
     public void rejectOrder(Long id) {
@@ -234,7 +250,16 @@ public class OrderService {
 
     public List<OrderResponseDTO> listOrderByPack(Long id) {
         Pack pack = packRepository.findById(id).orElseThrow(() -> new NotFoundException("pack not found"));
-        List<Order> orders = orderRepository.findAllByPack(pack);
+        List<Order> orders = orderRepository.findAllByPackOrderByDateDesc(pack);
         return orders.stream().map(mapperService::mapToDto).collect(Collectors.toList());
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void rejectOrderOutDate() {
+        LocalDate currentDate = LocalDate.now();
+        List<Order> orders = orderRepository.findAllByDateIsBeforeAndStatus(currentDate, OrderStatus.PENDING);
+        for (Order order : orders) {
+            rejectOrder(order.getId());
+        }
     }
 }

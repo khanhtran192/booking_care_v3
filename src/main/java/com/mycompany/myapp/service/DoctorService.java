@@ -6,13 +6,10 @@ import com.mycompany.myapp.domain.Image;
 import com.mycompany.myapp.domain.enumeration.ImageType;
 import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.exception.NotFoundException;
-import com.mycompany.myapp.repository.DoctorRepository;
-import com.mycompany.myapp.repository.HospitalRepository;
-import com.mycompany.myapp.repository.ImageRepository;
-import com.mycompany.myapp.repository.OrderRepository;
-import com.mycompany.myapp.service.dto.DoctorDTO;
+import com.mycompany.myapp.repository.*;
 import com.mycompany.myapp.service.dto.FileDTO;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
+import com.mycompany.myapp.service.dto.request.UpdateDoctorDTO;
 import com.mycompany.myapp.service.dto.response.DoctorCreatedDTO;
 import com.mycompany.myapp.service.dto.response.DoctorMostBookingDTO;
 import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
@@ -42,6 +39,8 @@ public class DoctorService {
 
     private final DoctorMapper doctorMapper;
 
+    private final DepartmentRepository departmentRepository;
+
     private final MapperService mapperService;
 
     private final UserService userService;
@@ -56,6 +55,7 @@ public class DoctorService {
     public DoctorService(
         DoctorRepository doctorRepository,
         DoctorMapper doctorMapper,
+        DepartmentRepository departmentRepository,
         UserService userService,
         HospitalRepository hospitalRepository,
         HospitalMapper hospitalMapper,
@@ -67,6 +67,7 @@ public class DoctorService {
     ) {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
+        this.departmentRepository = departmentRepository;
         this.userService = userService;
         this.hospitalRepository = hospitalRepository;
         this.hospitalMapper = hospitalMapper;
@@ -78,49 +79,26 @@ public class DoctorService {
     }
 
     /**
-     * Save a doctor.
-     *
-     * @param doctorDTO the entity to save.
-     * @return the persisted entity.
-     */
-    public DoctorDTO save(DoctorDTO doctorDTO) {
-        log.debug("Request to save Doctor : {}", doctorDTO);
-        Doctor doctor = doctorMapper.toEntity(doctorDTO);
-        doctor = doctorRepository.save(doctor);
-        return doctorMapper.toDto(doctor);
-    }
-
-    /**
      * Update a doctor.
      *
      * @param doctorDTO the entity to save.
      * @return the persisted entity.
      */
-    public DoctorDTO update(DoctorDTO doctorDTO) {
+    public DoctorResponseDTO update(UpdateDoctorDTO doctorDTO, Long id) {
         log.debug("Request to update Doctor : {}", doctorDTO);
-        Doctor doctor = doctorMapper.toEntity(doctorDTO);
+        Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor not found"));
+        Department department = departmentRepository
+            .findById(doctorDTO.getDepartmentId())
+            .orElseThrow(() -> new NotFoundException("Department not found"));
+        doctor.setEmail(doctorDTO.getEmail());
+        doctor.setName(doctorDTO.getName());
+        doctor.setPhoneNumber(doctorDTO.getPhoneNumber());
+        doctor.setDegree(doctorDTO.getDegree());
+        doctor.setSpecialize(doctorDTO.getSpecialize());
+        doctor.setDateOfBirth(doctorDTO.getDateOfBirth());
+        doctor.setDepartment(department);
         doctor = doctorRepository.save(doctor);
-        return doctorMapper.toDto(doctor);
-    }
-
-    /**
-     * Partially update a doctor.
-     *
-     * @param doctorDTO the entity to update partially.
-     * @return the persisted entity.
-     */
-    public Optional<DoctorDTO> partialUpdate(DoctorDTO doctorDTO) {
-        log.debug("Request to partially update Doctor : {}", doctorDTO);
-
-        return doctorRepository
-            .findById(doctorDTO.getId())
-            .map(existingDoctor -> {
-                doctorMapper.partialUpdate(existingDoctor, doctorDTO);
-
-                return existingDoctor;
-            })
-            .map(doctorRepository::save)
-            .map(doctorMapper::toDto);
+        return mapperService.mapToDto(doctor);
     }
 
     /**
@@ -130,9 +108,9 @@ public class DoctorService {
      * @return the entity.
      */
     @Transactional(readOnly = true)
-    public Optional<DoctorDTO> findOne(Long id) {
+    public Optional<DoctorResponseDTO> findOne(Long id) {
         log.debug("Request to get Doctor : {}", id);
-        return doctorRepository.findById(id).map(doctorMapper::toDto);
+        return doctorRepository.findById(id).map(mapperService::mapToDto);
     }
 
     /**

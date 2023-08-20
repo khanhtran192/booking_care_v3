@@ -3,6 +3,7 @@ package com.mycompany.myapp.web.rest;
 import com.mycompany.myapp.repository.DiagnoseRepository;
 import com.mycompany.myapp.service.DiagnoseService;
 import com.mycompany.myapp.service.dto.DiagnoseDTO;
+import com.mycompany.myapp.service.dto.response.DiagnoseResponseDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;

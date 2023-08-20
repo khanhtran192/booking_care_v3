@@ -1,5 +1,6 @@
 package com.mycompany.myapp.service.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.service.dto.*;
 import java.io.Serializable;
@@ -16,7 +17,10 @@ import lombok.*;
 public class CreateOrderDTO implements Serializable {
 
     private String symptom;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
+
     private Long timeslot;
 
     public String getSymptom() {

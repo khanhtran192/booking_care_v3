@@ -6,12 +6,10 @@ import com.mycompany.myapp.domain.enumeration.ImageType;
 import com.mycompany.myapp.domain.enumeration.TimeSlotValue;
 import com.mycompany.myapp.exception.BadRequestException;
 import com.mycompany.myapp.exception.NotFoundException;
-import com.mycompany.myapp.repository.DoctorRepository;
-import com.mycompany.myapp.repository.ImageRepository;
-import com.mycompany.myapp.repository.PackRepository;
-import com.mycompany.myapp.service.dto.CustomerDTO;
+import com.mycompany.myapp.repository.*;
 import com.mycompany.myapp.service.dto.request.CreateCustomerDTO;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
+import com.mycompany.myapp.service.dto.request.UpdateDoctorDTO;
 import com.mycompany.myapp.service.dto.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +23,24 @@ public class MapperService {
     private final DoctorRepository doctorRepository;
     private final CheckUtilService checkUtilService;
     private final ImageRepository imageRepository;
+    private final DepartmentRepository departmentRepository;
+
+    private final OrderRepository orderRepository;
 
     public MapperService(
         PackRepository packRepository,
         DoctorRepository doctorRepository,
         CheckUtilService checkUtilService,
-        ImageRepository imageRepository
+        ImageRepository imageRepository,
+        DepartmentRepository departmentRepository,
+        OrderRepository orderRepository
     ) {
         this.packRepository = packRepository;
         this.doctorRepository = doctorRepository;
         this.checkUtilService = checkUtilService;
         this.imageRepository = imageRepository;
+        this.departmentRepository = departmentRepository;
+        this.orderRepository = orderRepository;
     }
 
     public HospitalInfoResponseDTO mapToDto(Hospital hospital) {
@@ -276,5 +281,29 @@ public class MapperService {
         customer.setGender(Gender.valueOf(dto.getGender()));
         customer.setIdCard(dto.getIdCard());
         return customer;
+    }
+
+    public Doctor mapToEntity(UpdateDoctorDTO update) {
+        Department department = departmentRepository
+            .findById(update.getDepartmentId())
+            .orElseThrow(() -> new NotFoundException("Department not found"));
+        Doctor doctor = new Doctor();
+        doctor.setEmail(update.getEmail());
+        doctor.setName(update.getName());
+        doctor.setPhoneNumber(update.getPhoneNumber());
+        doctor.setDegree(update.getDegree());
+        doctor.setSpecialize(update.getSpecialize());
+        doctor.setDateOfBirth(update.getDateOfBirth());
+        doctor.setDepartment(department);
+        return doctor;
+    }
+
+    public DiagnoseResponseDTO mapToDto(Diagnose diagnose) {
+        Order order = diagnose.getOrder();
+        DiagnoseResponseDTO diagnoseResponseDTO = new DiagnoseResponseDTO();
+        diagnoseResponseDTO.setId(diagnose.getId());
+        diagnoseResponseDTO.setDescription(diagnose.getDescription());
+        diagnoseResponseDTO.setOrder(mapToDto(order));
+        return diagnoseResponseDTO;
     }
 }
