@@ -105,9 +105,9 @@ public class DepartmentService {
         return departmentRepository.findById(id).map(mapperService::mapToDto);
     }
 
-    public List<DoctorResponseDTO> findAllByDepartment(Long id) {
+    public Page<DoctorResponseDTO> findAllByDepartment(Pageable pageable, Long id) {
         Department department = departmentRepository.findById(id).orElseThrow(() -> new RuntimeException("No department found"));
-        return doctorService.findAllByDepartment(department);
+        return doctorService.findAllByDepartment(pageable, department);
     }
 
     public Page<DepartmentResponseDTO> findAllByHospital(Pageable pageable, Hospital hospital, String keyword) {

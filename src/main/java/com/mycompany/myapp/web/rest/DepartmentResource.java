@@ -83,8 +83,11 @@ public class DepartmentResource {
     }
 
     @GetMapping("/departments/{id}/doctors")
-    public ResponseEntity<List<DoctorResponseDTO>> getDoctorByDepartment(@PathVariable Long id) {
+    public ResponseEntity<Page<DoctorResponseDTO>> getDoctorByDepartment(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @PathVariable Long id
+    ) {
         log.debug("REST request to get doctors by Department : {}", id);
-        return ResponseEntity.ok().body(departmentService.findAllByDepartment(id));
+        return ResponseEntity.ok().body(departmentService.findAllByDepartment(pageable, id));
     }
 }

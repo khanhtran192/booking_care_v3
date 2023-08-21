@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
-    List<Doctor> findAllByDepartment(Department department);
+    Page<Doctor> findAllByDepartment(Pageable pageable, Department department);
     Doctor findDoctorByUserId(Long userId);
 
     @Query(

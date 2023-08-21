@@ -27,8 +27,6 @@ public class DoctorResponseDTO {
 
     private DepartmentResponseDTO department;
 
-    //    private HospitalDTO hospital;
-
     public Long getId() {
         return id;
     }

@@ -131,8 +131,8 @@ public class DoctorService {
         return doctorRepository.pageDoctorByHospitalForUser(pageable, hospitalId, keyword).map(mapperService::mapToDto);
     }
 
-    public List<DoctorResponseDTO> findAllByDepartment(Department department) {
-        return doctorRepository.findAllByDepartment(department).stream().map(mapperService::mapToDto).collect(Collectors.toList());
+    public Page<DoctorResponseDTO> findAllByDepartment(Pageable pageable, Department department) {
+        return doctorRepository.findAllByDepartment(pageable, department).map(mapperService::mapToDto);
     }
 
     public List<DoctorCreatedDTO> createDoctor(List<CreateDoctorDTO> doctorDTOs) {
