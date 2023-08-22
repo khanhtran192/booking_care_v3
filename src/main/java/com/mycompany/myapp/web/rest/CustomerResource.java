@@ -48,8 +48,8 @@ public class CustomerResource {
     @GetMapping("/customers/{id}")
     public ResponseEntity<CustomerDTO> getCustomer(@PathVariable Long id) {
         log.debug("REST request to get Customer : {}", id);
-        Optional<CustomerDTO> customerDTO = customerService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(customerDTO);
+        CustomerDTO customerDTO = customerService.findOne(id);
+        return ResponseEntity.ok().body(customerDTO);
     }
 
     @PostMapping("/customers")

@@ -280,6 +280,7 @@ public class MapperService {
         customer.setPhoneNumber(dto.getPhoneNumber());
         customer.setGender(Gender.valueOf(dto.getGender()));
         customer.setIdCard(dto.getIdCard());
+        customer.setAddress(dto.getAddress());
         return customer;
     }
 

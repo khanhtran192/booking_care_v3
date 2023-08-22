@@ -52,9 +52,14 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<CustomerDTO> findOne(Long id) {
+    public CustomerDTO findOne(Long id) {
         log.debug("Request to get Customer : {}", id);
-        return customerRepository.findById(id).map(customerMapper::toDto);
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        try {
+            return customerMapper.toDto(customerRepository.findByUserBooking(user.getId()));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public void createCustomer(CreateCustomerDTO dto) {
@@ -75,6 +80,7 @@ public class CustomerService {
         customer.setDateOfBirth(dto.getDateOfBirth());
         customer.setPhoneNumber(dto.getPhoneNumber());
         customer.setGender(Gender.valueOf(dto.getGender()));
+        customer.setAddress(dto.getAddress());
         customer.setIdCard(dto.getIdCard());
         customerRepository.save(customer);
     }
