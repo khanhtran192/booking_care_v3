@@ -50,9 +50,7 @@ public class MapperService {
                 ? "https://images2.thanhnien.vn/Uploaded/dieutrang-qc/2022_06_20/tam-tri-1-7301.jpg"
                 : imageBackground.getPath();
             Image imageLogo = imageRepository.findByHospitalIdAndType(hospital.getId(), ImageType.LOGO);
-            String logo = imageLogo == null
-                ? "https://cdn.vectorstock.com/i/preview-1x/58/17/clinic-logo-template-icon-brand-identity-isolated-vector-47895817.jpg"
-                : imageLogo.getPath();
+            String logo = imageLogo == null ? "https://upload.wikimedia.org/wikipedia/vi/a/a0/Benh_vien_108.jpg" : imageLogo.getPath();
             if (hospital == null) {
                 return null;
             }
@@ -276,7 +274,8 @@ public class MapperService {
         orderResponseDTO.setStatus(order.getStatus());
         orderResponseDTO.setSymptom(order.getSymptom());
         orderResponseDTO.setDate(order.getDate());
-        orderResponseDTO.setAddress(orderResponseDTO.getAddress());
+        orderResponseDTO.setAddress(order.getAddress());
+        orderResponseDTO.setId(order.getId());
         return orderResponseDTO;
     }
 
