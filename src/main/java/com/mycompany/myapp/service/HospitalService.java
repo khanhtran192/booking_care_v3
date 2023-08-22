@@ -115,9 +115,9 @@ public class HospitalService {
      * @return the entity.
      */
     @Transactional(readOnly = true)
-    public Optional<HospitalDTO> findOne(Long id) {
+    public HospitalInfoResponseDTO findOne(Long id) {
         log.debug("Request to get Hospital : {}", id);
-        return hospitalRepository.findById(id).map(hospitalMapper::toDto);
+        return mapperService.mapToDto(hospitalRepository.findById(id).orElseThrow(() -> new NotFoundException("hospital not found")));
     }
 
     /**

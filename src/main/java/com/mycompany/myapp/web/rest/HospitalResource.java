@@ -153,10 +153,10 @@ public class HospitalResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the hospitalDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/hospitals/{id}")
-    public ResponseEntity<HospitalDTO> getHospital(@PathVariable Long id) {
+    public ResponseEntity<HospitalInfoResponseDTO> getHospital(@PathVariable Long id) {
         log.debug("REST request to get Hospital : {}", id);
-        Optional<HospitalDTO> hospitalDTO = hospitalService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(hospitalDTO);
+        HospitalInfoResponseDTO hospitalDTO = hospitalService.findOne(id);
+        return ResponseEntity.ok().body(hospitalDTO);
     }
 
     /**

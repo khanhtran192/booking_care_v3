@@ -46,9 +46,13 @@ public class MapperService {
     public HospitalInfoResponseDTO mapToDto(Hospital hospital) {
         try {
             Image imageBackground = imageRepository.findByHospitalIdAndType(hospital.getId(), ImageType.DESCRIPTION);
-            String background = imageBackground == null ? "" : imageBackground.getPath();
+            String background = imageBackground == null
+                ? "https://images2.thanhnien.vn/Uploaded/dieutrang-qc/2022_06_20/tam-tri-1-7301.jpg"
+                : imageBackground.getPath();
             Image imageLogo = imageRepository.findByHospitalIdAndType(hospital.getId(), ImageType.LOGO);
-            String logo = imageLogo == null ? "" : imageLogo.getPath();
+            String logo = imageLogo == null
+                ? "https://cdn.vectorstock.com/i/preview-1x/58/17/clinic-logo-template-icon-brand-identity-isolated-vector-47895817.jpg"
+                : imageLogo.getPath();
             if (hospital == null) {
                 return null;
             }
@@ -61,6 +65,7 @@ public class MapperService {
             hospitalInfoResponseDTO.setLogo(logo);
             hospitalInfoResponseDTO.setBackgroundImage(background);
             hospitalInfoResponseDTO.setType(hospital.getType());
+            hospitalInfoResponseDTO.setDescription(hospital.getDescription());
             return hospitalInfoResponseDTO;
         } catch (Exception e) {
             log.error("map to hospital dto info error: {}", e.getMessage());
@@ -70,7 +75,9 @@ public class MapperService {
 
     public DepartmentResponseDTO mapToDto(Department department) {
         Image image = imageRepository.findByDepartmentIdAndType(department.getId(), ImageType.LOGO);
-        String logo = image == null ? "" : image.getPath();
+        String logo = image == null
+            ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQS8bPUHUUHZq-PBT-Qn_nLKRao81DeV1vMvm6-0jzsntCS1b0KXdMVJ58HvUjstwIaDHQ&usqp=CAU"
+            : image.getPath();
         try {
             if (department == null) {
                 return null;
