@@ -21,7 +21,7 @@ public class CreateOrderDTO implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
-    private Long timeslot;
+    private Long timeSlot;
 
     public String getSymptom() {
         return symptom;
@@ -39,12 +39,12 @@ public class CreateOrderDTO implements Serializable {
         this.date = date;
     }
 
-    public Long getTimeslot() {
-        return timeslot;
+    public Long getTimeSlot() {
+        return timeSlot;
     }
 
-    public void setTimeslot(Long timeslot) {
-        this.timeslot = timeslot;
+    public void setTimeslot(Long timeSlot) {
+        this.timeSlot = timeSlot;
     }
     //    @Override
     //    public boolean equals(Object o) {

@@ -177,7 +177,7 @@ public class OrderService {
         }
         Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor not found"));
         TimeSlot timeSlot = timeSlotRepository
-            .findById(create.getTimeslot())
+            .findById(create.getTimeSlot())
             .orElseThrow(() -> new NotFoundException("Time slot not found"));
         Hospital hospital = hospitalRepository
             .findById(Long.valueOf(doctor.getHospitalId()))
@@ -205,7 +205,7 @@ public class OrderService {
         }
         Pack pack = packRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor not found"));
         TimeSlot timeSlot = timeSlotRepository
-            .findById(create.getTimeslot())
+            .findById(create.getTimeSlot())
             .orElseThrow(() -> new NotFoundException("Time slot not found"));
         Hospital hospital = pack.getHospital();
         Order order = new Order();
@@ -235,7 +235,7 @@ public class OrderService {
 
     public OrderResponseDTO updateOrder(Long id, CreateOrderDTO create) {
         TimeSlot timeSlot = timeSlotRepository
-            .findById(create.getTimeslot())
+            .findById(create.getTimeSlot())
             .orElseThrow(() -> new NotFoundException("Time slot not found"));
         Order order = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order not found"));
         order.setTimeslot(timeSlot);
