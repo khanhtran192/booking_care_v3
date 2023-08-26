@@ -7,7 +7,6 @@ import com.mycompany.myapp.repository.DiagnoseRepository;
 import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.service.dto.request.CreateDiagnoseDTO;
 import com.mycompany.myapp.service.dto.response.DiagnoseResponseDTO;
-import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +25,18 @@ public class DiagnoseService {
     private final DiagnoseRepository diagnoseRepository;
     private final OrderRepository orderRepository;
     private final MapperService mapperService;
+    private final OrderService orderService;
 
-    public DiagnoseService(DiagnoseRepository diagnoseRepository, OrderRepository orderRepository, MapperService mapperService) {
+    public DiagnoseService(
+        DiagnoseRepository diagnoseRepository,
+        OrderRepository orderRepository,
+        MapperService mapperService,
+        OrderService orderService
+    ) {
         this.diagnoseRepository = diagnoseRepository;
         this.orderRepository = orderRepository;
         this.mapperService = mapperService;
+        this.orderService = orderService;
     }
 
     public DiagnoseResponseDTO createDiagnose(Long id, CreateDiagnoseDTO dto) {
@@ -39,6 +45,7 @@ public class DiagnoseService {
         diagnose.setDescription(dto.getDescription());
         diagnose.setOrder(order);
         diagnose = diagnoseRepository.save(diagnose);
+        orderService.completeOrder(id);
         return mapperService.mapToDto(diagnose);
     }
 
