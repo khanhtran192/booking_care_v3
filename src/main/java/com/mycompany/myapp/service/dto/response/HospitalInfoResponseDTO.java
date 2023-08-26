@@ -22,6 +22,15 @@ public class HospitalInfoResponseDTO {
 
     private FacilityType type;
     private String description;
+    private Boolean active;
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
     public String getDescription() {
         return description;

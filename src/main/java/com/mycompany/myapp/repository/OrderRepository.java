@@ -4,6 +4,8 @@ import com.mycompany.myapp.domain.*;
 import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,7 +23,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> orderByDoctor(@Param("doctor") Doctor doctor, @Param("status") List<OrderStatus> status);
 
     @Query("SELECT o FROM Order o WHERE o.doctor = :doctor AND :status IS NULL OR o.status IN (:status) ORDER BY o.date DESC")
-    List<Order> findAllbyDoctorAndStatus(@Param("doctor") Doctor doctor, @Param("status") List<OrderStatus> status);
+    Page<Order> findAllbyDoctorAndStatus(@Param("doctor") Doctor doctor, @Param("status") List<OrderStatus> status, Pageable pageable);
 
     List<Order> findAllByDoctorAndDateAndTimeslotAndStatusIn(Doctor doctor, LocalDate date, TimeSlot timeSlot, List<OrderStatus> status);
     List<Order> findAllByPackAndDateAndTimeslotAndStatusIn(Pack pack, LocalDate date, TimeSlot timeSlot, List<OrderStatus> status);
@@ -32,4 +34,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByDoctor(Doctor doctor);
 
     List<Order> findAllByDateIsBeforeAndStatus(LocalDate date, OrderStatus status);
+
+    Page<Order> findAllByHospitalIdOrderByDateDesc(Long hospitalId, Pageable pageable);
 }

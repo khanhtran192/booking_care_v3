@@ -24,6 +24,15 @@ public class DoctorResponseDTO {
     private Double star;
 
     private String specialize;
+    private Boolean active;
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
     private DepartmentResponseDTO department;
 

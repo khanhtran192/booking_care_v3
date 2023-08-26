@@ -63,6 +63,7 @@ public class MapperService {
             hospitalInfoResponseDTO.setLogo(logo);
             hospitalInfoResponseDTO.setBackgroundImage(background);
             hospitalInfoResponseDTO.setType(hospital.getType());
+            hospitalInfoResponseDTO.setActive(hospital.getActive());
             hospitalInfoResponseDTO.setDescription(hospital.getDescription());
             return hospitalInfoResponseDTO;
         } catch (Exception e) {
@@ -111,6 +112,7 @@ public class MapperService {
         doctorResponseDTO.setDepartment(mapToDto(doctor.getDepartment()));
         doctorResponseDTO.setStar(doctor.getStar());
         doctorResponseDTO.setAvatar(avatar);
+        doctorResponseDTO.setActive(doctor.getActive());
         return doctorResponseDTO;
     }
 
@@ -127,6 +129,7 @@ public class MapperService {
         dto.setDescription(pack.getDescription());
         dto.setPrice(pack.getPrice());
         dto.setHospital(mapToDto(pack.getHospital()));
+        dto.setActive(pack.getActive());
         dto.setLogo(logo);
         return dto;
     }
@@ -235,6 +238,7 @@ public class MapperService {
             timeSlotResponseDTO.setStartTime(mapToDto(timeSlot.getStartTime()));
             timeSlotResponseDTO.setEndTime(mapToDto(timeSlot.getEndTime()));
             timeSlotResponseDTO.setTime(timeSlot.getTime());
+            timeSlotResponseDTO.setActive(timeSlot.getActive());
             return timeSlotResponseDTO;
         } catch (Exception e) {
             log.error("map time slot to dto failed: {}", e.getMessage());

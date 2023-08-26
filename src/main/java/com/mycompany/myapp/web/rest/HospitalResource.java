@@ -503,4 +503,14 @@ public class HospitalResource {
     public ResponseEntity<OrderResponseDTO> createOrderPack(@PathVariable Long id, @RequestBody CreateOrderDTO request) {
         return ResponseEntity.ok().body(orderService.createOrderPack(id, request));
     }
+
+    @GetMapping("/hospitals/{id}/manage/order")
+    public ResponseEntity<Page<OrderResponseDTO>> getOrderByHospital(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @PathVariable Long id
+    ) {
+        Page<OrderResponseDTO> page = hospitalService.orderByHospital(id, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page);
+    }
 }

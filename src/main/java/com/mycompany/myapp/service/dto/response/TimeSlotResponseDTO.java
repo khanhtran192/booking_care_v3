@@ -7,10 +7,19 @@ public class TimeSlotResponseDTO {
     private TimeSlotValueResponseDTO startTime;
     private TimeSlotValueResponseDTO endTime;
     private String description;
+    private Boolean active;
     private Double price;
     private Boolean status;
     private DoctorResponseDTO doctor;
     private PackResponseDTO pack;
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
     public Long getId() {
         return id;

@@ -11,8 +11,25 @@ public class PackResponseDTO {
     private String backgroundImage;
 
     private String price;
+    private Boolean active;
 
     private HospitalInfoResponseDTO hospital;
+
+    public String getBackgroundImage() {
+        return backgroundImage;
+    }
+
+    public void setBackgroundImage(String backgroundImage) {
+        this.backgroundImage = backgroundImage;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
     public Long getId() {
         return id;

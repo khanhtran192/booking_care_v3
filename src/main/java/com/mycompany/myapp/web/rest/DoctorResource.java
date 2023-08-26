@@ -168,11 +168,12 @@ public class DoctorResource {
 
     @GetMapping("/doctors/{id}/orders")
     //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.DOCTOR + "\")")
-    public ResponseEntity<List> listOrdersByDoctor(
+    public ResponseEntity<Page> listOrdersByDoctor(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
         @PathVariable Long id,
         @RequestParam(name = "status", required = false) List<String> status
     ) {
-        return ResponseEntity.ok().body(doctorService.findAllByDoctorAndStatus(id, status));
+        return ResponseEntity.ok().body(doctorService.findAllByDoctorAndStatus(id, status, pageable));
     }
 
     @GetMapping("/doctors/{id}/time-slot-free")

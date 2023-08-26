@@ -7,14 +7,15 @@ import com.mycompany.myapp.domain.enumeration.ImageType;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.repository.ImageRepository;
+import com.mycompany.myapp.repository.OrderRepository;
 import com.mycompany.myapp.service.dto.FileDTO;
 import com.mycompany.myapp.service.dto.HospitalDTO;
 import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
 import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
 import com.mycompany.myapp.service.dto.response.HospitalInfoResponseDTO;
+import com.mycompany.myapp.service.dto.response.OrderResponseDTO;
 import com.mycompany.myapp.service.mapper.HospitalMapper;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,7 @@ public class HospitalService {
     private final HospitalMapper hospitalMapper;
 
     private final DoctorService doctorService;
+    private final OrderRepository orderRepository;
 
     private final UserService userService;
 
@@ -48,6 +50,7 @@ public class HospitalService {
         HospitalRepository hospitalRepository,
         HospitalMapper hospitalMapper,
         DoctorService doctorService,
+        OrderRepository orderRepository,
         DepartmentService departmentService,
         UserService userService,
         MapperService mapperService,
@@ -57,6 +60,7 @@ public class HospitalService {
         this.hospitalRepository = hospitalRepository;
         this.hospitalMapper = hospitalMapper;
         this.doctorService = doctorService;
+        this.orderRepository = orderRepository;
         this.departmentService = departmentService;
         this.userService = userService;
         this.mapperService = mapperService;
@@ -192,5 +196,9 @@ public class HospitalService {
             imageRepository.delete(old);
         }
         imageRepository.save(image);
+    }
+
+    public Page<OrderResponseDTO> orderByHospital(Long id, Pageable pageable) {
+        return orderRepository.findAllByHospitalIdOrderByDateDesc(id, pageable).map(mapperService::mapToDto);
     }
 }

@@ -43,43 +43,7 @@ public class CreateOrderDTO implements Serializable {
         return timeSlot;
     }
 
-    public void setTimeslot(Long timeSlot) {
+    public void setTimeSlot(Long timeSlot) {
         this.timeSlot = timeSlot;
     }
-    //    @Override
-    //    public boolean equals(Object o) {
-    //        if (this == o) {
-    //            return true;
-    //        }
-    //        if (!(o instanceof OrderDTO)) {
-    //            return false;
-    //        }
-    //
-    //        OrderDTO orderDTO = (OrderDTO) o;
-    //        if (this.id == null) {
-    //            return false;
-    //        }
-    //        return Objects.equals(this.id, orderDTO.getId());
-    //    }
-    //
-    //    @Override
-    //    public int hashCode() {
-    //        return Objects.hash(this.id);
-    //    }
-    // prettier-ignore
-    //    @Override
-    //    public String toString() {
-    //        return "OrderDTO{" +
-    //            "id=" + getId() +
-    //            ", address='" + getAddress() + "'" +
-    //            ", symptom='" + getSymptom() + "'" +
-    //            ", date='" + getDate() + "'" +
-    //            ", status='" + getStatus() + "'" +
-    //            ", price=" + getPrice() +
-    //            ", timeslot=" + getTimeslot() +
-    //            ", customer=" + getCustomer() +
-    //            ", doctor=" + getDoctor() +
-    //            ", pack=" + getPack() +
-    //            "}";
-    //    }
 }

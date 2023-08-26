@@ -216,18 +216,14 @@ public class DoctorService {
             .collect(Collectors.toList());
     }
 
-    public List<OrderResponseDTO> findAllByDoctorAndStatus(Long id, List<String> status) {
+    public Page<OrderResponseDTO> findAllByDoctorAndStatus(Long id, List<String> status, Pageable pageable) {
         Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor not found"));
         try {
             List<OrderStatus> orderStatuses = status.stream().map(OrderStatus::valueOf).collect(Collectors.toList());
-            return orderRepository
-                .findAllbyDoctorAndStatus(doctor, orderStatuses)
-                .stream()
-                .map(mapperService::mapToDto)
-                .collect(Collectors.toList());
+            return orderRepository.findAllbyDoctorAndStatus(doctor, orderStatuses, pageable).map(mapperService::mapToDto);
         } catch (Exception e) {
             log.error("get all order by doctor {} error: {}", doctor.getName(), e.getMessage());
-            return Collections.emptyList();
+            return null;
         }
     }
 
