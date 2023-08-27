@@ -136,14 +136,14 @@ public class HospitalResource {
 
     @GetMapping("/hospitals/manage")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<List<HospitalInfoResponseDTO>> getAllHospitals(
+    public ResponseEntity<Page<HospitalInfoResponseDTO>> getAllHospitals(
         @org.springdoc.api.annotations.ParameterObject Pageable pageable,
         @RequestParam(value = "keyword", required = false) String keyword
     ) {
         log.debug("REST request to get a page of Hospitals");
         Page<HospitalInfoResponseDTO> page = hospitalService.findAll(pageable, keyword);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
+        return ResponseEntity.ok().headers(headers).body(page);
     }
 
     /**

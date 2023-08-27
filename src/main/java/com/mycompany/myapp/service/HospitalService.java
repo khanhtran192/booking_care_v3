@@ -159,7 +159,7 @@ public class HospitalService {
         Hospital hospital = hospitalRepository.findById(id).orElseThrow(() -> new NotFoundException("Hospital: " + id + " not found"));
         hospital.setActive(true);
         hospitalRepository.save(hospital);
-        userService.activeHospital(id);
+        userService.activeHospital(hospital.getId());
     }
 
     public List<FacilityType> listFacilities() {
