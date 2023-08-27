@@ -167,7 +167,7 @@ public class DoctorService {
         Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor: " + id + " not found"));
         doctor.setActive(true);
         doctorRepository.save(doctor);
-        userService.activeDoctor(doctor.getId());
+        userService.activeDoctor(doctor.getUserId());
     }
 
     public List<DoctorResponseDTO> listDoctorMostStar() {
