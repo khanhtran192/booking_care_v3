@@ -87,9 +87,15 @@ public class HospitalService {
      * @param hospitalDTO the entity to save.
      * @return the persisted entity.
      */
-    public HospitalDTO update(HospitalDTO hospitalDTO) {
+    public HospitalDTO update(HospitalDTO hospitalDTO, Long id) {
         log.debug("Request to update Hospital : {}", hospitalDTO);
-        Hospital hospital = hospitalMapper.toEntity(hospitalDTO);
+
+        Hospital hospital = hospitalRepository.findById(id).orElseThrow(() -> new NotFoundException("hospital not found"));
+        hospital.setName(hospitalDTO.getName());
+        hospital.setEmail(hospitalDTO.getEmail());
+        hospital.setDescription(hospitalDTO.getDescription());
+        hospital.setPhoneNumber(hospitalDTO.getPhoneNumber());
+        hospital.setType(hospitalDTO.getType());
         hospital = hospitalRepository.save(hospital);
         return hospitalMapper.toDto(hospital);
     }
