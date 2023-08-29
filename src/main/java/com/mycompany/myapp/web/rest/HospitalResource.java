@@ -7,10 +7,7 @@ import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.*;
 import com.mycompany.myapp.service.dto.*;
-import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
-import com.mycompany.myapp.service.dto.request.CreateOrderDTO;
-import com.mycompany.myapp.service.dto.request.CreatePackDTO;
-import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
+import com.mycompany.myapp.service.dto.request.*;
 import com.mycompany.myapp.service.dto.response.*;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
@@ -99,22 +96,19 @@ public class HospitalResource {
         @Valid @RequestBody HospitalDTO hospitalDTO
     ) throws URISyntaxException {
         log.debug("REST request to update Hospital : {}, {}", id, hospitalDTO);
-        if (hospitalDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, hospitalDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!hospitalRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
+        //        if (hospitalDTO.getId() == null) {
+        //            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        //        }
+        //        if (!Objects.equals(id, hospitalDTO.getId())) {
+        //            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        //        }
+        //
+        //        if (!hospitalRepository.existsById(id)) {
+        //            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        //        }
 
         HospitalDTO result = hospitalService.update(hospitalDTO, id);
-        return ResponseEntity
-            .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, hospitalDTO.getId().toString()))
-            .body(result);
+        return ResponseEntity.ok().body(result);
     }
 
     /**
@@ -218,9 +212,9 @@ public class HospitalResource {
 
     @PostMapping("/hospitals/manage/doctors")
     //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<List<DoctorCreatedDTO>> createDoctor(@Valid @RequestBody List<CreateDoctorDTO> doctorDTO) {
+    public ResponseEntity<DoctorCreatedDTO> createDoctor(@Valid @RequestBody CreateDoctorDTO doctorDTO) {
         log.debug("REST request to save doctor : {}", doctorDTO);
-        return ResponseEntity.ok().body(doctorService.createDoctor(doctorDTO));
+        return ResponseEntity.ok().body(doctorService.createDoctorV2(doctorDTO));
     }
 
     @DeleteMapping("/hospitals/manage/doctors/{id}/inactive")
@@ -297,7 +291,7 @@ public class HospitalResource {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/hospitals/manage/departments/{id}/active/")
+    @PutMapping("/hospitals/manage/departments/{id}/active")
     //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> activeDepartment(@PathVariable Long id) {
         log.debug("REST request active Department : {}", id);
@@ -307,12 +301,9 @@ public class HospitalResource {
 
     @PostMapping("/hospitals/manage/departments")
     //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<DepartmentResponseDTO> createDepartment(@Valid @RequestBody DepartmentDTO departmentDTO)
+    public ResponseEntity<DepartmentResponseDTO> createDepartment(@Valid @RequestBody CreateDepartmentDTO departmentDTO)
         throws URISyntaxException {
         log.debug("REST request to save Department : {}", departmentDTO);
-        if (departmentDTO.getId() != null) {
-            throw new BadRequestAlertException("A new department cannot already have an ID", ENTITY_NAME, "idexists");
-        }
         DepartmentResponseDTO result = departmentService.save(departmentDTO);
         return ResponseEntity
             .created(new URI("/api/departments/" + result.getId()))
@@ -339,16 +330,16 @@ public class HospitalResource {
         @RequestBody CreatePackDTO packDTO
     ) throws URISyntaxException {
         log.debug("REST request to update Pack : {}, {}", id, packDTO);
-        if (packDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, packDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!packRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
+        //        if (packDTO.getId() == null) {
+        //            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        //        }
+        //        if (!Objects.equals(id, packDTO.getId())) {
+        //            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        //        }
+        //
+        //        if (!packRepository.existsById(id)) {
+        //            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        //        }
 
         PackResponseDTO result = packService.update(packDTO, id);
         return ResponseEntity
@@ -360,24 +351,24 @@ public class HospitalResource {
     @PutMapping("/hospitals/manage/departments/{id}")
     public ResponseEntity<DepartmentResponseDTO> updateDepartment(
         @PathVariable(value = "id", required = false) final Long id,
-        @Valid @RequestBody DepartmentDTO departmentDTO
+        @Valid @RequestBody CreateDepartmentDTO departmentDTO
     ) throws URISyntaxException {
         log.debug("REST request to update Department : {}, {}", id, departmentDTO);
-        if (departmentDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, departmentDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
+        //        if (departmentDTO.getId() == null) {
+        //            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        //        }
+        //        if (!Objects.equals(id, departmentDTO.getId())) {
+        //            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        //        }
+        //
+        //        if (!departmentRepository.existsById(id)) {
+        //            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        //        }
 
-        if (!departmentRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        DepartmentResponseDTO result = departmentService.update(departmentDTO);
+        DepartmentResponseDTO result = departmentService.update(departmentDTO, id);
         return ResponseEntity
             .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, departmentDTO.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, String.valueOf(id)))
             .body(result);
     }
 

@@ -223,14 +223,23 @@ public class OrderService {
         return mapperService.mapToDto(order);
     }
 
-    public List<OrderResponseDTO> listOrderPersonal() {
+    //    public List<OrderResponseDTO> listOrderPersonal() {
+    //        User user = userService.getUserWithAuthorities().orElseThrow(() -> new NotFoundException("user not found"));
+    //        Customer customer = customerRepository.findByUserBooking(user.getId());
+    //        if (customer == null) {
+    //            throw new NotFoundException("Customer not found");
+    //        }
+    //        List<Order> orders = orderRepository.findAllByCustomer(customer);
+    //        return orders.stream().map(mapperService::mapToDto).collect(Collectors.toList());
+    //    }
+    public Page<OrderResponseDTO> listOrderPersonalV2(Pageable pageable) {
         User user = userService.getUserWithAuthorities().orElseThrow(() -> new NotFoundException("user not found"));
         Customer customer = customerRepository.findByUserBooking(user.getId());
         if (customer == null) {
             throw new NotFoundException("Customer not found");
         }
-        List<Order> orders = orderRepository.findAllByCustomer(customer);
-        return orders.stream().map(mapperService::mapToDto).collect(Collectors.toList());
+        Page<Order> orders = orderRepository.findAllByCustomer(customer, pageable);
+        return orders.map(mapperService::mapToDto);
     }
 
     public OrderResponseDTO updateOrder(Long id, CreateOrderDTO create) {

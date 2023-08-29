@@ -13,6 +13,8 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
@@ -77,10 +79,17 @@ public class OrderResource {
         return ResponseUtil.wrapOrNotFound(orderDTO);
     }
 
+    //    @GetMapping("/orders/personal")
+    //    public ResponseEntity<List<OrderResponseDTO>> listOrderPersonal() {
+    //        log.debug("REST request to get all Orders");
+    //        List<OrderResponseDTO> orders = orderService.listOrderPersonal();
+    //        return ResponseEntity.ok(orders);
+    //    }
+
     @GetMapping("/orders/personal")
-    public ResponseEntity<List<OrderResponseDTO>> listOrderPersonal() {
+    public ResponseEntity<Page<OrderResponseDTO>> listOrderPersonal(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
         log.debug("REST request to get all Orders");
-        List<OrderResponseDTO> orders = orderService.listOrderPersonal();
+        Page<OrderResponseDTO> orders = orderService.listOrderPersonalV2(pageable);
         return ResponseEntity.ok(orders);
     }
 

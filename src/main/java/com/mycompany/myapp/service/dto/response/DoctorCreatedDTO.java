@@ -5,6 +5,8 @@ import com.mycompany.myapp.service.dto.HospitalDTO;
 
 public class DoctorCreatedDTO {
 
+    private Long id;
+
     private String name;
     private String email;
     private DepartmentDTO department;
@@ -40,5 +42,13 @@ public class DoctorCreatedDTO {
 
     public void setHospital(HospitalDTO hospital) {
         this.hospital = hospital;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

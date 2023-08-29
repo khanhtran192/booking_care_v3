@@ -28,7 +28,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByDoctorAndDateAndTimeslotAndStatusIn(Doctor doctor, LocalDate date, TimeSlot timeSlot, List<OrderStatus> status);
     List<Order> findAllByPackAndDateAndTimeslotAndStatusIn(Pack pack, LocalDate date, TimeSlot timeSlot, List<OrderStatus> status);
 
-    List<Order> findAllByCustomer(Customer customer);
+    //    List<Order> findAllByCustomer(Customer customer);
+    Page<Order> findAllByCustomer(Customer customer, Pageable pageable);
 
     List<Order> findAllByPackOrderByDateDesc(Pack pack);
     List<Order> findAllByDoctor(Doctor doctor);

@@ -3,6 +3,7 @@ package com.mycompany.myapp.web.rest;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.service.dto.request.CreateHospitalDTO;
+import com.mycompany.myapp.service.dto.response.HospitalInfoResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,12 +29,8 @@ public class AdminResource {
 
     @PostMapping("/hospitals")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<Void> createHospital(@RequestBody CreateHospitalDTO createHospitalDTO) {
+    public ResponseEntity<HospitalInfoResponseDTO> createHospital(@RequestBody CreateHospitalDTO createHospitalDTO) {
         log.debug("REST request to create hospital: {}", createHospitalDTO.getName());
-        userService.createHospital(createHospitalDTO);
-        return ResponseEntity
-            .noContent()
-            .headers(HeaderUtil.createAlert(applicationName, "userManagement.created", createHospitalDTO.getName()))
-            .build();
+        return ResponseEntity.ok(userService.createHospital(createHospitalDTO));
     }
 }

@@ -155,6 +155,20 @@ public class DoctorService {
             .collect(Collectors.toList());
     }
 
+    public DoctorCreatedDTO createDoctorV2(CreateDoctorDTO doctorDTOs) {
+        Long emailDoctorCreated = userService.createDoctorV2(doctorDTOs);
+        List<Doctor> doctorCreated = new ArrayList<>();
+        Doctor doctor = doctorRepository.findDoctorByUserId(emailDoctorCreated);
+        doctorCreated.add(doctor);
+        DoctorCreatedDTO d = new DoctorCreatedDTO();
+        d.setId(doctor.getId());
+        d.setName(doctor.getName());
+        d.setEmail(doctor.getEmail());
+        d.setDepartment(departmentMapper.toDto(doctor.getDepartment()));
+        d.setHospital(hospitalMapper.toDto(hospitalRepository.findById(Long.valueOf(doctor.getHospitalId())).orElse(null)));
+        return d;
+    }
+
     public void inactiveDoctorById(Long doctorId) {
         Doctor doctor = doctorRepository.findById(doctorId).orElseThrow(() -> new NotFoundException("Doctor not found"));
         userService.deleteDoctor(doctor.getUserId());

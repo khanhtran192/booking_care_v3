@@ -15,11 +15,11 @@ import com.mycompany.myapp.service.dto.AdminUserDTO;
 import com.mycompany.myapp.service.dto.UserDTO;
 import com.mycompany.myapp.service.dto.request.CreateDoctorDTO;
 import com.mycompany.myapp.service.dto.request.CreateHospitalDTO;
+import com.mycompany.myapp.service.dto.response.HospitalInfoResponseDTO;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -44,6 +44,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
+    private final MapperService mapperService;
 
     private final AuthorityRepository authorityRepository;
     private final DoctorRepository doctorRepository;
@@ -55,6 +56,7 @@ public class UserService {
     public UserService(
         UserRepository userRepository,
         PasswordEncoder passwordEncoder,
+        MapperService mapperService,
         AuthorityRepository authorityRepository,
         DoctorRepository doctorRepository,
         DepartmentRepository departmentRepository,
@@ -63,6 +65,7 @@ public class UserService {
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.mapperService = mapperService;
         this.authorityRepository = authorityRepository;
         this.doctorRepository = doctorRepository;
         this.departmentRepository = departmentRepository;
@@ -377,6 +380,60 @@ public class UserService {
         return doctorCreated;
     }
 
+    public Long createDoctorV2(CreateDoctorDTO doctorDTO) {
+        List<Long> doctorCreated = new ArrayList<>();
+        User user = new User();
+        Doctor doctor = new Doctor();
+        List<Authority> authorities = authorityRepository.findAllById(
+            Arrays.asList(AuthoritiesConstants.USER, AuthoritiesConstants.DOCTOR)
+        );
+
+        boolean newAccount = true;
+        if (!hospitalRepository.existsById(doctorDTO.getHospitalId()) || !departmentRepository.existsById(doctorDTO.getDepartmentId())) {
+            throw new NotFoundException("hospital or department does not exist");
+        }
+        if (doctorDTO.getEmail() == null) {
+            throw new NotFoundException("Email can not be null");
+        }
+        if (Boolean.TRUE.equals(userRepository.existsByEmail(doctorDTO.getEmail()))) {
+            log.debug("User already exists, add role doctor for user: {}", doctorDTO.getEmail());
+            newAccount = false;
+            user = userRepository.findByEmail(doctorDTO.getEmail());
+            user.setAuthorities((new HashSet<>(authorities)));
+            userRepository.save(user);
+        } else {
+            user.setLogin(doctorDTO.getLogin());
+            user.setEmail(doctorDTO.getEmail().toLowerCase());
+            user.setFirstName(doctorDTO.getFirstName());
+            user.setLastName(doctorDTO.getLastName());
+            user.setLangKey(Constants.DEFAULT_LANGUAGE);
+            user.setPassword(passwordEncoder.encode(RandomUtil.generatePassword()));
+            user.setResetKey(RandomUtil.generateResetKey());
+            user.setActivated(true);
+            user.setAuthorities((new HashSet<>(authorities)));
+            user.setResetDate(LocalDate.now());
+            userRepository.save(user);
+            log.debug(CREATE_USER_SUCCESS, user);
+        }
+        if (doctorRepository.findDoctorByUserId(user.getId()) != null) {
+            doctor = doctorRepository.findDoctorByUserId(user.getId());
+        }
+        doctor.setName(doctorDTO.getName());
+        doctor.setEmail(doctorDTO.getEmail().toLowerCase());
+        doctor.setHospitalId(Math.toIntExact(doctorDTO.getHospitalId()));
+        doctor.setDepartment(departmentRepository.findById(doctorDTO.getDepartmentId()).orElse(null));
+        doctor.setUserId(user.getId());
+        doctor.setActive(true);
+        doctorRepository.save(doctor);
+        log.debug("Created Information for doctor: {}", doctor);
+        doctorCreated.add(doctor.getUserId());
+        if (Boolean.TRUE.equals(newAccount)) {
+            mailService.sendCreationEmail(user);
+        }
+
+        return doctor.getUserId();
+    }
+
     public void deleteDoctor(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User " + id + " does not exist"));
         Set<Authority> authorities = new HashSet<>();
@@ -390,7 +447,7 @@ public class UserService {
         log.debug("Delete role doctor of user: {}", user);
     }
 
-    public void createHospital(CreateHospitalDTO hospital) {
+    public HospitalInfoResponseDTO createHospital(CreateHospitalDTO hospital) {
         if (Boolean.TRUE.equals(userRepository.existsByEmail(hospital.getEmail()))) {
             throw new AlreadyExistedException("user " + hospital.getEmail() + " already exists");
         } else if (Boolean.TRUE.equals(hospitalRepository.existsByEmail(hospital.getEmail()))) {
@@ -421,10 +478,11 @@ public class UserService {
             newHospital.setPhoneNumber(hospital.getPhoneNumber());
             newHospital.setUserId(user.getId());
             newHospital.setType(FacilityType.valueOf(hospital.getType()));
-            hospitalRepository.save(newHospital);
+            newHospital = hospitalRepository.save(newHospital);
             log.debug("Created successfully new hospital with name: {}", newHospital.getName());
 
             mailService.sendCreationEmail(user);
+            return mapperService.mapToDto(newHospital);
         }
     }
 

@@ -6,13 +6,14 @@ import com.mycompany.myapp.domain.Image;
 import com.mycompany.myapp.domain.enumeration.ImageType;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.DepartmentRepository;
+import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.repository.ImageRepository;
 import com.mycompany.myapp.service.dto.DepartmentDTO;
 import com.mycompany.myapp.service.dto.FileDTO;
+import com.mycompany.myapp.service.dto.request.CreateDepartmentDTO;
 import com.mycompany.myapp.service.dto.response.DepartmentResponseDTO;
 import com.mycompany.myapp.service.dto.response.DoctorResponseDTO;
 import com.mycompany.myapp.service.mapper.DepartmentMapper;
-import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public class DepartmentService {
 
     private final DepartmentMapper departmentMapper;
     private final DoctorService doctorService;
+    private final HospitalRepository hospitalRepository;
 
     private final MapperService mapperService;
     private final MinioService minioService;
@@ -43,6 +45,7 @@ public class DepartmentService {
         DepartmentRepository departmentRepository,
         DepartmentMapper departmentMapper,
         DoctorService doctorService,
+        HospitalRepository hospitalRepository,
         MapperService mapperService,
         MinioService minioService,
         ImageRepository imageRepository
@@ -50,6 +53,7 @@ public class DepartmentService {
         this.departmentRepository = departmentRepository;
         this.departmentMapper = departmentMapper;
         this.doctorService = doctorService;
+        this.hospitalRepository = hospitalRepository;
         this.mapperService = mapperService;
         this.minioService = minioService;
         this.imageRepository = imageRepository;
@@ -61,9 +65,16 @@ public class DepartmentService {
      * @param departmentDTO the entity to save.
      * @return the persisted entity.
      */
-    public DepartmentResponseDTO save(DepartmentDTO departmentDTO) {
+    public DepartmentResponseDTO save(CreateDepartmentDTO departmentDTO) {
         log.debug("Request to save Department : {}", departmentDTO);
-        Department department = departmentMapper.toEntity(departmentDTO);
+        Hospital hospital = hospitalRepository
+            .findById(departmentDTO.getHospitalId())
+            .orElseThrow(() -> new NotFoundException("Department"));
+        Department department = new Department();
+        department.setDepartmentName(departmentDTO.getDepartmentName());
+        department.setDescription(departmentDTO.getDescription());
+        department.setActive(true);
+        department.setHospital(hospital);
         department = departmentRepository.save(department);
         return mapperService.mapToDto(department);
     }
@@ -74,9 +85,11 @@ public class DepartmentService {
      * @param departmentDTO the entity to save.
      * @return the persisted entity.
      */
-    public DepartmentResponseDTO update(DepartmentDTO departmentDTO) {
+    public DepartmentResponseDTO update(CreateDepartmentDTO departmentDTO, Long id) {
         log.debug("Request to update Department : {}", departmentDTO);
-        Department department = departmentMapper.toEntity(departmentDTO);
+        Department department = departmentRepository.findById(id).orElseThrow(() -> new NotFoundException("Department not found"));
+        department.setDepartmentName(departmentDTO.getDepartmentName());
+        department.setDescription(departmentDTO.getDescription());
         department = departmentRepository.save(department);
         return mapperService.mapToDto(department);
     }
