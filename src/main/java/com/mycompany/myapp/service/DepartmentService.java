@@ -124,7 +124,7 @@ public class DepartmentService {
     }
 
     public Page<DepartmentResponseDTO> findAllByHospital(Pageable pageable, Hospital hospital, String keyword) {
-        return departmentRepository.pageDepartmentByHospital(pageable, hospital, keyword).map(mapperService::mapToDto);
+        return departmentRepository.findAllByHospital(pageable, hospital).map(mapperService::mapToDto);
     }
 
     public Page<DepartmentResponseDTO> findAllByHospitalForUser(Pageable pageable, Hospital hospital, String keyword) {

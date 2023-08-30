@@ -18,15 +18,17 @@ import org.springframework.stereotype.Repository;
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
     List<Department> findAllByHospital_Id(Long id);
 
-    @Query(
-        value = "SELECT d FROM Department d " +
-        "JOIN Doctor dt ON dt.department.id = d.id " +
-        "WHERE d.hospital = :hospital AND " +
-        "((:keyword IS NULL OR d.departmentName LIKE %:keyword%) OR " +
-        "(:keyword IS NULL OR dt.name LIKE %:keyword%)) " +
-        "GROUP BY d.id"
-    )
-    Page<Department> pageDepartmentByHospital(Pageable pageable, @Param("hospital") Hospital hospital, @Param("keyword") String keyword);
+    //    @Query(
+    //        value = "SELECT d FROM Department d " +
+    ////        "JOIN Doctor dt ON dt.department.id = d.id " +
+    //        "WHERE d.hospital = :hospital " +
+    ////        "((:keyword IS NULL OR d.departmentName LIKE %:keyword%)) " +
+    ////            "OR " +
+    ////        "(:keyword IS NULL OR dt.name LIKE %:keyword%)) " +
+    //        "GROUP BY d.id"
+    //    )
+    //    Page<Department> pageDepartmentByHospital(Pageable pageable, @Param("hospital") Hospital hospital, @Param("keyword") String keyword);
+    Page<Department> findAllByHospital(Pageable pageable, Hospital hospital);
 
     @Query(
         value = "SELECT d FROM Department d " +

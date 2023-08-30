@@ -37,16 +37,17 @@ public interface HospitalRepository extends JpaRepository<Hospital, Long> {
 
     @Query(
         value = "SELECT h FROM Hospital h " +
-        "JOIN Department d ON h.id = d.hospital.id " +
+        //        "JOIN Department d ON h.id = d.hospital.id " +
         //        "JOIN Doctor dt ON h.id = dt.hospitalId " +
-        "JOIN Pack p ON h.id = p.hospital.id " +
+        //        "JOIN Pack p ON h.id = p.hospital.id " +
         "WHERE " +
         "(((:keyword) IS NULL OR h.name LIKE %:keyword%) OR " +
-        "((:keyword) IS NULL OR h.address LIKE %:keyword%) OR " +
-        "((:keyword) IS NULL OR d.departmentName LIKE %:keyword%) OR " +
+        "((:keyword) IS NULL OR h.address LIKE %:keyword%)) " +
+        //            "OR " +
+        //        "((:keyword) IS NULL OR d.departmentName LIKE %:keyword%) OR " +
         //        "((:keyword) IS NULL OR dt.name LIKE %:keyword%) OR " +
         //        "((:keyword) IS NULL OR dt.specialize LIKE %:keyword%) OR " +
-        "((:keyword) IS NULL OR p.name LIKE %:keyword%)) " +
+        //        "((:keyword) IS NULL OR p.name LIKE %:keyword%)) " +
         "GROUP BY h.id"
     )
     Page<Hospital> listHospital(Pageable pageable, @Param("keyword") String keyword);
