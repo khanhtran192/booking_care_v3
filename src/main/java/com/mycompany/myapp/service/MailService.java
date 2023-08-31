@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -111,76 +112,111 @@ public class MailService {
 
     @Async
     public void sendEmailOrder(User user, String templateName, String titleKey, Order order) {
-        if (user.getEmail() == null) {
-            log.debug("Email doesn't exist for user '{}'", user.getLogin());
-            return;
+        try {
+            if (user.getEmail() == null) {
+                log.debug("Email doesn't exist for user '{}'", user.getLogin());
+                return;
+            }
+            Customer customer = order.getCustomer();
+            Locale locale = Locale.forLanguageTag(user.getLangKey());
+            Context context = new Context(locale);
+            context.setVariable(USER, user);
+            context.setVariable("order", order);
+            context.setVariable("customer", customer);
+            context.setVariable(BASE_URL, jHipsterProperties.getMail().getBaseUrl());
+            String content = templateEngine.process(templateName, context);
+            String subject = messageSource.getMessage(titleKey, null, locale);
+            sendEmail(user.getEmail(), subject, content, false, true);
+        } catch (Exception e) {
+            log.error("BUG SEND MAIL: {}", e.getMessage());
         }
-        Locale locale = Locale.forLanguageTag(user.getLangKey());
-        Context context = new Context(locale);
-        context.setVariable(USER, user);
-        context.setVariable("order", order);
-        context.setVariable("customer", order.getCustomer());
-        context.setVariable(BASE_URL, jHipsterProperties.getMail().getBaseUrl());
-        String content = templateEngine.process(templateName, context);
-        String subject = messageSource.getMessage(titleKey, null, locale);
-        sendEmail(user.getEmail(), subject, content, false, true);
     }
 
+    @Async
     public void sendMailApproveOrder(Order order) {
-        Customer customer = order.getCustomer();
-        User user = userRepository.findById(customer.getUserBooking()).orElseThrow(() -> new NotFoundException("User not found"));
-        sendEmailOrder(user, "mail/approveOrder", "email.order.title", order);
+        try {
+            Customer customer = order.getCustomer();
+            User user = userRepository.findById(customer.getUserBooking()).orElseThrow(() -> new NotFoundException("User not found"));
+            sendEmailOrder(user, "mail/approveOrder", "email.order.title", order);
+        } catch (Exception e) {
+            log.error("BUG SEND MAIL: {}", e.getMessage());
+        }
     }
 
+    @Async
     public void sendMailRejectOrder(Order order) {
-        Customer customer = order.getCustomer();
-        User user = userRepository.findById(customer.getUserBooking()).orElseThrow(() -> new NotFoundException("User not found"));
-        sendEmailOrder(user, "mail/rejectOrder", "email.order.title", order);
+        try {
+            Customer customer = order.getCustomer();
+            User user = userRepository.findById(customer.getUserBooking()).orElseThrow(() -> new NotFoundException("User not found"));
+            sendEmailOrder(user, "mail/rejectOrder", "email.order.title", order);
+        } catch (Exception e) {
+            log.error("BUG SEND MAIL: {}", e.getMessage());
+        }
     }
 
+    @Async
     public void sendMailComplete(Order order) {
-        Customer customer = order.getCustomer();
-        User user = userRepository.findById(customer.getUserBooking()).orElseThrow(() -> new NotFoundException("User not found"));
-        sendEmailOrder(user, "mail/completeOrder", "email.order.title", order);
+        try {
+            Customer customer = order.getCustomer();
+            User user = userRepository.findById(customer.getUserBooking()).orElseThrow(() -> new NotFoundException("User not found"));
+            sendEmailOrder(user, "mail/completeOrder", "email.order.title", order);
+        } catch (Exception e) {
+            log.error("BUG SEND MAIL: {}", e.getMessage());
+        }
     }
 
+    @Async
     public void sendMailCancelOrder(Order order) {
-        User user = null;
-        if (order.getDoctor() != null) {
-            user = userRepository.findById(order.getDoctor().getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
-        } else {
-            user =
-                userRepository
-                    .findById(order.getPack().getHospital().getUserId())
-                    .orElseThrow(() -> new NotFoundException("User not found"));
+        try {
+            User user = null;
+            if (order.getDoctor() != null) {
+                user = userRepository.findById(order.getDoctor().getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
+            } else {
+                user =
+                    userRepository
+                        .findById(order.getPack().getHospital().getUserId())
+                        .orElseThrow(() -> new NotFoundException("User not found"));
+            }
+            sendEmailOrder(user, "mail/cancelOrder", "email.order.cancel.title", order);
+        } catch (Exception e) {
+            log.error("BUG SEND MAIL: {}", e.getMessage());
         }
-        sendEmailOrder(user, "mail/cancelOrder", "email.order.cancel.title", order);
     }
 
+    @Async
     public void sendMailHaveNewOrder(Order order) {
-        User user = null;
-        if (order.getDoctor() != null) {
-            user = userRepository.findById(order.getDoctor().getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
-        } else {
-            user =
-                userRepository
-                    .findById(order.getPack().getHospital().getUserId())
-                    .orElseThrow(() -> new NotFoundException("User not found"));
+        try {
+            User user = null;
+            if (order.getDoctor() != null) {
+                user = userRepository.findById(order.getDoctor().getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
+            } else {
+                user =
+                    userRepository
+                        .findById(order.getPack().getHospital().getUserId())
+                        .orElseThrow(() -> new NotFoundException("User not found"));
+            }
+            sendEmailOrder(user, "mail/newOrder", "email.order.new.title", order);
+        } catch (Exception e) {
+            log.error("BUG SEND MAIL: {}", e.getMessage());
         }
-        sendEmailOrder(user, "mail/newOrder", "email.order.new.title", order);
     }
 
+    @Async
     public void sendMailChangeOrder(Order order) {
-        User user = null;
-        if (order.getDoctor() != null) {
-            user = userRepository.findById(order.getDoctor().getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
-        } else {
-            user =
-                userRepository
-                    .findById(order.getPack().getHospital().getUserId())
-                    .orElseThrow(() -> new NotFoundException("User not found"));
+        try {
+            User user = null;
+            if (order.getDoctor() != null) {
+                user = userRepository.findById(order.getDoctor().getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
+            } else {
+                user =
+                    userRepository
+                        .findById(order.getPack().getHospital().getUserId())
+                        .orElseThrow(() -> new NotFoundException("User not found"));
+            }
+            sendEmailOrder(user, "mail/changeOrder", "email.order.change.title", order);
+        } catch (Exception e) {
+            log.error("BUG SEND MAIL: {}", e.getMessage());
         }
-        sendEmailOrder(user, "mail/changeOrder", "email.order.change.title", order);
     }
 
     @Async

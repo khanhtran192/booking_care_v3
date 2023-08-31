@@ -7,7 +7,7 @@
   </head>
   <body>
     <p th:text="#{email.order.greeting(${user.login})}">Dear</p>
-    <p th:text="#{email.order.canceled(${customer.fullName()})}"></p>
+    <p th:text="#{email.order.canceled(${customer.fullName})}"></p>
     <p>
       <a th:with="url=(@{|${baseUrl}/api/orders/${order.id}|})" th:href="${url}" th:text="${url}">Activation link</a>
     </p>
