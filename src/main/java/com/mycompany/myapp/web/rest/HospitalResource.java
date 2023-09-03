@@ -390,9 +390,12 @@ public class HospitalResource {
 
     @GetMapping("/hospitals/manage/packs/{id}/time-slots")
     //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<List<TimeSlotResponseDTO>> allTimeSlotByPack(@PathVariable Long id) {
+    public ResponseEntity<Page<TimeSlotResponseDTO>> allTimeSlotByPack(
+        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @PathVariable Long id
+    ) {
         log.debug("REST request to get all time slot in Pack : {}", id);
-        List<TimeSlotResponseDTO> list = timeSlotService.allTimeSlotByPack(id);
+        Page<TimeSlotResponseDTO> list = timeSlotService.allTimeSlotByPack(id, pageable);
         return ResponseEntity.ok().body(list);
     }
 

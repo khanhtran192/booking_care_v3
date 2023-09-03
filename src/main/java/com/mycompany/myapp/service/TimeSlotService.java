@@ -145,10 +145,10 @@ public class TimeSlotService {
         return timeSlots.stream().map(mapperService::mapToDto).collect(Collectors.toList());
     }
 
-    public List<TimeSlotResponseDTO> allTimeSlotByPack(Long packId) {
+    public Page<TimeSlotResponseDTO> allTimeSlotByPack(Long packId, Pageable pageable) {
         Pack pack = packRepository.findById(packId).orElseThrow(() -> new NotFoundException("Pack: " + packId + "not found"));
-        List<TimeSlot> timeSlots = timeSlotRepository.findAllByPack(pack);
-        return timeSlots.stream().map(mapperService::mapToDto).collect(Collectors.toList());
+        Page<TimeSlot> timeSlots = timeSlotRepository.findAllByPack(pack, pageable);
+        return timeSlots.map(mapperService::mapToDto);
     }
 
     public List<TimeSlotResponseDTO> listTimeSlotFreeOfDoctor(Long id, LocalDate date) {

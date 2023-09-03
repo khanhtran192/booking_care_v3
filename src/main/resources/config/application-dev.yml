@@ -32,7 +32,7 @@ spring:
       indent-output: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mariadb://localhost:3306/data_test?useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:mariadb://localhost:3306/booking_care_data_v2?useLegacyDatetimeCode=false&serverTimezone=UTC
     username: root
     password: 19022001
     hikari:
@@ -44,9 +44,9 @@ spring:
         prepStmtCacheSqlLimit: 2048
         useServerPrepStmts: true
   jpa:
-    hibernate:
-      ddl-auto: update
-    generate-ddl: true
+  #    hibernate:
+  #      ddl-auto: update
+  #    generate-ddl: true
   liquibase:
     # Remove 'faker' if you do not want the sample data to be loaded automatically
     contexts: dev, faker
@@ -126,4 +126,4 @@ minio:
   access:
     key: bookingcare
     secret: bookingcare
-  url: http://172.18.0.2:9000
+  url: http://192.168.1.172:9000

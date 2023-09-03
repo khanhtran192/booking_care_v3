@@ -1,6 +1,7 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.security.AuthoritiesConstants;
+import com.mycompany.myapp.service.DataService;
 import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.service.dto.request.CreateHospitalDTO;
 import com.mycompany.myapp.service.dto.response.HospitalInfoResponseDTO;
@@ -10,10 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import tech.jhipster.web.util.HeaderUtil;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api")
 public class AdminResource {
 
     private final Logger log = LoggerFactory.getLogger(AccountResource.class);
@@ -23,14 +23,22 @@ public class AdminResource {
 
     private final UserService userService;
 
-    public AdminResource(UserService userService) {
+    private final DataService dataService;
+
+    public AdminResource(UserService userService, DataService dataService) {
         this.userService = userService;
+        this.dataService = dataService;
     }
 
-    @PostMapping("/hospitals")
+    @PostMapping("/admin/hospitals")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<HospitalInfoResponseDTO> createHospital(@RequestBody CreateHospitalDTO createHospitalDTO) {
         log.debug("REST request to create hospital: {}", createHospitalDTO.getName());
         return ResponseEntity.ok(userService.createHospital(createHospitalDTO));
+    }
+
+    @GetMapping("/create")
+    public void createAdmin() {
+        dataService.addAdminAndUser();
     }
 }

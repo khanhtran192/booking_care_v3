@@ -135,7 +135,7 @@ public class DoctorResource {
     }
 
     @GetMapping("/doctors/{id}/manage/time-slots")
-    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
+    //    @PreAuthorize("hasAnyAuthority(\"" + AuthoritiesConstants.HOSPITAL + "\" , \"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<TimeSlotResponseDTO>> allTimeSlotByDoctor(@PathVariable Long id) {
         log.debug("REST request to get all time slot active by doctor : {}", id);
         List<TimeSlotResponseDTO> list = timeSlotService.allTimeSlotByDoctor(id);
