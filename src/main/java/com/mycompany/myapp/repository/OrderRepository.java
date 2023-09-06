@@ -36,5 +36,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findAllByDateIsBeforeAndStatus(LocalDate date, OrderStatus status);
 
-    Page<Order> findAllByHospitalIdOrderByDateDesc(Long hospitalId, Pageable pageable);
+    @Query("SELECT o FROM Order o WHERE o.hospitalId = :hospitalId ORDER BY o.status DESC, o.date DESC")
+    Page<Order> findAllByHospitalIdOrderByDateDesc(@Param("hospitalId") Long hospitalId, Pageable pageable);
+    //    @Query("SELECT o FROM Order o WHERE o.hospitalId = :hospitalId ORDER BY o.status, o.date DESC")
+    //    Page<Order> findAllByHospitalIdOrderByStatusAsc(Long hospitalId, Pageable pageable);
 }

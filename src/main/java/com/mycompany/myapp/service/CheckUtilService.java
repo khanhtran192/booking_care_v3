@@ -14,8 +14,11 @@ import com.mycompany.myapp.repository.PackRepository;
 import com.mycompany.myapp.repository.TimeSlotRepository;
 import com.mycompany.myapp.service.dto.request.CreateTimeSlotDTO;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,7 +46,7 @@ public class CheckUtilService {
         this.orderRepository = orderRepository;
     }
 
-    public Boolean checkTimeSlot(CreateTimeSlotDTO createTimeSlotDTO) {
+    public Boolean checkTimeSlot(CreateTimeSlotDTO createTimeSlotDTO, Long timeSlotId) {
         boolean byDoctor = false;
         if (createTimeSlotDTO.getDoctorId() != null && createTimeSlotDTO.getPackId() != null) {
             throw new BadRequestException("Can not has both doctorId and packId");
@@ -53,26 +56,47 @@ public class CheckUtilService {
             byDoctor = true;
         }
         if (byDoctor) {
-            return checkTimeSlotByDoctor(createTimeSlotDTO);
+            return checkTimeSlotByDoctor(createTimeSlotDTO, timeSlotId);
         } else {
-            return checkTimeSlotByPack(createTimeSlotDTO);
+            return checkTimeSlotByPack(createTimeSlotDTO, timeSlotId);
         }
     }
 
-    public Boolean checkTimeSlotByDoctor(CreateTimeSlotDTO createTimeSlotDTO) {
+    public Boolean checkTimeSlotByDoctor(CreateTimeSlotDTO createTimeSlotDTO, Long timeSlotId) {
         Doctor doctor = doctorRepository
             .findById(createTimeSlotDTO.getDoctorId())
             .orElseThrow(() -> new NotFoundException("Doctor not found"));
-        List<TimeSlot> timeSlots = timeSlotRepository.findAllByDoctorAndActiveIsTrue(doctor);
+        List<TimeSlot> timeSlots = new ArrayList<>();
+        if (timeSlotId == null) {
+            timeSlots = timeSlotRepository.findAllByDoctorAndActiveIsTrue(doctor);
+        } else {
+            timeSlots =
+                timeSlotRepository
+                    .findAllByDoctorAndActiveIsTrue(doctor)
+                    .stream()
+                    .filter(timeSlot -> !Objects.equals(timeSlot.getId(), timeSlotId))
+                    .collect(Collectors.toList());
+        }
         for (TimeSlot timeSlot : timeSlots) {
             return checkTime(createTimeSlotDTO, timeSlot);
         }
         return false;
     }
 
-    public Boolean checkTimeSlotByPack(CreateTimeSlotDTO createTimeSlotDTO) {
+    public Boolean checkTimeSlotByPack(CreateTimeSlotDTO createTimeSlotDTO, Long timeSlotId) {
         Pack pack = packRepository.findById(createTimeSlotDTO.getPackId()).orElseThrow(() -> new NotFoundException("Pack not found"));
-        List<TimeSlot> timeSlots = timeSlotRepository.findAllByPackAndActiveIsTrue(pack);
+        //        List<TimeSlot> timeSlots = timeSlotRepository.findAllByPackAndActiveIsTrue(pack);
+        List<TimeSlot> timeSlots = new ArrayList<>();
+        if (timeSlotId == null) {
+            timeSlots = timeSlotRepository.findAllByPackAndActiveIsTrue(pack);
+        } else {
+            timeSlots =
+                timeSlotRepository
+                    .findAllByPackAndActiveIsTrue(pack)
+                    .stream()
+                    .filter(timeSlot -> !Objects.equals(timeSlot.getId(), timeSlotId))
+                    .collect(Collectors.toList());
+        }
         for (TimeSlot timeSlot : timeSlots) {
             return checkTime(createTimeSlotDTO, timeSlot);
         }
@@ -90,7 +114,7 @@ public class CheckUtilService {
     }
 
     public Integer convertTimeSlotToInt(String timeSlot) {
-        TimeSlotValue timeSlotValue = TimeSlotValue.valueOf(timeSlot);
+        TimeSlotValue timeSlotValue = TimeSlotValue.findByValue(timeSlot);
         return timeSlotValue.getNumber();
     }
 
