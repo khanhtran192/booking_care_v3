@@ -144,20 +144,20 @@ public class MapperService {
             throw new BadRequestException("time cannot be null");
         } else {
             if (
-                TimeSlotValue.valueOf(createTimeSlotDTO.getStartTime()).getNumber() >=
-                TimeSlotValue.valueOf(createTimeSlotDTO.getEndTime()).getNumber()
+                TimeSlotValue.findByValue(createTimeSlotDTO.getStartTime()).getNumber() >=
+                TimeSlotValue.findByValue(createTimeSlotDTO.getEndTime()).getNumber()
             ) {
                 throw new BadRequestException("Start time cannot equal or after end time");
             }
             if (!checkUtilService.checkTimeSlot(createTimeSlotDTO, timeSlot.getId())) {
                 throw new BadRequestException("The time period conflicts with the existing time period.");
             }
-            timeSlot.setStartTime(TimeSlotValue.valueOf(createTimeSlotDTO.getStartTime()));
-            timeSlot.setEndTime(TimeSlotValue.valueOf(createTimeSlotDTO.getEndTime()));
+            timeSlot.setStartTime(TimeSlotValue.findByValue(createTimeSlotDTO.getStartTime()));
+            timeSlot.setEndTime(TimeSlotValue.findByValue(createTimeSlotDTO.getEndTime()));
             timeSlot.setTime(
-                TimeSlotValue.valueOf(createTimeSlotDTO.getStartTime()).getValue() +
-                " : " +
-                TimeSlotValue.valueOf(createTimeSlotDTO.getEndTime()).getValue()
+                TimeSlotValue.findByValue(createTimeSlotDTO.getStartTime()).getValue() +
+                " - " +
+                TimeSlotValue.findByValue(createTimeSlotDTO.getEndTime()).getValue()
             );
         }
         timeSlot.setPrice(createTimeSlotDTO.getPrice());
