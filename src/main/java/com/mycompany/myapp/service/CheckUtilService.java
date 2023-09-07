@@ -77,6 +77,9 @@ public class CheckUtilService {
                     .filter(timeSlot -> !Objects.equals(timeSlot.getId(), timeSlotId))
                     .collect(Collectors.toList());
         }
+        if (timeSlots.size() == 0) {
+            return true;
+        }
         for (TimeSlot timeSlot : timeSlots) {
             return checkTime(createTimeSlotDTO, timeSlot);
         }
@@ -96,6 +99,9 @@ public class CheckUtilService {
                     .stream()
                     .filter(timeSlot -> !Objects.equals(timeSlot.getId(), timeSlotId))
                     .collect(Collectors.toList());
+        }
+        if (timeSlots.size() == 0) {
+            return true;
         }
         for (TimeSlot timeSlot : timeSlots) {
             return checkTime(createTimeSlotDTO, timeSlot);

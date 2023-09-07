@@ -230,11 +230,10 @@ public class DoctorService {
             .collect(Collectors.toList());
     }
 
-    public Page<OrderResponseDTO> findAllByDoctorAndStatus(Long id, List<String> status, Pageable pageable) {
+    public Page<OrderResponseDTO> findAllByDoctorAndStatus(Long id, Pageable pageable) {
         Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new NotFoundException("Doctor not found"));
         try {
-            List<OrderStatus> orderStatuses = status.stream().map(OrderStatus::valueOf).collect(Collectors.toList());
-            return orderRepository.findAllbyDoctorAndStatus(doctor, orderStatuses, pageable).map(mapperService::mapToDto);
+            return orderRepository.findAllbyDoctor(doctor, pageable).map(mapperService::mapToDto);
         } catch (Exception e) {
             log.error("get all order by doctor {} error: {}", doctor.getName(), e.getMessage());
             return null;

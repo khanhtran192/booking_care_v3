@@ -22,8 +22,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE o.doctor = :doctor AND o.status IN (:status)")
     List<Order> orderByDoctor(@Param("doctor") Doctor doctor, @Param("status") List<OrderStatus> status);
 
-    @Query("SELECT o FROM Order o WHERE o.doctor = :doctor AND :status IS NULL OR o.status IN (:status) ORDER BY o.date DESC")
-    Page<Order> findAllbyDoctorAndStatus(@Param("doctor") Doctor doctor, @Param("status") List<OrderStatus> status, Pageable pageable);
+    @Query("SELECT o FROM Order o WHERE o.doctor = :doctor ORDER BY o.date DESC")
+    Page<Order> findAllbyDoctor(@Param("doctor") Doctor doctor, Pageable pageable);
 
     List<Order> findAllByDoctorAndDateAndTimeslotAndStatusIn(Doctor doctor, LocalDate date, TimeSlot timeSlot, List<OrderStatus> status);
     List<Order> findAllByPackAndDateAndTimeslotAndStatusIn(Pack pack, LocalDate date, TimeSlot timeSlot, List<OrderStatus> status);
