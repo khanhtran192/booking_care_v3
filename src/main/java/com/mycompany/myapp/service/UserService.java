@@ -82,6 +82,7 @@ public class UserService {
                 user.setActivated(true);
                 user.setActivationKey(null);
                 log.debug("Activated user: {}", user);
+                userRepository.save(user);
                 return user;
             });
     }

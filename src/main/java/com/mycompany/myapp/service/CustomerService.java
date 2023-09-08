@@ -11,7 +11,9 @@ import com.mycompany.myapp.service.dto.CustomerDTO;
 import com.mycompany.myapp.service.dto.request.CreateCustomerDTO;
 import com.mycompany.myapp.service.dto.response.CustomerResponseDTO;
 import com.mycompany.myapp.service.mapper.CustomerMapper;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -64,25 +66,38 @@ public class CustomerService {
 
     public void createCustomer(CreateCustomerDTO dto) {
         Customer customer = mapperService.mapToEntity(dto);
+        Map<String, String> name = getName(customer.getFullName());
         User user = userService.getUserWithAuthorities().orElseThrow(() -> new NotFoundException("User not found"));
+        user.setFirstName(name.get("firstName"));
+        user.setLastName(name.get("lastName"));
+        userRepository.save(user);
         Customer customerCheck = customerRepository.findByUserBooking(user.getId());
         if (customerCheck != null) {
             throw new AlreadyExistedException("Customer already exists");
         }
         customer.setEmail(user.getEmail());
         customer.setUserBooking(user.getId());
+        customer.setFirstName(name.get("firstName"));
+        customer.setLastName(name.get("lastName"));
         customerRepository.save(customer);
     }
 
     public void updateCustomer(CreateCustomerDTO dto, Long id) {
+        Map<String, String> name = getName(dto.getFullName());
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new NotFoundException("Customer not found"));
         customer.setFullName(dto.getFullName());
+        customer.setFirstName(name.get("firstName"));
+        customer.setLastName(name.get("lastName"));
         customer.setDateOfBirth(dto.getDateOfBirth());
         customer.setPhoneNumber(dto.getPhoneNumber());
         customer.setGender(Gender.valueOf(dto.getGender()));
         customer.setAddress(dto.getAddress());
         customer.setIdCard(dto.getIdCard());
         customerRepository.save(customer);
+        User user = userRepository.findById(customer.getUserBooking()).orElseThrow(() -> new NotFoundException("User not found"));
+        user.setFirstName(name.get("firstName"));
+        user.setLastName(name.get("lastName"));
+        userRepository.save(user);
     }
 
     public CustomerResponseDTO findByUser(Long id) {
@@ -97,5 +112,32 @@ public class CustomerService {
     public Page<CustomerResponseDTO> listCustomerByHospial(Long id, Pageable pageable) {
         Page<Customer> customers = customerRepository.customerByHospital(id, pageable);
         return customers.map(mapperService::mapToDto);
+    }
+
+    public Map<String, String> getName(String fullname) {
+        Map<String, String> result = new HashMap<String, String>();
+        String[] parts = fullname.split(" ");
+
+        // Kiểm tra xem có đủ 2 phần (firstname và lastname) không
+        if (parts.length >= 2) {
+            String firstName = parts[0];
+
+            // Dùng StringBuilder để kết hợp các phần còn lại thành lastname
+            StringBuilder lastNameBuilder = new StringBuilder();
+            for (int i = 1; i < parts.length; i++) {
+                lastNameBuilder.append(parts[i]);
+                if (i < parts.length - 1) {
+                    lastNameBuilder.append(" ");
+                }
+            }
+            String lastName = lastNameBuilder.toString();
+            result.put("lastName", lastName);
+            result.put("firstName", firstName);
+            return result;
+        } else {
+            result.put("lastName", "lastName");
+            result.put("firstName", "firstName");
+            return result;
+        }
     }
 }
