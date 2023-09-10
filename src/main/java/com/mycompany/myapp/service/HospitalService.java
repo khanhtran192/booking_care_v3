@@ -4,6 +4,7 @@ import com.mycompany.myapp.domain.Hospital;
 import com.mycompany.myapp.domain.Image;
 import com.mycompany.myapp.domain.enumeration.FacilityType;
 import com.mycompany.myapp.domain.enumeration.ImageType;
+import com.mycompany.myapp.domain.enumeration.OrderStatus;
 import com.mycompany.myapp.exception.NotFoundException;
 import com.mycompany.myapp.repository.HospitalRepository;
 import com.mycompany.myapp.repository.ImageRepository;
@@ -206,5 +207,10 @@ public class HospitalService {
 
     public Page<OrderResponseDTO> orderByHospital(Long id, Pageable pageable) {
         return orderRepository.findAllByHospitalIdOrderByDateDesc(id, pageable).map(mapperService::mapToDto);
+    }
+
+    public Page<OrderResponseDTO> orderByHospitalV2(Long id, String status, Pageable pageable) {
+        OrderStatus orderStatus = OrderStatus.valueOf(status);
+        return orderRepository.findAllByHospitalIdOrderByDateDescV2(id, orderStatus, pageable).map(mapperService::mapToDto);
     }
 }

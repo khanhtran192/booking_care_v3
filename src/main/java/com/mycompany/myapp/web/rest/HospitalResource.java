@@ -501,9 +501,10 @@ public class HospitalResource {
     @GetMapping("/hospitals/{id}/manage/order")
     public ResponseEntity<Page<OrderResponseDTO>> getOrderByHospital(
         @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @RequestParam(name = "status", required = false) String status,
         @PathVariable Long id
     ) {
-        Page<OrderResponseDTO> page = hospitalService.orderByHospital(id, pageable);
+        Page<OrderResponseDTO> page = hospitalService.orderByHospitalV2(id, status, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page);
     }
