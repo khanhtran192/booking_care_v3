@@ -22,7 +22,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE o.doctor = :doctor AND o.status IN (:status)")
     List<Order> orderByDoctor(@Param("doctor") Doctor doctor, @Param("status") List<OrderStatus> status);
 
-    @Query("SELECT o FROM Order o WHERE o.doctor = :doctor AND :status IS NULL OR o.status = :status  ORDER BY o.date DESC")
+    @Query("SELECT o FROM Order o WHERE (o.doctor = :doctor) AND (:status IS NULL OR o.status = :status)  ORDER BY o.date DESC")
     Page<Order> findAllbyDoctor(@Param("doctor") Doctor doctor, @Param("status") OrderStatus status, Pageable pageable);
 
     List<Order> findAllByDoctorAndDateAndTimeslotAndStatusIn(Doctor doctor, LocalDate date, TimeSlot timeSlot, List<OrderStatus> status);
@@ -39,9 +39,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE o.hospitalId = :hospitalId ORDER BY o.status DESC, o.date DESC")
     Page<Order> findAllByHospitalIdOrderByDateDesc(@Param("hospitalId") Long hospitalId, Pageable pageable);
 
-    @Query(
-        "SELECT o FROM Order o WHERE o.hospitalId = :hospitalId AND :status IS NULL OR o.status = :status ORDER BY o.status DESC, o.date DESC"
-    )
+    @Query("SELECT o FROM Order o WHERE (o.hospitalId = :hospitalId) AND (:status IS NULL OR o.status = :status) ORDER BY o.date DESC")
     Page<Order> findAllByHospitalIdOrderByDateDescV2(
         @Param("hospitalId") Long hospitalId,
         @Param("status") OrderStatus status,

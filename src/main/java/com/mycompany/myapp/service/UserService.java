@@ -96,6 +96,7 @@ public class UserService {
                 user.setPassword(passwordEncoder.encode(newPassword));
                 user.setResetKey(null);
                 user.setResetDate(null);
+                user = userRepository.save(user);
                 return user;
             });
     }
@@ -107,6 +108,7 @@ public class UserService {
             .map(user -> {
                 user.setResetKey(RandomUtil.generateResetKey());
                 user.setResetDate(LocalDate.now());
+                user = userRepository.save(user);
                 return user;
             });
     }

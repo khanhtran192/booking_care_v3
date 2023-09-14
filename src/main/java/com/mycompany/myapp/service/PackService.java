@@ -91,16 +91,17 @@ public class PackService {
     public PackResponseDTO update(CreatePackDTO packDTO, Long id) {
         log.debug("Request to update Pack : {}", packDTO);
         Pack pack = packRepository.findById(id).orElse(new Pack());
-        Hospital hospital = hospitalRepository
-            .findById(packDTO.getHospitalId())
-            .orElseThrow(() -> new NotFoundException("Hospital not found"));
+        //        Hospital hospital = hospitalRepository
+        //            .findById(packDTO.getHospitalId())
+        //            .orElseThrow(() -> new NotFoundException("Hospital not found"));
+        Hospital hospital = pack.getHospital();
         if (packRepository.existsByNameAndHospital(packDTO.getName(), hospital)) {
             throw new AlreadyExistedException("This pack already exists");
         }
         pack.setName(packDTO.getName());
         pack.setDescription(packDTO.getDescription());
         pack.setActive(packDTO.getActive());
-        pack.setHospital(hospital);
+        //        pack.setHospital(hospital);
         pack = packRepository.save(pack);
         return mapperService.mapToDto(pack);
     }

@@ -344,7 +344,7 @@ public class HospitalResource {
         PackResponseDTO result = packService.update(packDTO, id);
         return ResponseEntity
             .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, packDTO.getId().toString()))
+            //            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, packDTO.getId().toString()))
             .body(result);
     }
 
